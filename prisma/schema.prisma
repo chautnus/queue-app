@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  logo      String?
+  queues    Queue[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Queue {
+  id                String         @id @default(cuid())
+  name              String
+  startTime         String
+  endTime           String
+  avgProcessingTime Int
+  numberOfCounters  Int            @default(1)
+  workingHours      String?
+  qrType            String         @default("fixed")
+  isActive          Boolean        @default(true)
+  admin             Admin          @relation(fields: [adminId], references: [id])
+  adminId           String
+  entries           QueueEntry[]
+  staffSessions     StaffSession[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model QueueEntry {
+  id                String   @id @default(cuid())
+  queue             Queue    @relation(fields: [queueId], references: [id])
+  queueId           String
+  deviceId          String
+  ticketNumber      Int
+  verificationCode  String
+  status            String   @default("waiting")
+  date              String
+  counterNumber     Int?
+  calledBySessionId String?
+  joinedAt          DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Staff {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  password  String
+  name      String
+  sessions  StaffSession[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model StaffSession {
+  id            String    @id @default(cuid())
+  staffId       String
+  staff         Staff     @relation(fields: [staffId], references: [id])
+  queueId       String
+  queue         Queue     @relation(fields: [queueId], references: [id])
+  counterNumber Int       @default(1)
+  status        String    @default("idle")
+  date          String
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  updatedAt     DateTime  @updatedAt
+}
