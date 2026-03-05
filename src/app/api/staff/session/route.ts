@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       },
     })
     if (activeSession) {
-      return NextResponse.json({ session: activeSession }, { status: 200 })
+      return NextResponse.json(activeSession, { status: 200 })
     }
 
     const staffSession = await prisma.staffSession.create({
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json({ session: staffSession }, { status: 201 })
+    return NextResponse.json(staffSession, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Lỗi máy chủ' }, { status: 500 })
   }
