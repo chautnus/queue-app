@@ -16,7 +16,7 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true); setError('')
-    const res = await signIn('staff-credentials', { ...form, redirect: false })
+    const res = await signIn('credentials', { ...form, redirect: false })
     if (res?.error) {
       setError('Email hoặc mật khẩu không đúng')
       setLoading(false)
