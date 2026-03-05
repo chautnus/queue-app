@@ -14,6 +14,7 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  turbopack: {}, // Tắt lỗi conflict giữa next-pwa (webpack) và Turbopack
 }
 
 export default withPWA(nextConfig)
