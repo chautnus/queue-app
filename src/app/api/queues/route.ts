@@ -45,7 +45,8 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(queue, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: 'Lỗi máy chủ' }, { status: 500 })
+  } catch (e) {
+    console.error('[POST /api/queues]', e)
+    return NextResponse.json({ error: 'Lỗi máy chủ', detail: String(e) }, { status: 500 })
   }
 }
