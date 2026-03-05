@@ -1,12 +1,11 @@
 'use client'
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/staff'
   const [form, setForm] = useState({ email: '', password: '' })
@@ -21,7 +20,7 @@ function LoginForm() {
       setError('Email hoặc mật khẩu không đúng')
       setLoading(false)
     } else {
-      router.push(redirect)
+      window.location.href = redirect
     }
   }
 
