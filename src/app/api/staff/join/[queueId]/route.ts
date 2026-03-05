@@ -14,12 +14,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!queue) return NextResponse.json({ error: 'Hàng đợi không tồn tại' }, { status: 404 })
 
   return NextResponse.json({
-    queue: {
-      id: queue.id,
-      name: queue.name,
-      numberOfCounters: queue.numberOfCounters,
-      isActive: queue.isActive,
-      adminLogo: queue.admin.logo,
-    },
+    id: queue.id,
+    name: queue.name,
+    numberOfCounters: queue.numberOfCounters,
+    isActive: queue.isActive,
+    adminLogo: queue.admin.logo,
   })
 }
