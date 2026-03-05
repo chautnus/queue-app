@@ -13,7 +13,8 @@ const withPWA = withPWAInit({
 })
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // output: 'standalone' bị bỏ vì Railway dùng Railpack (không cần standalone)
+  // standalone thiếu Prisma native binary cho Linux → Prisma crash ở runtime
   turbopack: {}, // Tắt lỗi conflict giữa next-pwa (webpack) và Turbopack
 }
 
