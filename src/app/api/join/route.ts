@@ -44,7 +44,14 @@ export async function GET(req: NextRequest) {
     isOpen: open,
     waitingCount,
     estimatedWait,
-    existingEntry: existing,
+    existingEntry: existing ? {
+      id: existing.id,
+      ticketNumber: existing.ticketNumber,
+      verificationCode: existing.verificationCode,
+      status: existing.status,
+      joinedAt: existing.joinedAt.toISOString(),
+      estimatedServedAt: existing.estimatedServedAt?.toISOString() ?? null,
+    } : null,
   })
 }
 
@@ -77,17 +84,32 @@ export async function POST(req: NextRequest) {
     const ticketNumber = (lastEntry?.ticketNumber ?? 0) + 1
     const verificationCode = generateVerificationCode()
 
-    const entry = await prisma.queueEntry.create({
-      data: { queueId, deviceId, ticketNumber, verificationCode, date: today },
-    })
-
+    // Tính thời gian chờ dự kiến
     const waitingAhead = await prisma.queueEntry.count({
-      where: { queueId, date: today, status: 'waiting', ticketNumber: { lt: ticketNumber } },
+      where: { queueId, date: today, status: 'waiting' },
+    })
+    const estimatedWaitMins = calculateEstimatedWait(waitingAhead, queue.avgProcessingTime, queue.numberOfCounters)
+    const estimatedServedAt = new Date(Date.now() + estimatedWaitMins * 60 * 1000)
+
+    const entry = await prisma.queueEntry.create({
+      data: {
+        queueId, deviceId, ticketNumber, verificationCode, date: today,
+        estimatedServedAt,
+      },
     })
 
-    const estimatedWait = calculateEstimatedWait(waitingAhead, queue.avgProcessingTime, queue.numberOfCounters)
-
-    return NextResponse.json({ entry, estimatedWait, queueName: queue.name }, { status: 201 })
+    return NextResponse.json({
+      entry: {
+        id: entry.id,
+        ticketNumber: entry.ticketNumber,
+        verificationCode: entry.verificationCode,
+        status: entry.status,
+        joinedAt: entry.joinedAt.toISOString(),
+        estimatedServedAt: entry.estimatedServedAt?.toISOString() ?? null,
+      },
+      estimatedWait: estimatedWaitMins,
+      queueName: queue.name,
+    }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Lỗi máy chủ' }, { status: 500 })
   }

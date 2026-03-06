@@ -18,7 +18,7 @@ interface QueueFormProps {
   initial?: {
     id?: string; name?: string; startTime?: string; endTime?: string;
     avgProcessingTime?: number; numberOfCounters?: number; workingHours?: string | null;
-    qrType?: string; isActive?: boolean;
+    qrType?: string; isActive?: boolean; waitThreshold?: number; waitCheckDepth?: number;
   }
   mode: 'create' | 'edit'
 }
@@ -33,6 +33,8 @@ export default function QueueForm({ initial, mode }: QueueFormProps) {
     numberOfCounters: initial?.numberOfCounters ?? 1,
     qrType: initial?.qrType ?? 'fixed',
     isActive: initial?.isActive ?? true,
+    waitThreshold: initial?.waitThreshold ?? 5,
+    waitCheckDepth: initial?.waitCheckDepth ?? 5,
   })
   const [wh, setWh] = useState<WorkingHours>(
     initial?.workingHours ? JSON.parse(initial.workingHours) : defaultWH()
@@ -150,6 +152,28 @@ export default function QueueForm({ initial, mode }: QueueFormProps) {
         ) : (
           <p className="text-sm text-gray-400">Sử dụng giờ mở/đóng cửa chung cho tất cả các ngày.</p>
         )}
+      </div>
+
+      {/* Cài đặt tính toán thời gian chờ */}
+      <div className="card space-y-4">
+        <h2 className="font-semibold text-gray-900 text-lg">Cài đặt thời gian chờ</h2>
+        <p className="text-sm text-gray-500">Hệ thống tự động tính lại thời gian chờ khi nhân viên hoàn thành phục vụ.</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="form-label">Ngưỡng cập nhật (phút)</label>
+            <input type="number" min="1" max="60" className="form-input"
+              value={form.waitThreshold}
+              onChange={e => setForm(f => ({ ...f, waitThreshold: Number(e.target.value) }))} />
+            <p className="text-xs text-gray-400 mt-1">Cập nhật khi thời gian chênh ≥ số này</p>
+          </div>
+          <div>
+            <label className="form-label">Số khách kiểm tra lại</label>
+            <input type="number" min="1" max="20" className="form-input"
+              value={form.waitCheckDepth}
+              onChange={e => setForm(f => ({ ...f, waitCheckDepth: Number(e.target.value) }))} />
+            <p className="text-xs text-gray-400 mt-1">Tính lại cho N khách đầu hàng đợi</p>
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-3">

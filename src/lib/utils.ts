@@ -10,8 +10,19 @@ export function formatTime(time: string): string {
   return `${displayHour}:${m} ${ampm}`
 }
 
+/** Trả về thời gian hiện tại theo múi giờ Việt Nam (UTC+7) */
+export function getVietnamTime(): Date {
+  const now = new Date()
+  return new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }))
+}
+
+/** Trả về chuỗi ngày theo múi giờ Việt Nam, VD: "2026-03-05" */
 export function getTodayString(): string {
-  return new Date().toISOString().split('T')[0]
+  const vn = getVietnamTime()
+  const y = vn.getFullYear()
+  const m = String(vn.getMonth() + 1).padStart(2, '0')
+  const d = String(vn.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
 
 export function getDayName(date: Date): string {
@@ -35,9 +46,10 @@ export function isQueueOpen(queue: {
 }): boolean {
   if (!queue.isActive) return false
 
-  const now = new Date()
-  const dayName = getDayName(now)
-  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  // Dùng giờ Việt Nam (UTC+7) để so sánh
+  const vn = getVietnamTime()
+  const dayName = getDayName(vn)
+  const currentTime = `${String(vn.getHours()).padStart(2, '0')}:${String(vn.getMinutes()).padStart(2, '0')}`
 
   if (queue.workingHours) {
     try {

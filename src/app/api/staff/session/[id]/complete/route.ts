@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { staffAuthOptions } from '@/lib/staffAuth'
 import { prisma } from '@/lib/prisma'
 import { getTodayString } from '@/lib/utils'
+import { recalculateWaitTimes } from '@/lib/queueUtils'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -25,10 +26,10 @@ export async function POST(_req: NextRequest, { params }: Params) {
   })
 
   // Đưa phiên về idle
-  await prisma.staffSession.update({
-    where: { id },
-    data: { status: 'idle' },
-  })
+  await prisma.staffSession.update({ where: { id }, data: { status: 'idle' } })
+
+  // Tính lại thời gian chờ cho các khách còn lại
+  await recalculateWaitTimes(staffSession.queueId)
 
   return NextResponse.json({ ok: true })
 }

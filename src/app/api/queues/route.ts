@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       name, startTime, endTime, avgProcessingTime,
-      numberOfCounters, workingHours, qrType,
+      numberOfCounters, workingHours, qrType, waitThreshold, waitCheckDepth,
     } = body
 
     if (!name || !startTime || !endTime || !avgProcessingTime) {
@@ -40,6 +40,8 @@ export async function POST(req: NextRequest) {
         numberOfCounters: parseInt(numberOfCounters) || 1,
         workingHours: workingHours ? JSON.stringify(workingHours) : null,
         qrType: qrType || 'fixed',
+        waitThreshold: parseInt(waitThreshold) || 5,
+        waitCheckDepth: parseInt(waitCheckDepth) || 5,
         adminId: session.user.id,
       },
     })

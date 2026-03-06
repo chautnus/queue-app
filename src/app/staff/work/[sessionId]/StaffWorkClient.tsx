@@ -14,13 +14,13 @@ interface SessionData {
   counterNumber: number
   queue: { id: string; name: string }
   currentEntry: CurrentEntry | null
+  autoTimedOut?: boolean
 }
 
 export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
   const router = useRouter()
   const [session, setSession] = useState<SessionData | null>(null)
   const [fetchError, setFetchError] = useState('')
-  const [ticketInput, setTicketInput] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState('')
   const [actionMsg, setActionMsg] = useState('')
@@ -31,6 +31,9 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
       const res = await fetch(`/api/staff/session/${sessionId}`)
       const data = await res.json()
       if (!res.ok) { setFetchError(data.error || 'Lỗi tải dữ liệu'); return }
+      if (data.autoTimedOut) {
+        setActionMsg('⏱️ Đã tự động hoàn thành do quá giờ phục vụ.')
+      }
       setSession(data)
     } catch {
       setFetchError('Mất kết nối mạng')
@@ -43,16 +46,13 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
     return () => { if (pollRef.current) clearInterval(pollRef.current) }
   }, [fetchSession])
 
-  const doAction = async (url: string, body?: object) => {
+  const doPost = async (url: string) => {
     setActionLoading(true); setActionError(''); setActionMsg('')
     try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined,
-      })
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
       const data = await res.json()
       if (!res.ok) { setActionError(data.error || 'Thao tác thất bại'); setActionLoading(false); return null }
+      if (data.done) { setActionMsg(data.message || 'Hết khách trong hàng đợi') }
       await fetchSession()
       setActionLoading(false)
       return data
@@ -78,15 +78,16 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
     }
   }
 
+  // Gọi khách tiếp theo tự động
   const handleCallNext = async () => {
-    if (!ticketInput.trim()) { setActionError('Nhập số thứ tự'); return }
-    const data = await doAction(`/api/staff/session/${sessionId}/next`, { ticketNumber: Number(ticketInput) })
-    if (data) { setTicketInput(''); setActionMsg(`Đã gọi #${data.ticketNumber}`) }
+    const data = await doPost(`/api/staff/session/${sessionId}/next`)
+    if (data && !data.done) setActionMsg(`✅ Đã gọi số #${data.ticketNumber}`)
   }
 
+  // Hoàn thành và không gọi tiếp
   const handleComplete = async () => {
-    await doAction(`/api/staff/session/${sessionId}/complete`)
-    setActionMsg('Hoàn thành, sẵn sàng nhận khách tiếp')
+    await doPost(`/api/staff/session/${sessionId}/complete`)
+    setActionMsg('Hoàn thành. Sẵn sàng nhận khách tiếp.')
   }
 
   const handlePause = () => doPatch({ status: 'paused' })
@@ -125,7 +126,9 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
     ended: 'bg-gray-100 text-gray-600',
   }[s.status] ?? 'bg-gray-100 text-gray-600'
 
-  const statusLabel = { idle: 'Sẵn sàng', serving: 'Đang phục vụ', paused: 'Tạm dừng', ended: 'Đã kết thúc' }[s.status] ?? s.status
+  const statusLabel = {
+    idle: 'Sẵn sàng', serving: 'Đang phục vụ', paused: 'Tạm dừng', ended: 'Đã kết thúc',
+  }[s.status] ?? s.status
 
   // ── ENDED ────────────────────────────────────────────────────────
   if (s.status === 'ended') {
@@ -134,9 +137,7 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
         <div className="card w-full max-w-sm text-center">
           <div className="text-5xl mb-4">✅</div>
           <h1 className="text-xl font-bold text-gray-800 mb-2">Ca làm đã kết thúc</h1>
-          <p className="text-gray-500 text-sm mb-6">
-            Cửa {s.counterNumber} · {s.queue.name}
-          </p>
+          <p className="text-gray-500 text-sm mb-6">Cửa {s.counterNumber} · {s.queue.name}</p>
           <button onClick={() => router.push('/staff/login')} className="btn-primary w-full justify-center">
             Về trang đăng nhập
           </button>
@@ -171,120 +172,78 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
         {s.status === 'paused' && (
           <div className="card text-center space-y-4">
             <div className="text-4xl">⏸️</div>
-            <p className="text-gray-600">Bạn đang tạm dừng phục vụ</p>
+            <p className="text-gray-600 font-medium">Đang tạm dừng phục vụ</p>
             <button onClick={handleResume} disabled={actionLoading} className="btn-primary w-full justify-center">
-              Tiếp tục phục vụ
+              ▶ Tiếp tục phục vụ
             </button>
-            <button onClick={handleEnd} disabled={actionLoading} className="btn-secondary w-full justify-center text-red-600 border-red-200 hover:bg-red-50">
-              Kết thúc ca
+            <button onClick={handleEnd} disabled={actionLoading}
+              className="w-full px-4 py-2 rounded-lg border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50">
+              🚪 Kết thúc ca
             </button>
           </div>
         )}
 
-        {/* ── SERVING ── */}
+        {/* ── Khách đang phục vụ ── */}
         {s.status === 'serving' && s.currentEntry && (
-          <>
-            {/* Current customer card */}
-            <div className="card bg-blue-50 border-2 border-blue-200">
-              <p className="text-sm text-blue-600 font-medium mb-1">Đang phục vụ</p>
-              <div className="flex items-baseline gap-3 mb-4">
-                <span className="text-gray-500 text-sm">Số thứ tự</span>
-                <span className="text-4xl font-bold text-blue-700">#{s.currentEntry.ticketNumber}</span>
-              </div>
-              <p className="text-sm text-gray-500 mb-2">Mã xác nhận</p>
-              <div className="flex gap-3 justify-center">
-                {s.currentEntry.verificationCode.split('').map((digit, i) => (
-                  <div key={i} className="w-14 h-14 bg-white border-2 border-blue-300 rounded-xl flex items-center justify-center text-3xl font-bold text-blue-800 font-mono">
-                    {digit}
-                  </div>
-                ))}
-              </div>
+          <div className="card bg-blue-50 border-2 border-blue-200">
+            <p className="text-sm text-blue-600 font-medium mb-2">Đang phục vụ</p>
+            <div className="flex items-baseline gap-3 mb-4">
+              <span className="text-gray-500 text-sm">Số thứ tự</span>
+              <span className="text-5xl font-black text-blue-700">#{s.currentEntry.ticketNumber}</span>
             </div>
+            <p className="text-sm text-gray-500 mb-2">Mã xác nhận (4 số)</p>
+            <div className="flex gap-3 justify-center">
+              {s.currentEntry.verificationCode.split('').map((digit, i) => (
+                <div key={i}
+                  className="w-14 h-14 bg-white border-2 border-blue-300 rounded-xl flex items-center justify-center text-3xl font-bold text-blue-800 font-mono">
+                  {digit}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-            {/* Call next */}
-            <div className="card space-y-3">
-              <p className="text-sm font-medium text-gray-700">Gọi khách tiếp theo</p>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  min="1"
-                  className="form-input flex-1"
-                  placeholder="Số thứ tự"
-                  value={ticketInput}
-                  onChange={e => setTicketInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleCallNext()}
-                />
-                <button
-                  onClick={handleCallNext}
-                  disabled={actionLoading || !ticketInput.trim()}
-                  className="btn-primary whitespace-nowrap"
-                >
-                  {actionLoading ? '...' : 'Gọi →'}
-                </button>
-              </div>
-              <button
-                onClick={handleComplete}
-                disabled={actionLoading}
-                className="btn-secondary w-full justify-center"
-              >
-                Hoàn thành (không gọi tiếp)
+        {/* ── IDLE: chờ nhận khách ── */}
+        {s.status === 'idle' && (
+          <div className="card text-center py-6">
+            <div className="text-4xl mb-3">👋</div>
+            <p className="text-gray-600 font-medium mb-1">Sẵn sàng nhận khách</p>
+            <p className="text-gray-400 text-sm">Bấm nút bên dưới để gọi khách tiếp theo</p>
+          </div>
+        )}
+
+        {/* ── Nút hành động ── */}
+        {(s.status === 'idle' || s.status === 'serving') && (
+          <div className="space-y-3">
+            {/* Gọi khách tiếp - nút chính */}
+            <button
+              onClick={handleCallNext}
+              disabled={actionLoading}
+              className="btn-primary w-full justify-center py-4 text-lg"
+            >
+              {actionLoading ? '⏳ Đang xử lý...' : '📢 Gọi khách tiếp theo →'}
+            </button>
+
+            {/* Hoàn thành không gọi tiếp (chỉ khi đang serving) */}
+            {s.status === 'serving' && (
+              <button onClick={handleComplete} disabled={actionLoading} className="btn-secondary w-full justify-center">
+                ✓ Hoàn thành (không gọi tiếp)
+              </button>
+            )}
+
+            {/* Tạm nghỉ + Kết thúc ca */}
+            <div className="flex gap-3">
+              <button onClick={handlePause} disabled={actionLoading} className="btn-secondary flex-1 justify-center">
+                ⏸ Tạm nghỉ
+              </button>
+              <button onClick={handleEnd} disabled={actionLoading}
+                className="flex-1 px-4 py-2 rounded-lg border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50">
+                🚪 Kết thúc ca
               </button>
             </div>
-          </>
-        )}
-
-        {/* ── IDLE ── */}
-        {s.status === 'idle' && (
-          <div className="card space-y-4">
-            <div className="text-center py-2">
-              <div className="text-3xl mb-2">👋</div>
-              <p className="text-gray-600">Sẵn sàng nhận khách</p>
-            </div>
-            <div>
-              <label className="form-label">Nhập số thứ tự khách hàng</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  min="1"
-                  className="form-input flex-1 text-xl"
-                  placeholder="VD: 42"
-                  value={ticketInput}
-                  onChange={e => setTicketInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleCallNext()}
-                />
-                <button
-                  onClick={handleCallNext}
-                  disabled={actionLoading || !ticketInput.trim()}
-                  className="btn-primary whitespace-nowrap"
-                >
-                  {actionLoading ? '...' : 'Gọi →'}
-                </button>
-              </div>
-            </div>
           </div>
         )}
 
-        {/* Action buttons (idle + serving) */}
-        {(s.status === 'idle' || s.status === 'serving') && (
-          <div className="flex gap-3">
-            <button
-              onClick={handlePause}
-              disabled={actionLoading}
-              className="btn-secondary flex-1 justify-center"
-            >
-              Tạm dừng
-            </button>
-            <button
-              onClick={handleEnd}
-              disabled={actionLoading}
-              className="flex-1 px-4 py-2 rounded-lg border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
-            >
-              Kết thúc ca
-            </button>
-          </div>
-        )}
-
-        {/* Last updated */}
         <p className="text-center text-xs text-gray-400">Tự động cập nhật mỗi 15 giây</p>
       </div>
     </div>

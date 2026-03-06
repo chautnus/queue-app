@@ -31,6 +31,8 @@ export default async function EditQueuePage({ params }: { params: Promise<{ id: 
         workingHours: queue.workingHours,
         qrType: queue.qrType,
         isActive: queue.isActive,
+        waitThreshold: queue.waitThreshold,
+        waitCheckDepth: queue.waitCheckDepth,
       }} />
     </div>
   )

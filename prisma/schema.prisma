@@ -28,6 +28,9 @@ model Queue {
   workingHours      String?
   qrType            String         @default("fixed")
   isActive          Boolean        @default(true)
+  // Cài đặt tính toán thời gian chờ
+  waitThreshold     Int            @default(5)  // phút chênh tối thiểu để cập nhật lại
+  waitCheckDepth    Int            @default(5)  // số khách hàng tính lại khi có thay đổi
   admin             Admin          @relation(fields: [adminId], references: [id])
   adminId           String
   entries           QueueEntry[]
@@ -37,18 +40,20 @@ model Queue {
 }
 
 model QueueEntry {
-  id                String   @id @default(cuid())
-  queue             Queue    @relation(fields: [queueId], references: [id])
+  id                String    @id @default(cuid())
+  queue             Queue     @relation(fields: [queueId], references: [id])
   queueId           String
   deviceId          String
   ticketNumber      Int
   verificationCode  String
-  status            String   @default("waiting")
+  status            String    @default("waiting")
   date              String
   counterNumber     Int?
   calledBySessionId String?
-  joinedAt          DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  estimatedServedAt DateTime? // thời điểm dự kiến được phục vụ (cập nhật khi tính lại)
+  calledAt          DateTime? // thời điểm nhân viên gọi khách này
+  joinedAt          DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 model Staff {
