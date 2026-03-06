@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateVerificationCode, getTodayString, calculateEstimatedWait, isQueueOpen } from '@/lib/utils'
 
+// Rate limiting: tối đa 10 lần join / IP / phút
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT = 10
+const RATE_WINDOW_MS = 60 * 1000
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitMap.get(ip)
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS })
+    return true
+  }
+  if (entry.count >= RATE_LIMIT) return false
+  entry.count++
+  return true
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const queueId = searchParams.get('queueId')
@@ -57,6 +74,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting theo IP
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? req.headers.get('x-real-ip') ?? 'unknown'
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json({ error: 'Bạn đang thao tác quá nhanh. Vui lòng thử lại sau.' }, { status: 429 })
+    }
+
     const { queueId, deviceId } = await req.json()
 
     if (!queueId || !deviceId) {
@@ -68,6 +91,16 @@ export async function POST(req: NextRequest) {
     const queue = await prisma.queue.findUnique({ where: { id: queueId } })
     if (!queue) return NextResponse.json({ error: 'Hàng đợi không tồn tại' }, { status: 404 })
     if (!isQueueOpen(queue)) return NextResponse.json({ error: 'Hàng đợi đã đóng' }, { status: 400 })
+
+    // Kiểm tra giới hạn kích thước hàng đợi
+    if (queue.maxQueueSize > 0) {
+      const currentSize = await prisma.queueEntry.count({
+        where: { queueId, date: today, status: { in: ['waiting', 'called'] } },
+      })
+      if (currentSize >= queue.maxQueueSize) {
+        return NextResponse.json({ error: `Hàng đợi đã đầy (tối đa ${queue.maxQueueSize} người)` }, { status: 429 })
+      }
+    }
 
     const existing = await prisma.queueEntry.findFirst({
       where: { queueId, deviceId, date: today, status: { in: ['waiting', 'called'] } },

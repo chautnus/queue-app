@@ -33,6 +33,8 @@ export default async function EditQueuePage({ params }: { params: Promise<{ id: 
         isActive: queue.isActive,
         waitThreshold: queue.waitThreshold,
         waitCheckDepth: queue.waitCheckDepth,
+        maxQueueSize: queue.maxQueueSize,
+        allowRequeue: queue.allowRequeue,
       }} />
     </div>
   )

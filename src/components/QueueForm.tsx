@@ -19,6 +19,7 @@ interface QueueFormProps {
     id?: string; name?: string; startTime?: string; endTime?: string;
     avgProcessingTime?: number; numberOfCounters?: number; workingHours?: string | null;
     qrType?: string; isActive?: boolean; waitThreshold?: number; waitCheckDepth?: number;
+    maxQueueSize?: number; allowRequeue?: boolean;
   }
   mode: 'create' | 'edit'
 }
@@ -35,6 +36,8 @@ export default function QueueForm({ initial, mode }: QueueFormProps) {
     isActive: initial?.isActive ?? true,
     waitThreshold: initial?.waitThreshold ?? 5,
     waitCheckDepth: initial?.waitCheckDepth ?? 5,
+    maxQueueSize: initial?.maxQueueSize ?? 0,
+    allowRequeue: initial?.allowRequeue ?? false,
   })
   const [wh, setWh] = useState<WorkingHours>(
     initial?.workingHours ? JSON.parse(initial.workingHours) : defaultWH()
@@ -172,6 +175,27 @@ export default function QueueForm({ initial, mode }: QueueFormProps) {
               value={form.waitCheckDepth}
               onChange={e => setForm(f => ({ ...f, waitCheckDepth: Number(e.target.value) }))} />
             <p className="text-xs text-gray-400 mt-1">Tính lại cho N khách đầu hàng đợi</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Cài đặt nâng cao */}
+      <div className="card space-y-4">
+        <h2 className="font-semibold text-gray-900 text-lg">Cài đặt nâng cao</h2>
+        <div>
+          <label className="form-label">Giới hạn hàng đợi (0 = không giới hạn)</label>
+          <input type="number" min="0" max="500" className="form-input"
+            value={form.maxQueueSize}
+            onChange={e => setForm(f => ({ ...f, maxQueueSize: Number(e.target.value) }))} />
+          <p className="text-xs text-gray-400 mt-1">Số người tối đa trong hàng đợi cùng lúc. 0 = không giới hạn.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <input type="checkbox" id="allowRequeue" checked={form.allowRequeue}
+            onChange={e => setForm(f => ({ ...f, allowRequeue: e.target.checked }))}
+            className="w-4 h-4 rounded border-gray-300 text-blue-600" />
+          <div>
+            <label htmlFor="allowRequeue" className="form-label mb-0 cursor-pointer">Cho phép xếp lại hàng khi vắng mặt</label>
+            <p className="text-xs text-gray-400 mt-0.5">Khách vắng mặt lần 1 sẽ được xếp lại cuối hàng đợi. Vắng lần 2 mới bị huỷ.</p>
           </div>
         </div>
       </div>

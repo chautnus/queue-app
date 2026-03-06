@@ -90,6 +90,19 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
     setActionMsg('Hoàn thành. Sẵn sàng nhận khách tiếp.')
   }
 
+  // Khách vắng mặt
+  const handleAbsent = async () => {
+    const data = await doPost(`/api/staff/session/${sessionId}/absent`)
+    if (data?.done) return // message already set by doPost
+    if (data) {
+      if (data.requeuedTicket) {
+        setActionMsg(`⚠️ Khách #${data.requeuedTicket} vắng mặt, đã xếp lại. Đã gọi #${data.ticketNumber}`)
+      } else {
+        setActionMsg(`⚠️ Khách vắng mặt. Đã gọi #${data.ticketNumber}`)
+      }
+    }
+  }
+
   const handlePause = () => doPatch({ status: 'paused' })
   const handleResume = () => doPatch({ status: 'idle' })
   const handleEnd = async () => {
@@ -224,11 +237,17 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
               {actionLoading ? '⏳ Đang xử lý...' : '📢 Gọi khách tiếp theo →'}
             </button>
 
-            {/* Hoàn thành không gọi tiếp (chỉ khi đang serving) */}
+            {/* Khách vắng mặt + Hoàn thành không gọi tiếp (chỉ khi đang serving) */}
             {s.status === 'serving' && (
-              <button onClick={handleComplete} disabled={actionLoading} className="btn-secondary w-full justify-center">
-                ✓ Hoàn thành (không gọi tiếp)
-              </button>
+              <div className="grid grid-cols-2 gap-3">
+                <button onClick={handleAbsent} disabled={actionLoading}
+                  className="px-4 py-2 rounded-lg border border-orange-300 text-orange-700 text-sm font-medium bg-orange-50 hover:bg-orange-100 transition-colors disabled:opacity-50">
+                  ⚠️ Khách vắng mặt
+                </button>
+                <button onClick={handleComplete} disabled={actionLoading} className="btn-secondary justify-center">
+                  ✓ Hoàn thành
+                </button>
+              </div>
             )}
 
             {/* Tạm nghỉ + Kết thúc ca */}

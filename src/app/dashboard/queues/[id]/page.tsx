@@ -61,6 +61,7 @@ export default async function QueueDetailPage({ params }: { params: Promise<{ id
           </div>
         </div>
         <div className="flex gap-2">
+          <Link href={`/display/${id}`} target="_blank" className="btn-secondary text-sm">🖥️ Màn hình kiosk</Link>
           <Link href={`/dashboard/queues/${id}/edit`} className="btn-secondary text-sm">Chỉnh sửa</Link>
           <DeleteQueueButton queueId={id} queueName={queue.name} />
         </div>

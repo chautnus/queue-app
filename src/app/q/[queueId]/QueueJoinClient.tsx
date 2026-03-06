@@ -1,6 +1,45 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''
+
+async function subscribePush(entryId: string): Promise<boolean> {
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false
+    const permission = await Notification.requestPermission()
+    if (permission !== 'granted') return false
+
+    const reg = await navigator.serviceWorker.ready
+    let sub = await reg.pushManager.getSubscription()
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      })
+    }
+
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entryId, subscription: sub.toJSON() }),
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = atob(base64)
+  const array = new Uint8Array(rawData.length)
+  for (let i = 0; i < rawData.length; i++) {
+    array[i] = rawData.charCodeAt(i)
+  }
+  return array.buffer as ArrayBuffer
+}
 
 type QueueInfo = {
   id: string; name: string; adminLogo?: string
@@ -56,6 +95,7 @@ export default function QueueJoinClient({ queueId }: { queueId: string }) {
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState('')
   const [now, setNow] = useState(new Date())
+  const [pushStatus, setPushStatus] = useState<'idle' | 'subscribing' | 'subscribed' | 'denied' | 'unsupported'>('idle')
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -114,6 +154,15 @@ export default function QueueJoinClient({ queueId }: { queueId: string }) {
     if (res.ok) { setResult(json); setStage('joined') }
     else { setError(json.error ?? 'Lỗi tham gia'); setJoining(false) }
   }
+
+  const handleSubscribePush = useCallback(async (entryId: string) => {
+    if (!VAPID_PUBLIC_KEY) { setPushStatus('unsupported'); return }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) { setPushStatus('unsupported'); return }
+    setPushStatus('subscribing')
+    const ok = await subscribePush(entryId)
+    if (ok) setPushStatus('subscribed')
+    else setPushStatus('denied')
+  }, [])
 
   if (stage === 'loading') {
     return (
@@ -234,6 +283,27 @@ export default function QueueJoinClient({ queueId }: { queueId: string }) {
             </div>
             <p className="text-xs text-gray-400 text-center">Giữ mã này để nhân viên xác nhận</p>
           </div>
+
+          {/* Push notification subscribe */}
+          {pushStatus === 'idle' && VAPID_PUBLIC_KEY && (
+            <button
+              onClick={() => handleSubscribePush(result.entry.id)}
+              className="mt-4 w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition-colors"
+            >
+              🔔 Nhận thông báo khi đến lượt
+            </button>
+          )}
+          {pushStatus === 'subscribing' && (
+            <p className="mt-4 text-sm text-gray-500 text-center">Đang đăng ký thông báo...</p>
+          )}
+          {pushStatus === 'subscribed' && (
+            <div className="mt-4 bg-green-50 border border-green-200 rounded-xl p-3 text-green-700 text-sm text-center">
+              ✅ Bạn sẽ nhận thông báo khi đến lượt!
+            </div>
+          )}
+          {pushStatus === 'denied' && (
+            <p className="mt-4 text-xs text-gray-400 text-center">Thông báo bị từ chối. Quét lại QR để kiểm tra trạng thái.</p>
+          )}
 
           <div className="mt-4 text-sm text-gray-500 bg-blue-50 rounded-xl p-3">
             💡 Quét lại QR code để xem trạng thái và thời gian chờ bất cứ lúc nào.
