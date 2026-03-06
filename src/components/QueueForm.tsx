@@ -73,19 +73,19 @@ export default function QueueForm({ initial, mode }: QueueFormProps) {
       <div className="card space-y-4">
         <h2 className="font-semibold text-gray-900 text-lg">Thông tin cơ bản</h2>
         <div>
-          <label className="form-label">Tên hàng đợi *</label>
-          <input className="form-input" placeholder="VD: Hàng đợi khám bệnh"
+          <label htmlFor="queue-name" className="form-label">Tên hàng đợi *</label>
+          <input id="queue-name" className="form-input" placeholder="VD: Hàng đợi khám bệnh"
             value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="form-label">Giờ mở cửa *</label>
-            <input type="time" className="form-input"
+            <label htmlFor="startTime" className="form-label">Giờ mở cửa *</label>
+            <input id="startTime" type="time" className="form-input"
               value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} required />
           </div>
           <div>
-            <label className="form-label">Giờ đóng cửa *</label>
-            <input type="time" className="form-input"
+            <label htmlFor="endTime" className="form-label">Giờ đóng cửa *</label>
+            <input id="endTime" type="time" className="form-input"
               value={form.endTime} onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))} required />
           </div>
         </div>
@@ -183,8 +183,8 @@ export default function QueueForm({ initial, mode }: QueueFormProps) {
       <div className="card space-y-4">
         <h2 className="font-semibold text-gray-900 text-lg">Cài đặt nâng cao</h2>
         <div>
-          <label className="form-label">Giới hạn hàng đợi (0 = không giới hạn)</label>
-          <input type="number" min="0" max="500" className="form-input"
+          <label htmlFor="maxQueueSize" className="form-label">Giới hạn hàng đợi (0 = không giới hạn)</label>
+          <input id="maxQueueSize" type="number" min="0" max="500" className="form-input"
             value={form.maxQueueSize}
             onChange={e => setForm(f => ({ ...f, maxQueueSize: Number(e.target.value) }))} />
           <p className="text-xs text-gray-400 mt-1">Số người tối đa trong hàng đợi cùng lúc. 0 = không giới hạn.</p>
