@@ -8,11 +8,13 @@ import QRDisplay from '@/components/QRDisplay'
 import StaffQRDisplay from '@/components/StaffQRDisplay'
 import QueueMonitor from '@/components/QueueMonitor'
 import DeleteQueueButton from '@/components/DeleteQueueButton'
+import { getTranslations } from 'next-intl/server'
 
 export default async function QueueDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getServerSession(authOptions)
   const today = getTodayString()
+  const t = await getTranslations('queues')
 
   const queue = await prisma.queue.findUnique({
     where: { id, adminId: session!.user.id },
@@ -52,27 +54,27 @@ export default async function QueueDetailPage({ params }: { params: Promise<{ id
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900">{queue.name}</h1>
-              <span className={`badge ${open ? 'badge-green' : 'badge-red'}`}>{open ? 'Đang mở' : 'Đã đóng'}</span>
+              <span className={`badge ${open ? 'badge-green' : 'badge-red'}`}>{open ? t('open') : t('closed')}</span>
               <span className={`badge ${queue.isActive ? 'badge-blue' : 'badge-gray'}`}>
-                {queue.isActive ? 'Kích hoạt' : 'Tạm dừng'}
+                {queue.isActive ? t('activate') : t('pause')}
               </span>
             </div>
             <p className="text-sm text-gray-400 mt-1">{workingHoursSummary}</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/display/${id}`} target="_blank" className="btn-secondary text-sm">🖥️ Màn hình kiosk</Link>
-          <Link href={`/dashboard/queues/${id}/edit`} className="btn-secondary text-sm">Chỉnh sửa</Link>
+          <Link href={`/display/${id}`} target="_blank" className="btn-secondary text-sm">🖥️ {t('kioskDisplay')}</Link>
+          <Link href={`/dashboard/queues/${id}/edit`} className="btn-secondary text-sm">{t('edit')}</Link>
           <DeleteQueueButton queueId={id} queueName={queue.name} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Đang chờ hôm nay', value: waitingCount, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-          { label: 'Tổng lượt hôm nay', value: totalToday, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Số cửa phục vụ', value: queue.numberOfCounters, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-          { label: 'Phút xử lý TB', value: queue.avgProcessingTime, color: 'text-green-600', bg: 'bg-green-50' },
+          { label: t('waitingToday'), value: waitingCount, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+          { label: t('totalToday'), value: totalToday, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: t('numberOfCounters'), value: queue.numberOfCounters, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { label: t('avgProcessingTime'), value: queue.avgProcessingTime, color: 'text-green-600', bg: 'bg-green-50' },
         ].map(s => (
           <div key={s.label} className={`card ${s.bg}`}>
             <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>

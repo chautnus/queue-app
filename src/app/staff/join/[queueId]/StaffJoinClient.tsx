@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 interface QueueInfo {
   id: string
@@ -13,6 +14,7 @@ interface QueueInfo {
 }
 
 export default function StaffJoinClient({ queueId }: { queueId: string }) {
+  const t = useTranslations('staff')
   const { data: session, status } = useSession()
   const router = useRouter()
   const [queue, setQueue] = useState<QueueInfo | null>(null)
@@ -28,8 +30,8 @@ export default function StaffJoinClient({ queueId }: { queueId: string }) {
         if (d.error) setQueueError(d.error)
         else setQueue(d)
       })
-      .catch(() => setQueueError('Không thể tải thông tin hàng đợi'))
-  }, [queueId])
+      .catch(() => setQueueError(t('loadError')))
+  }, [queueId, t])
 
   const handleJoin = async () => {
     setLoading(true); setError('')
@@ -39,15 +41,14 @@ export default function StaffJoinClient({ queueId }: { queueId: string }) {
       body: JSON.stringify({ queueId, counterNumber: counter }),
     })
     const data = await res.json()
-    if (!res.ok) { setError(data.error || 'Không thể bắt đầu ca'); setLoading(false); return }
+    if (!res.ok) { setError(data.error || t('cannotStart')); setLoading(false); return }
     router.push(`/staff/work/${data.id}`)
   }
 
-  // Loading queue info
   if (!queue && !queueError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100">
-        <div className="text-gray-400 text-lg">Đang tải...</div>
+        <div className="text-gray-400 text-lg">{t('checkingAuth')}</div>
       </div>
     )
   }
@@ -58,7 +59,7 @@ export default function StaffJoinClient({ queueId }: { queueId: string }) {
         <div className="card w-full max-w-sm text-center">
           <div className="text-4xl mb-3">⚠️</div>
           <p className="text-red-600 font-medium">{queueError}</p>
-          <Link href="/staff" className="btn-secondary mt-4 inline-block">Về trang chủ</Link>
+          <Link href="/staff" className="btn-secondary mt-4 inline-block">{t('backToLogin')}</Link>
         </div>
       </div>
     )
@@ -77,43 +78,43 @@ export default function StaffJoinClient({ queueId }: { queueId: string }) {
             </div>
           )}
           <h1 className="text-xl font-bold text-gray-900">{queue!.name}</h1>
-          <p className="text-sm text-gray-500 mt-1">Tham gia ca làm việc</p>
+          <p className="text-sm text-gray-500 mt-1">{t('joinShift')}</p>
         </div>
 
         {/* Not logged in */}
         {status === 'unauthenticated' && (
           <div className="text-center space-y-4">
-            <p className="text-gray-600 text-sm">Bạn cần đăng nhập để bắt đầu ca làm</p>
+            <p className="text-gray-600 text-sm">{t('loginRequired')}</p>
             <Link
               href={`/staff/login?redirect=/staff/join/${queueId}`}
               className="btn-primary w-full justify-center block"
             >
-              Đăng nhập
+              {t('loginButton')}
             </Link>
             <Link
               href={`/staff/register`}
               className="btn-secondary w-full justify-center block text-sm"
             >
-              Chưa có tài khoản? Đăng ký
+              {t('noAccount')}
             </Link>
           </div>
         )}
 
         {/* Auth loading */}
         {status === 'loading' && (
-          <div className="text-center text-gray-400 py-4">Đang kiểm tra đăng nhập...</div>
+          <div className="text-center text-gray-400 py-4">{t('checkingAuth')}</div>
         )}
 
         {/* Logged in */}
         {status === 'authenticated' && (
           <div className="space-y-4">
             <div className="bg-orange-50 rounded-lg px-4 py-3 text-sm text-gray-700">
-              Xin chào, <span className="font-semibold">{session.user?.name}</span>
+              {t('greeting', { name: session.user?.name ?? '' })}
             </div>
 
             {!queue!.isActive && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                Hàng đợi này hiện không hoạt động
+                {t('queueInactive')}
               </div>
             )}
 
@@ -123,21 +124,21 @@ export default function StaffJoinClient({ queueId }: { queueId: string }) {
 
             {queue!.numberOfCounters > 1 && (
               <div>
-                <label className="form-label">Chọn cửa phục vụ</label>
+                <label className="form-label">{t('selectCounter')}</label>
                 <select
                   className="form-input"
                   value={counter}
                   onChange={e => setCounter(Number(e.target.value))}
                 >
                   {Array.from({ length: queue!.numberOfCounters }, (_, i) => i + 1).map(n => (
-                    <option key={n} value={n}>Cửa {n}</option>
+                    <option key={n} value={n}>{t('counter', { n })}</option>
                   ))}
                 </select>
               </div>
             )}
 
             {queue!.numberOfCounters === 1 && (
-              <p className="text-sm text-gray-500 text-center">Bạn sẽ phục vụ tại <strong>Cửa 1</strong></p>
+              <p className="text-sm text-gray-500 text-center">{t('serveAtCounter1')}</p>
             )}
 
             <button
@@ -145,7 +146,7 @@ export default function StaffJoinClient({ queueId }: { queueId: string }) {
               disabled={loading || !queue!.isActive}
               className="btn-primary w-full justify-center"
             >
-              {loading ? 'Đang bắt đầu...' : 'Bắt đầu ca làm →'}
+              {loading ? t('starting') : t('startShift')}
             </button>
           </div>
         )}

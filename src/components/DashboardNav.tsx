@@ -2,13 +2,17 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import LanguageSwitcher from './LanguageSwitcher'
 
 export default function DashboardNav({ userName }: { userName: string }) {
   const pathname = usePathname()
+  const t = useTranslations('dashboard')
+  const tAuth = useTranslations('auth')
   const navItems = [
-    { href: '/dashboard', label: 'Tổng quan', icon: '🏠' },
-    { href: '/dashboard/queues', label: 'Hàng đợi', icon: '📋' },
-    { href: '/dashboard/profile', label: 'Hồ sơ', icon: '👤' },
+    { href: '/dashboard', label: t('nav.overview'), icon: '🏠' },
+    { href: '/dashboard/queues', label: t('nav.queues'), icon: '📋' },
+    { href: '/dashboard/profile', label: t('nav.profile'), icon: '👤' },
   ]
 
   return (
@@ -32,10 +36,11 @@ export default function DashboardNav({ userName }: { userName: string }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <span className="text-sm text-gray-500 hidden sm:block">{userName}</span>
             <button onClick={() => signOut({ callbackUrl: '/login' })}
               className="text-sm text-gray-500 hover:text-gray-900 font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-              Đăng xuất
+              {tAuth('logout')}
             </button>
           </div>
         </div>

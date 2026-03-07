@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface QRDisplayProps {
   queueId: string
@@ -9,6 +10,7 @@ interface QRDisplayProps {
 }
 
 export default function QRDisplay({ queueId, qrType, queueName, logoUrl }: QRDisplayProps) {
+  const t = useTranslations('queues')
   const [displayUrl, setDisplayUrl] = useState('')
   const [rawQrUrl, setRawQrUrl] = useState('')
   const [copied, setCopied] = useState(false)
@@ -59,9 +61,9 @@ export default function QRDisplay({ queueId, qrType, queueName, logoUrl }: QRDis
 
   return (
     <div className="card text-center">
-      <h3 className="font-semibold text-gray-900 mb-1">QR Code tham gia</h3>
+      <h3 className="font-semibold text-gray-900 mb-1">{t('customerQr')}</h3>
       <p className="text-xs text-gray-400 mb-4">
-        {qrType === 'daily' ? `Hôm nay: ${today}` : 'Cố định – không thay đổi'}
+        {qrType === 'daily' ? t('today', { date: today }) : t('fixedQr')}
       </p>
       {displayUrl ? (
         <div className="flex justify-center mb-4">
@@ -71,18 +73,18 @@ export default function QRDisplay({ queueId, qrType, queueName, logoUrl }: QRDis
         </div>
       ) : (
         <div className="w-52 h-52 mx-auto mb-4 bg-gray-100 rounded-2xl animate-pulse flex items-center justify-center text-gray-300">
-          Đang tạo...
+          {t('generating')}
         </div>
       )}
       <div className="space-y-2">
         <button onClick={copyLink}
           className={`btn-secondary w-full justify-center text-sm ${copied ? 'text-green-600 border-green-300' : ''}`}>
-          {copied ? '✓ Đã sao chép!' : '🔗 Sao chép liên kết'}
+          {copied ? t('copied') : t('copyLink')}
         </button>
         {displayUrl && (
           <a href={displayUrl} download={`qr-${queueName}.png`}
             className="btn-secondary w-full justify-center text-sm inline-flex">
-            ⬇ Tải QR Code
+            {t('downloadQr')}
           </a>
         )}
       </div>

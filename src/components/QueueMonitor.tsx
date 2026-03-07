@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 
 type Entry = {
   id: string
@@ -10,12 +11,6 @@ type Entry = {
   joinedAt: string
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  waiting: 'Đang chờ',
-  called: 'Đang phục vụ',
-  completed: 'Hoàn thành',
-  cancelled: 'Đã hủy',
-}
 const STATUS_BADGE: Record<string, string> = {
   waiting: 'badge-yellow',
   called: 'badge-blue',
@@ -24,6 +19,7 @@ const STATUS_BADGE: Record<string, string> = {
 }
 
 export default function QueueMonitor({ queueId }: { queueId: string }) {
+  const t = useTranslations('queues')
   const [entries, setEntries] = useState<Entry[]>([])
   const [filter, setFilter] = useState('waiting')
   const [loading, setLoading] = useState(true)
@@ -52,6 +48,13 @@ export default function QueueMonitor({ queueId }: { queueId: string }) {
     setUpdating(null)
   }
 
+  const statusLabels: Record<string, string> = {
+    waiting: t('monitor.filterAll'),
+    called: t('monitor.filterServing'),
+    completed: t('monitor.filterDone'),
+    cancelled: t('monitor.filterCancelled'),
+  }
+
   const displayed = entries.filter(e => filter === 'all' || e.status === filter)
   const counts = {
     waiting: entries.filter(e => e.status === 'waiting').length,
@@ -60,20 +63,22 @@ export default function QueueMonitor({ queueId }: { queueId: string }) {
     cancelled: entries.filter(e => e.status === 'cancelled').length,
   }
 
+  const filterTabs = [
+    { key: 'waiting', label: t('monitor.filterAll'), color: 'bg-yellow-50 text-yellow-700' },
+    { key: 'called', label: t('monitor.filterServing'), color: 'bg-blue-50 text-blue-700' },
+    { key: 'completed', label: t('monitor.filterDone'), color: 'bg-green-50 text-green-700' },
+    { key: 'cancelled', label: t('monitor.filterCancelled'), color: 'bg-red-50 text-red-700' },
+  ]
+
   return (
     <div className="card">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900">Danh sách hôm nay</h3>
-        <button onClick={load} className="text-sm text-blue-600 hover:underline font-medium">↻ Làm mới</button>
+        <h3 className="font-semibold text-gray-900">{t('monitor.title')}</h3>
+        <button onClick={load} className="text-sm text-blue-600 hover:underline font-medium">{t('monitor.refresh')}</button>
       </div>
 
       <div className="grid grid-cols-4 gap-2 mb-4">
-        {[
-          { key: 'waiting', label: 'Đang chờ', color: 'bg-yellow-50 text-yellow-700' },
-          { key: 'called', label: 'Đang phục vụ', color: 'bg-blue-50 text-blue-700' },
-          { key: 'completed', label: 'Hoàn thành', color: 'bg-green-50 text-green-700' },
-          { key: 'cancelled', label: 'Đã hủy', color: 'bg-red-50 text-red-700' },
-        ].map(s => (
+        {filterTabs.map(s => (
           <button key={s.key} onClick={() => setFilter(s.key)}
             className={`rounded-lg p-2 text-center transition-all border-2 ${filter === s.key ? 'border-blue-400 ' + s.color : 'border-transparent ' + s.color} hover:opacity-90`}>
             <div className="text-xl font-bold">{counts[s.key as keyof typeof counts]}</div>
@@ -83,22 +88,22 @@ export default function QueueMonitor({ queueId }: { queueId: string }) {
       </div>
 
       {loading ? (
-        <div className="text-center py-8 text-gray-400">Đang tải...</div>
+        <div className="text-center py-8 text-gray-400">...</div>
       ) : displayed.length === 0 ? (
         <div className="text-center py-8 text-gray-400">
           <div className="text-4xl mb-2">📭</div>
-          <p>Không có dữ liệu</p>
+          <p>{t('monitor.noData')}</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left py-2 px-3 text-gray-500 font-medium">STT</th>
-                <th className="text-left py-2 px-3 text-gray-500 font-medium">Mã xác nhận</th>
-                <th className="text-left py-2 px-3 text-gray-500 font-medium">Trạng thái</th>
-                <th className="text-left py-2 px-3 text-gray-500 font-medium">Thời gian</th>
-                <th className="text-left py-2 px-3 text-gray-500 font-medium">Hành động</th>
+                <th className="text-left py-2 px-3 text-gray-500 font-medium">{t('monitor.ticketNo')}</th>
+                <th className="text-left py-2 px-3 text-gray-500 font-medium">{t('monitor.code')}</th>
+                <th className="text-left py-2 px-3 text-gray-500 font-medium">{t('monitor.status')}</th>
+                <th className="text-left py-2 px-3 text-gray-500 font-medium">{t('monitor.time')}</th>
+                <th className="text-left py-2 px-3 text-gray-500 font-medium">{t('monitor.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -114,7 +119,7 @@ export default function QueueMonitor({ queueId }: { queueId: string }) {
                   </td>
                   <td className="py-3 px-3">
                     <span className={`badge ${STATUS_BADGE[e.status] ?? 'badge-gray'}`}>
-                      {STATUS_LABELS[e.status] ?? e.status}
+                      {statusLabels[e.status] ?? e.status}
                     </span>
                   </td>
                   <td className="py-3 px-3 text-gray-400">
@@ -126,21 +131,21 @@ export default function QueueMonitor({ queueId }: { queueId: string }) {
                         <button disabled={updating === e.id}
                           onClick={() => updateStatus(e.id, 'called')}
                           className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 font-medium disabled:opacity-50">
-                          Gọi
+                          {t('monitor.call')}
                         </button>
                       )}
                       {e.status === 'called' && (
                         <button disabled={updating === e.id}
                           onClick={() => updateStatus(e.id, 'completed')}
                           className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 font-medium disabled:opacity-50">
-                          Hoàn thành
+                          {t('monitor.complete')}
                         </button>
                       )}
                       {(e.status === 'waiting' || e.status === 'called') && (
                         <button disabled={updating === e.id}
                           onClick={() => updateStatus(e.id, 'cancelled')}
                           className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 font-medium disabled:opacity-50">
-                          Hủy
+                          {t('monitor.cancel')}
                         </button>
                       )}
                     </div>

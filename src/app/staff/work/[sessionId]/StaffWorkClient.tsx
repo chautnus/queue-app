@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 interface CurrentEntry {
   ticketNumber: number
@@ -18,6 +19,7 @@ interface SessionData {
 }
 
 export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
+  const t = useTranslations('staff')
   const router = useRouter()
   const [session, setSession] = useState<SessionData | null>(null)
   const [fetchError, setFetchError] = useState('')
@@ -30,15 +32,15 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
     try {
       const res = await fetch(`/api/staff/session/${sessionId}`)
       const data = await res.json()
-      if (!res.ok) { setFetchError(data.error || 'Lỗi tải dữ liệu'); return }
+      if (!res.ok) { setFetchError(data.error || t('loadError2')); return }
       if (data.autoTimedOut) {
-        setActionMsg('⏱️ Đã tự động hoàn thành do quá giờ phục vụ.')
+        setActionMsg(t('autoTimeout'))
       }
       setSession(data)
     } catch {
-      setFetchError('Mất kết nối mạng')
+      setFetchError(t('networkLost'))
     }
-  }, [sessionId])
+  }, [sessionId, t])
 
   useEffect(() => {
     fetchSession()
@@ -51,13 +53,13 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
     try {
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
       const data = await res.json()
-      if (!res.ok) { setActionError(data.error || 'Thao tác thất bại'); setActionLoading(false); return null }
-      if (data.done) { setActionMsg(data.message || 'Hết khách trong hàng đợi') }
+      if (!res.ok) { setActionError(data.error || t('actionFailed')); setActionLoading(false); return null }
+      if (data.done) { setActionMsg(data.message || t('noCustomers')) }
       await fetchSession()
       setActionLoading(false)
       return data
     } catch {
-      setActionError('Lỗi kết nối'); setActionLoading(false); return null
+      setActionError(t('connectionError')); setActionLoading(false); return null
     }
   }
 
@@ -70,35 +72,32 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
         body: JSON.stringify(body),
       })
       const data = await res.json()
-      if (!res.ok) { setActionError(data.error || 'Thao tác thất bại'); setActionLoading(false); return }
+      if (!res.ok) { setActionError(data.error || t('actionFailed')); setActionLoading(false); return }
       await fetchSession()
       setActionLoading(false)
     } catch {
-      setActionError('Lỗi kết nối'); setActionLoading(false)
+      setActionError(t('connectionError')); setActionLoading(false)
     }
   }
 
-  // Gọi khách tiếp theo tự động
   const handleCallNext = async () => {
     const data = await doPost(`/api/staff/session/${sessionId}/next`)
-    if (data && !data.done) setActionMsg(`✅ Đã gọi số #${data.ticketNumber}`)
+    if (data && !data.done) setActionMsg(t('calledMsg', { n: data.ticketNumber }))
   }
 
-  // Hoàn thành và không gọi tiếp
   const handleComplete = async () => {
     await doPost(`/api/staff/session/${sessionId}/complete`)
-    setActionMsg('Hoàn thành. Sẵn sàng nhận khách tiếp.')
+    setActionMsg(t('completeMsg'))
   }
 
-  // Khách vắng mặt
   const handleAbsent = async () => {
     const data = await doPost(`/api/staff/session/${sessionId}/absent`)
-    if (data?.done) return // message already set by doPost
+    if (data?.done) return
     if (data) {
       if (data.requeuedTicket) {
-        setActionMsg(`⚠️ Khách #${data.requeuedTicket} vắng mặt, đã xếp lại. Đã gọi #${data.ticketNumber}`)
+        setActionMsg(t('absentRequeuedMsg', { absent: data.requeuedTicket, n: data.ticketNumber }))
       } else {
-        setActionMsg(`⚠️ Khách vắng mặt. Đã gọi #${data.ticketNumber}`)
+        setActionMsg(t('absentMsg', { n: data.ticketNumber }))
       }
     }
   }
@@ -106,7 +105,7 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
   const handlePause = () => doPatch({ status: 'paused' })
   const handleResume = () => doPatch({ status: 'idle' })
   const handleEnd = async () => {
-    if (!confirm('Kết thúc ca làm hôm nay?')) return
+    if (!confirm(t('endConfirm'))) return
     await doPatch({ status: 'ended' })
   }
 
@@ -114,7 +113,7 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
   if (!session && !fetchError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100">
-        <div className="text-gray-400 text-lg">Đang tải...</div>
+        <div className="text-gray-400 text-lg">{t('checkingAuth')}</div>
       </div>
     )
   }
@@ -125,7 +124,7 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
         <div className="card w-full max-w-sm text-center">
           <div className="text-4xl mb-3">⚠️</div>
           <p className="text-red-600 font-medium mb-4">{fetchError}</p>
-          <button onClick={fetchSession} className="btn-primary">Thử lại</button>
+          <button onClick={fetchSession} className="btn-primary">{t('resumeButton')}</button>
         </div>
       </div>
     )
@@ -140,7 +139,10 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
   }[s.status] ?? 'bg-gray-100 text-gray-600'
 
   const statusLabel = {
-    idle: 'Sẵn sàng', serving: 'Đang phục vụ', paused: 'Tạm dừng', ended: 'Đã kết thúc',
+    idle: t('statusIdle'),
+    serving: t('statusServing'),
+    paused: t('statusPaused'),
+    ended: t('statusEnded'),
   }[s.status] ?? s.status
 
   // ── ENDED ────────────────────────────────────────────────────────
@@ -149,10 +151,10 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100 p-4">
         <div className="card w-full max-w-sm text-center">
           <div className="text-5xl mb-4">✅</div>
-          <h1 className="text-xl font-bold text-gray-800 mb-2">Ca làm đã kết thúc</h1>
-          <p className="text-gray-500 text-sm mb-6">Cửa {s.counterNumber} · {s.queue.name}</p>
+          <h1 className="text-xl font-bold text-gray-800 mb-2">{t('endTitle')}</h1>
+          <p className="text-gray-500 text-sm mb-6">{t('endSubtitle', { n: s.counterNumber, queue: s.queue.name })}</p>
           <button onClick={() => router.push('/staff/login')} className="btn-primary w-full justify-center">
-            Về trang đăng nhập
+            {t('backToLogin')}
           </button>
         </div>
       </div>
@@ -165,7 +167,7 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
       {/* Top bar */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div>
-          <span className="font-bold text-gray-900">Cửa {s.counterNumber}</span>
+          <span className="font-bold text-gray-900">{t('counter', { n: s.counterNumber })}</span>
           <span className="text-gray-400 mx-2">·</span>
           <span className="text-gray-700 text-sm">{s.queue.name}</span>
         </div>
@@ -185,13 +187,13 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
         {s.status === 'paused' && (
           <div className="card text-center space-y-4">
             <div className="text-4xl">⏸️</div>
-            <p className="text-gray-600 font-medium">Đang tạm dừng phục vụ</p>
+            <p className="text-gray-600 font-medium">{t('paused')}</p>
             <button onClick={handleResume} disabled={actionLoading} className="btn-primary w-full justify-center">
-              ▶ Tiếp tục phục vụ
+              {t('resumeButton')}
             </button>
             <button onClick={handleEnd} disabled={actionLoading}
               className="w-full px-4 py-2 rounded-lg border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50">
-              🚪 Kết thúc ca
+              {t('endButton')}
             </button>
           </div>
         )}
@@ -199,12 +201,12 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
         {/* ── Khách đang phục vụ ── */}
         {s.status === 'serving' && s.currentEntry && (
           <div className="card bg-blue-50 border-2 border-blue-200">
-            <p className="text-sm text-blue-600 font-medium mb-2">Đang phục vụ</p>
+            <p className="text-sm text-blue-600 font-medium mb-2">{t('serving')}</p>
             <div className="flex items-baseline gap-3 mb-4">
-              <span className="text-gray-500 text-sm">Số thứ tự</span>
+              <span className="text-gray-500 text-sm">{t('ticketNo')}</span>
               <span className="text-5xl font-black text-blue-700">#{s.currentEntry.ticketNumber}</span>
             </div>
-            <p className="text-sm text-gray-500 mb-2">Mã xác nhận (4 số)</p>
+            <p className="text-sm text-gray-500 mb-2">{t('confirmCode')}</p>
             <div className="flex gap-3 justify-center">
               {s.currentEntry.verificationCode.split('').map((digit, i) => (
                 <div key={i}
@@ -216,54 +218,51 @@ export default function StaffWorkClient({ sessionId }: { sessionId: string }) {
           </div>
         )}
 
-        {/* ── IDLE: chờ nhận khách ── */}
+        {/* ── IDLE ── */}
         {s.status === 'idle' && (
           <div className="card text-center py-6">
             <div className="text-4xl mb-3">👋</div>
-            <p className="text-gray-600 font-medium mb-1">Sẵn sàng nhận khách</p>
-            <p className="text-gray-400 text-sm">Bấm nút bên dưới để gọi khách tiếp theo</p>
+            <p className="text-gray-600 font-medium mb-1">{t('ready')}</p>
+            <p className="text-gray-400 text-sm">{t('readyHint')}</p>
           </div>
         )}
 
         {/* ── Nút hành động ── */}
         {(s.status === 'idle' || s.status === 'serving') && (
           <div className="space-y-3">
-            {/* Gọi khách tiếp - nút chính */}
             <button
               onClick={handleCallNext}
               disabled={actionLoading}
               className="btn-primary w-full justify-center py-4 text-lg"
             >
-              {actionLoading ? '⏳ Đang xử lý...' : '📢 Gọi khách tiếp theo →'}
+              {actionLoading ? t('processing') : t('callNext')}
             </button>
 
-            {/* Khách vắng mặt + Hoàn thành không gọi tiếp (chỉ khi đang serving) */}
             {s.status === 'serving' && (
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={handleAbsent} disabled={actionLoading}
                   className="px-4 py-2 rounded-lg border border-orange-300 text-orange-700 text-sm font-medium bg-orange-50 hover:bg-orange-100 transition-colors disabled:opacity-50">
-                  ⚠️ Khách vắng mặt
+                  {t('absent')}
                 </button>
                 <button onClick={handleComplete} disabled={actionLoading} className="btn-secondary justify-center">
-                  ✓ Hoàn thành
+                  {t('complete')}
                 </button>
               </div>
             )}
 
-            {/* Tạm nghỉ + Kết thúc ca */}
             <div className="flex gap-3">
               <button onClick={handlePause} disabled={actionLoading} className="btn-secondary flex-1 justify-center">
-                ⏸ Tạm nghỉ
+                {t('pauseButton')}
               </button>
               <button onClick={handleEnd} disabled={actionLoading}
                 className="flex-1 px-4 py-2 rounded-lg border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50">
-                🚪 Kết thúc ca
+                {t('endButton')}
               </button>
             </div>
           </div>
         )}
 
-        <p className="text-center text-xs text-gray-400">Tự động cập nhật mỗi 15 giây</p>
+        <p className="text-center text-xs text-gray-400">{t('autoRefresh')}</p>
       </div>
     </div>
   )

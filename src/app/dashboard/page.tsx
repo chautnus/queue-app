@@ -3,10 +3,12 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getTodayString } from '@/lib/utils'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   const today = getTodayString()
+  const t = await getTranslations('dashboard')
 
   const queues = await prisma.queue.findMany({
     where: { adminId: session!.user.id },
@@ -25,11 +27,11 @@ export default async function DashboardPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tổng quan</h1>
-          <p className="text-gray-500 mt-1">Chào mừng, {session?.user.name}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="text-gray-500 mt-1">{t('greeting', { name: session?.user.name ?? '' })}</p>
         </div>
         <Link href="/dashboard/queues/new" className="btn-primary">
-          + Tạo hàng đợi mới
+          {t('createQueue')}
         </Link>
       </div>
 
@@ -39,7 +41,7 @@ export default async function DashboardPage() {
             <div className="text-3xl">📋</div>
             <div>
               <div className="text-2xl font-bold text-gray-900">{totalQueues}</div>
-              <div className="text-sm text-gray-500">Tổng hàng đợi</div>
+              <div className="text-sm text-gray-500">{t('totalQueues')}</div>
             </div>
           </div>
         </div>
@@ -48,7 +50,7 @@ export default async function DashboardPage() {
             <div className="text-3xl">✅</div>
             <div>
               <div className="text-2xl font-bold text-green-600">{activeQueues}</div>
-              <div className="text-sm text-gray-500">Đang hoạt động</div>
+              <div className="text-sm text-gray-500">{t('activeQueues')}</div>
             </div>
           </div>
         </div>
@@ -57,7 +59,7 @@ export default async function DashboardPage() {
             <div className="text-3xl">👥</div>
             <div>
               <div className="text-2xl font-bold text-blue-600">{totalWaiting}</div>
-              <div className="text-sm text-gray-500">Đang chờ hôm nay</div>
+              <div className="text-sm text-gray-500">{t('waitingToday')}</div>
             </div>
           </div>
         </div>
@@ -65,15 +67,15 @@ export default async function DashboardPage() {
 
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Danh sách hàng đợi</h2>
-          <Link href="/dashboard/queues" className="text-blue-600 text-sm font-medium hover:underline">Xem tất cả →</Link>
+          <h2 className="text-lg font-semibold text-gray-900">{t('queueList')}</h2>
+          <Link href="/dashboard/queues" className="text-blue-600 text-sm font-medium hover:underline">{t('viewAll')}</Link>
         </div>
         {queues.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <div className="text-5xl mb-4">📭</div>
-            <p className="font-medium">Chưa có hàng đợi nào</p>
-            <p className="text-sm mt-1">Tạo hàng đợi đầu tiên của bạn</p>
-            <Link href="/dashboard/queues/new" className="btn-primary mt-4 inline-flex">Tạo ngay</Link>
+            <p className="font-medium">{t('noQueues')}</p>
+            <p className="text-sm mt-1">{t('createFirst')}</p>
+            <Link href="/dashboard/queues/new" className="btn-primary mt-4 inline-flex">{t('createNow')}</Link>
           </div>
         ) : (
           <div className="space-y-3">
@@ -90,9 +92,9 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-500">{q.entries.length} đang chờ</span>
+                  <span className="text-sm text-gray-500">{t('waiting', { count: q.entries.length })}</span>
                   <span className={`badge ${q.isActive ? 'badge-green' : 'badge-gray'}`}>
-                    {q.isActive ? 'Hoạt động' : 'Tạm dừng'}
+                    {q.isActive ? t('active') : t('paused')}
                   </span>
                 </div>
               </Link>

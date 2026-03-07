@@ -4,10 +4,13 @@ import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { useTranslations } from 'next-intl'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 function LoginForm() {
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/staff'
+  const t = useTranslations('auth')
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,7 +20,7 @@ function LoginForm() {
     setLoading(true); setError('')
     const res = await signIn('credentials', { ...form, redirect: false })
     if (res?.error) {
-      setError('Email hoặc mật khẩu không đúng')
+      setError(t('wrongCredentials'))
       setLoading(false)
     } else {
       window.location.href = redirect
@@ -27,32 +30,35 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100">
       <div className="card w-full max-w-md">
+        <div className="flex justify-end mb-2">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">👷</div>
-          <h1 className="text-2xl font-bold text-gray-900">Đăng nhập nhân viên</h1>
-          <p className="text-gray-500 mt-1">Tài khoản dành cho nhân viên phục vụ</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('staffLoginTitle')}</h1>
+          <p className="text-gray-500 mt-1">{t('staffLoginDesc')}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
           )}
           <div>
-            <label className="form-label">Email</label>
+            <label className="form-label">{t('email')}</label>
             <input type="email" className="form-input" placeholder="nhanvien@example.com"
               value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
           </div>
           <div>
-            <label className="form-label">Mật khẩu</label>
+            <label className="form-label">{t('password')}</label>
             <input type="password" className="form-input" placeholder="••••••••"
               value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
           </div>
           <button type="submit" className="btn-primary w-full justify-center" disabled={loading}>
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {loading ? t('loggingIn') : t('loginButton')}
           </button>
         </form>
         <p className="text-center text-sm text-gray-500 mt-6">
-          Chưa có tài khoản?{' '}
-          <Link href="/staff/register" className="text-orange-600 font-semibold hover:underline">Đăng ký</Link>
+          {t('noAccount')}{' '}
+          <Link href="/staff/register" className="text-orange-600 font-semibold hover:underline">{t('registerLink')}</Link>
         </p>
       </div>
     </div>
@@ -61,7 +67,7 @@ function LoginForm() {
 
 export default function StaffLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-gray-400">Đang tải...</div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-gray-400">...</div></div>}>
       <LoginForm />
     </Suspense>
   )

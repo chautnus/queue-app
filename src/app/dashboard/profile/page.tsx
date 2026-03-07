@@ -1,7 +1,9 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 
 export default function ProfilePage() {
+  const t = useTranslations('profile')
   const [logo, setLogo] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -29,9 +31,9 @@ export default function ProfilePage() {
     const data = await res.json()
     if (res.ok) {
       setLogo(data.logo + '?t=' + Date.now())
-      setMessage('Đã cập nhật logo thành công!')
+      setMessage(t('uploadSuccess'))
     } else {
-      setError(data.error || 'Lỗi upload')
+      setError(data.error || t('uploadError'))
     }
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -40,47 +42,42 @@ export default function ProfilePage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Hồ sơ quản trị</h1>
-        <p className="text-gray-500 mt-1">Thông tin tài khoản và logo tổ chức</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="text-gray-500 mt-1">{t('subtitle')}</p>
       </div>
 
       <div className="max-w-lg space-y-6">
-        {/* Thông tin tài khoản */}
         <div className="card space-y-3">
-          <h2 className="font-semibold text-gray-900">Thông tin tài khoản</h2>
+          <h2 className="font-semibold text-gray-900">{t('accountInfo')}</h2>
           <div className="text-sm space-y-2">
             <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-500">Họ tên</span>
+              <span className="text-gray-500">{t('fullName')}</span>
               <span className="font-medium text-gray-900">{name}</span>
             </div>
             <div className="flex justify-between py-2">
-              <span className="text-gray-500">Email</span>
+              <span className="text-gray-500">{t('email')}</span>
               <span className="font-medium text-gray-900">{email}</span>
             </div>
           </div>
         </div>
 
-        {/* Logo tổ chức */}
         <div className="card space-y-4">
-          <h2 className="font-semibold text-gray-900">Logo tổ chức</h2>
-          <p className="text-sm text-gray-500">
-            Logo này sẽ hiển thị trên trang lấy số của khách hàng và được nhúng vào QR code.
-          </p>
+          <h2 className="font-semibold text-gray-900">{t('logoTitle')}</h2>
+          <p className="text-sm text-gray-500">{t('logoDesc')}</p>
 
-          {/* Preview logo hiện tại */}
           <div className="flex items-center gap-4">
             {logo ? (
               <img src={logo} alt="Logo" className="w-24 h-24 rounded-2xl object-cover border-2 border-gray-200 shadow" />
             ) : (
               <div className="w-24 h-24 rounded-2xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
-                Chưa có logo
+                {t('noLogo')}
               </div>
             )}
             <div>
               <p className="text-sm font-medium text-gray-700 mb-1">
-                {logo ? 'Logo hiện tại' : 'Chưa có logo'}
+                {logo ? t('currentLogo') : t('noLogo')}
               </p>
-              <p className="text-xs text-gray-400">PNG, JPG, WebP · Tối đa 5MB</p>
+              <p className="text-xs text-gray-400">{t('logoFormats')}</p>
             </div>
           </div>
 
@@ -102,7 +99,7 @@ export default function ProfilePage() {
             />
             <label htmlFor="logo-upload"
               className={`btn-primary cursor-pointer inline-flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-              {uploading ? '⏳ Đang tải lên...' : '📸 ' + (logo ? 'Thay đổi logo' : 'Tải logo lên')}
+              {uploading ? t('uploading') : (logo ? t('changeButton') : t('uploadButton'))}
             </label>
           </div>
         </div>

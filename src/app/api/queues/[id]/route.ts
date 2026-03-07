@@ -30,7 +30,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const {
       name, startTime, endTime, avgProcessingTime,
       numberOfCounters, workingHours, qrType, isActive, waitThreshold, waitCheckDepth,
-      maxQueueSize, allowRequeue,
+      maxQueueSize, allowRequeue, redirectUrl,
     } = body
 
     const queue = await prisma.queue.update({
@@ -48,6 +48,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         waitCheckDepth: parseInt(waitCheckDepth) || 5,
         maxQueueSize: parseInt(maxQueueSize) || 0,
         allowRequeue: allowRequeue === true || allowRequeue === 'true',
+        redirectUrl: redirectUrl !== undefined ? (redirectUrl || '') : undefined,
       },
     })
     return NextResponse.json(queue)

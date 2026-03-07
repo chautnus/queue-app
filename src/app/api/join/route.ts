@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
       avgProcessingTime: queue.avgProcessingTime,
       numberOfCounters: queue.numberOfCounters,
       isActive: queue.isActive,
+      redirectUrl: queue.redirectUrl,
     },
     isOpen: open,
     waitingCount,
@@ -142,6 +143,7 @@ export async function POST(req: NextRequest) {
       },
       estimatedWait: estimatedWaitMins,
       queueName: queue.name,
+      redirectUrl: queue.redirectUrl || '',
     }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Lỗi máy chủ' }, { status: 500 })

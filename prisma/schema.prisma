@@ -32,6 +32,7 @@ model Queue {
   waitCheckDepth    Int            @default(5)
   maxQueueSize      Int            @default(0)
   allowRequeue      Boolean        @default(false)
+  redirectUrl       String         @default("")
   admin             Admin          @relation(fields: [adminId], references: [id])
   adminId           String
   entries           QueueEntry[]

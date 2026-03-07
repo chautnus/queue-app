@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const {
       name, startTime, endTime, avgProcessingTime,
       numberOfCounters, workingHours, qrType, waitThreshold, waitCheckDepth,
-      maxQueueSize, allowRequeue,
+      maxQueueSize, allowRequeue, redirectUrl,
     } = body
 
     if (!name || !startTime || !endTime || !avgProcessingTime) {
@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
         waitCheckDepth: parseInt(waitCheckDepth) || 5,
         maxQueueSize: parseInt(maxQueueSize) || 0,
         allowRequeue: allowRequeue === true || allowRequeue === 'true',
+        redirectUrl: redirectUrl || '',
         adminId: session.user.id,
       },
     })

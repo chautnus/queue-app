@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useRef, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface Counter {
   counterNumber: number
@@ -34,6 +35,7 @@ function beep() {
 }
 
 export default function DisplayClient({ queueId }: { queueId: string }) {
+  const t = useTranslations('kiosk')
   const [data, setData] = useState<DisplayData | null>(null)
   const [error, setError] = useState('')
   const [clock, setClock] = useState(new Date())
@@ -43,9 +45,8 @@ export default function DisplayClient({ queueId }: { queueId: string }) {
     try {
       const res = await fetch(`/api/display/${queueId}`)
       const json: DisplayData = await res.json()
-      if (!res.ok) { setError('Không tìm thấy hàng đợi'); return }
+      if (!res.ok) { setError(t('notFound')); return }
 
-      // Phát âm thanh khi có số mới được gọi
       const prev = prevTicketsRef.current
       json.counters.forEach(c => {
         const prevTicket = prev[c.counterNumber]
@@ -53,16 +54,15 @@ export default function DisplayClient({ queueId }: { queueId: string }) {
           beep()
         }
       })
-      // Lưu lại trạng thái hiện tại
       const next: Record<number, number | null> = {}
       json.counters.forEach(c => { next[c.counterNumber] = c.currentTicket })
       prevTicketsRef.current = next
 
       setData(json)
     } catch {
-      setError('Mất kết nối')
+      setError(t('connectionLost'))
     }
-  }, [queueId])
+  }, [queueId, t])
 
   useEffect(() => {
     fetchData()
@@ -70,7 +70,6 @@ export default function DisplayClient({ queueId }: { queueId: string }) {
     return () => clearInterval(poll)
   }, [fetchData])
 
-  // Đồng hồ
   useEffect(() => {
     const tick = setInterval(() => setClock(new Date()), 1000)
     return () => clearInterval(tick)
@@ -90,7 +89,7 @@ export default function DisplayClient({ queueId }: { queueId: string }) {
   if (!data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <div className="text-2xl animate-pulse">Đang tải...</div>
+        <div className="text-2xl animate-pulse">{t('loading')}</div>
       </div>
     )
   }
@@ -127,7 +126,7 @@ export default function DisplayClient({ queueId }: { queueId: string }) {
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
               <div className="text-8xl mb-6 opacity-30">🏢</div>
-              <p className="text-3xl text-gray-500">Chưa có nhân viên nào bắt đầu ca làm việc</p>
+              <p className="text-3xl text-gray-500">{t('noStaff')}</p>
             </div>
           </div>
         ) : (
@@ -141,13 +140,13 @@ export default function DisplayClient({ queueId }: { queueId: string }) {
                     : 'bg-gray-800 border-gray-600'
                 }`}
               >
-                <div className="text-gray-400 text-xl font-medium mb-2">CỬA {c.counterNumber}</div>
+                <div className="text-gray-400 text-xl font-medium mb-2">{t('counter', { n: c.counterNumber })}</div>
                 <div className={`text-9xl font-black mb-4 ${c.currentTicket !== null ? 'text-blue-300' : 'text-gray-600'}`}>
                   {c.currentTicket !== null ? c.currentTicket : '—'}
                 </div>
                 <div className="text-gray-400 text-lg">{c.staffName}</div>
                 {c.sessionStatus === 'idle' && c.currentTicket === null && (
-                  <div className="mt-3 text-green-400 text-sm font-medium">● Sẵn sàng</div>
+                  <div className="mt-3 text-green-400 text-sm font-medium">{t('ready')}</div>
                 )}
               </div>
             ))}
@@ -158,7 +157,7 @@ export default function DisplayClient({ queueId }: { queueId: string }) {
           <div className="mt-4 flex gap-3 flex-wrap">
             {pausedCounters.map(c => (
               <div key={c.counterNumber} className="bg-yellow-900/40 border border-yellow-600 rounded-xl px-4 py-2 text-yellow-400 text-sm">
-                ⏸ Cửa {c.counterNumber} đang tạm nghỉ
+                {t('counterPaused', { n: c.counterNumber })}
               </div>
             ))}
           </div>
@@ -170,20 +169,20 @@ export default function DisplayClient({ queueId }: { queueId: string }) {
         <div className="flex gap-8">
           <div className="text-center">
             <div className="text-3xl font-bold text-yellow-400">{data.waitingCount}</div>
-            <div className="text-gray-400 text-sm">Đang chờ</div>
+            <div className="text-gray-400 text-sm">{t('waiting')}</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-green-400">{data.completedCount}</div>
-            <div className="text-gray-400 text-sm">Đã phục vụ hôm nay</div>
+            <div className="text-gray-400 text-sm">{t('servedToday')}</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-blue-400">
               {data.counters.filter(c => c.currentTicket !== null).length}
             </div>
-            <div className="text-gray-400 text-sm">Đang phục vụ</div>
+            <div className="text-gray-400 text-sm">{t('currentlyServing')}</div>
           </div>
         </div>
-        <div className="text-gray-600 text-xs">Tự cập nhật mỗi 5 giây</div>
+        <div className="text-gray-600 text-xs">{t('autoRefresh')}</div>
       </div>
     </div>
   )
