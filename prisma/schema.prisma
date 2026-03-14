@@ -1,0 +1,299 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── AUTH & USERS ────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          UserRole  @default(ADMIN)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  ownedQueues   Queue[]        @relation("QueueOwner")
+  staffQueues   QueueStaff[]
+  staffSessions StaffSession[]
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+// NextAuth required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── QUEUE ────────────────────────────────────────────────────────────────────
+
+model Queue {
+  id      String      @id @default(cuid())
+  ownerId String
+  name    String
+  logoUrl String?
+  slug    String      @unique
+  status  QueueStatus @default(INACTIVE)
+
+  // Timing
+  startAt  DateTime
+  endAt    DateTime
+  timezone String // IANA tz e.g. "Asia/Ho_Chi_Minh"
+
+  // QR settings
+  qrRotationType QrRotationType @default(FIXED)
+  qrSecret       String // HMAC secret for signing QR tokens
+
+  // Customer options
+  requireCustomerInfo Boolean @default(false)
+  // JSON: Array<{ name, label, type: 'text'|'number'|'select', required, options?, streamCondition? }>
+  customFields        Json?
+  redirectUrl         String?
+  allowTransfer       Boolean @default(false)
+  transferQueueId     String?
+
+  // Ad banner (AdSense override or custom)
+  adBannerSlotId String?
+
+  // Brand settings
+  greeting String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner               User                 @relation("QueueOwner", fields: [ownerId], references: [id])
+  streams             Stream[]
+  staff               QueueStaff[]
+  tickets             Ticket[]
+  deviceRegistrations DeviceRegistration[]
+  pushSubscriptions   PushSubscription[]
+  staffSessions       StaffSession[]
+
+  @@index([ownerId])
+}
+
+enum QueueStatus {
+  INACTIVE
+  ACTIVE
+  PAUSED
+  CLOSED
+}
+
+enum QrRotationType {
+  FIXED
+  DAILY
+}
+
+// ─── STREAM (luồng) ──────────────────────────────────────────────────────────
+
+model Stream {
+  id                   String  @id @default(cuid())
+  queueId              String
+  name                 String
+  avgProcessingSeconds Int     @default(300) // per counter, default 5 min
+  ticketPrefix         String? // e.g. "A", "B" → "A001"
+  order                Int     @default(0)
+
+  queue    Queue     @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  counters Counter[]
+  tickets  Ticket[]
+
+  dailyCounters DailyTicketCounter[]
+
+  @@index([queueId])
+}
+
+// ─── COUNTER (cửa) ──────────────────────────────────────────────────────────
+
+model Counter {
+  id       String @id @default(cuid())
+  streamId String
+  name     String
+  order    Int    @default(0)
+
+  // JSON: Array<{ dayOfWeek: 0-6, openTime: "08:00", closeTime: "17:00", isOpen: boolean }>
+  schedule Json?
+
+  stream        Stream         @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  staffSessions StaffSession[]
+
+  @@index([streamId])
+}
+
+// ─── QUEUE STAFF (membership) ────────────────────────────────────────────────
+
+model QueueStaff {
+  id      String @id @default(cuid())
+  queueId String
+  userId  String
+
+  queue Queue @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([queueId, userId])
+}
+
+// ─── STAFF SESSION ────────────────────────────────────────────────────────────
+
+model StaffSession {
+  id        String             @id @default(cuid())
+  userId    String
+  counterId String
+  queueId   String
+  status    StaffSessionStatus @default(ACTIVE)
+
+  startAt             DateTime  @default(now())
+  endAt               DateTime?
+  pausedAt            DateTime?
+  servedCount         Int       @default(0)
+  totalServiceSeconds Int       @default(0)
+
+  // Which streams this staff serves in this session (Postgres string array)
+  streamIds String[]
+
+  user    User    @relation(fields: [userId], references: [id])
+  counter Counter @relation(fields: [counterId], references: [id])
+  queue   Queue   @relation(fields: [queueId], references: [id])
+  tickets Ticket[] @relation("ServingSession")
+
+  @@index([counterId])
+  @@index([userId])
+  @@index([queueId])
+}
+
+enum StaffSessionStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+// ─── TICKET ──────────────────────────────────────────────────────────────────
+
+model Ticket {
+  id            String       @id @default(cuid())
+  queueId       String
+  streamId      String
+  ticketNumber  Int // Sequential per stream per day
+  displayNumber String // e.g. "A042"
+  verifyCode    String // 4-digit random code
+  status        TicketStatus @default(WAITING)
+
+  deviceId     String?
+  customerInfo Json? // Collected custom field responses
+
+  createdAt   DateTime  @default(now())
+  calledAt    DateTime?
+  servedAt    DateTime?
+  completedAt DateTime?
+
+  rating        Int?
+  ratingComment String?
+
+  staffSessionId String?
+
+  queue        Queue         @relation(fields: [queueId], references: [id])
+  stream       Stream        @relation(fields: [streamId], references: [id])
+  staffSession StaffSession? @relation("ServingSession", fields: [staffSessionId], references: [id])
+
+  @@index([queueId, streamId, status])
+  @@index([queueId, createdAt])
+  @@index([displayNumber, queueId])
+}
+
+enum TicketStatus {
+  WAITING
+  CALLED // Staff pressed "next" - customer is being notified
+  SERVING // Staff confirmed ticket (entered code)
+  COMPLETED
+  ABSENT // Customer didn't show up
+  CANCELLED
+}
+
+// ─── DEVICE REGISTRATION ─────────────────────────────────────────────────────
+
+model DeviceRegistration {
+  id        String   @id @default(cuid())
+  queueId   String
+  deviceId  String
+  ticketId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  queue Queue @relation(fields: [queueId], references: [id], onDelete: Cascade)
+
+  @@unique([queueId, deviceId])
+  @@index([queueId])
+}
+
+// ─── PUSH SUBSCRIPTIONS ──────────────────────────────────────────────────────
+
+model PushSubscription {
+  id       String @id @default(cuid())
+  queueId  String
+  ticketId String
+  endpoint String @unique @db.Text
+  p256dh   String
+  auth     String
+
+  createdAt DateTime @default(now())
+
+  queue Queue @relation(fields: [queueId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+// ─── DAILY TICKET COUNTER ────────────────────────────────────────────────────
+
+model DailyTicketCounter {
+  id       String @id @default(cuid())
+  streamId String
+  date     String // "YYYY-MM-DD" in queue's timezone
+  count    Int    @default(0)
+
+  stream Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+  @@unique([streamId, date])
+}

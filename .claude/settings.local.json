@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/dev/queue-app -type f -name *.json -o -name *.js -o -name *.ts -o -name *.tsx -o -name *.md -o -name .*)",
+      "Bash(ls -la /c/dev/queue-app/package.json /c/dev/queue-app/package-lock.json /c/dev/queue-app/tsconfig.json /c/dev/queue-app/next.config.js /c/dev/queue-app/.env*)",
+      "Bash(file * .*)",
+      "Bash(ls -d /c/dev/queue-app/node_modules/@*)",
+      "Bash(find . -name *.config.* -o -name tsconfig* -o -name .env* -o -name package*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(npx prisma:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.railway.com)",
+      "WebFetch(domain:docs.railway.app)",
+      "Bash(railway --version)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(curl -s \"https://api.github.com/repos/chautnus/queue-app\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''''fs''''\\).readFileSync\\(''''/dev/stdin'''',''''utf8''''\\)\\); console.log\\(''''Repo:'''',d.full_name,''''| Branch:'''',d.default_branch,''''| Size:'''',d.size,''''KB | Empty:'''',d.size===0\\)\")",
+      "WebFetch(domain:api.github.com)"
+    ]
+  }
+}

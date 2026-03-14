@@ -1,0 +1,52 @@
+{
+  "name": "queue-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.7.4",
+    "@hookform/resolvers": "^3.9.1",
+    "@prisma/client": "^6.3.1",
+    "@tanstack/react-query": "^5.65.1",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.5.1",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "jose": "^5.10.0",
+    "next": "^16.1.6",
+    "next-auth": "^5.0.0-beta.28",
+    "next-intl": "^3.26.3",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "sharp": "^0.33.5",
+    "uuid": "^11.0.5",
+    "web-push": "^3.6.7",
+    "zod": "^3.24.1",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.13.1",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@types/uuid": "^10.0.0",
+    "@types/web-push": "^3.6.4",
+    "eslint": "^9.19.0",
+    "eslint-config-next": "15.1.7",
+    "prisma": "^6.3.1",
+    "tailwindcss": "^4.0.6",
+    "typescript": "^5.7.3"
+  }
+}
