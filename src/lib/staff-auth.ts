@@ -74,6 +74,6 @@ export const {
     signIn: "/staff/login",
     error: "/staff/login",
   },
-  secret: process.env.STAFF_AUTH_SECRET ?? process.env.AUTH_SECRET,
+  secret: process.env.STAFF_AUTH_SECRET ?? process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   basePath: "/api/staff-auth",
 });

@@ -2,7 +2,7 @@ import webpush from "web-push";
 import { prisma } from "@/lib/prisma";
 
 function initVapid() {
-  const subject = process.env.VAPID_SUBJECT;
+  const subject = process.env.VAPID_SUBJECT ?? process.env.VAPID_EMAIL;
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   if (subject && publicKey && privateKey) {
