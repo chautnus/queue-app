@@ -88,11 +88,14 @@ model Queue {
   qrSecret       String // HMAC secret for signing QR tokens
 
   // Customer options
-  requireCustomerInfo Boolean @default(false)
+  requireCustomerInfo Boolean     @default(false)
+  collectName         CollectMode @default(HIDDEN)
+  collectPhone        CollectMode @default(HIDDEN)
+  collectEmail        CollectMode @default(HIDDEN)
   // JSON: Array<{ name, label, type: 'text'|'number'|'select', required, options?, streamCondition? }>
   customFields        Json?
   redirectUrl         String?
-  allowTransfer       Boolean @default(false)
+  allowTransfer       Boolean     @default(false)
   transferQueueId     String?
 
   // Ad banner (AdSense override or custom)
@@ -125,6 +128,12 @@ enum QueueStatus {
 enum QrRotationType {
   FIXED
   DAILY
+}
+
+enum CollectMode {
+  HIDDEN
+  OPTIONAL
+  REQUIRED
 }
 
 // ─── STREAM (luồng) ──────────────────────────────────────────────────────────

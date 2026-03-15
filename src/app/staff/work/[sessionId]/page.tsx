@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import WorkScreen from "@/components/staff/WorkScreen";
+import AdBanner from "@/components/AdBanner";
 
 export const metadata: Metadata = { title: "Serving" };
 
@@ -28,6 +29,7 @@ export default async function StaffWorkPage({
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto px-4 py-6">
+        <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_STAFF ?? ""} />
         <WorkScreen
           sessionId={sessionId}
           counterName={staffSession.counter.name}

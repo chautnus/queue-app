@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import CustomerFlow from "@/components/customer/CustomerFlow";
+import AdBanner from "@/components/AdBanner";
 
 export async function generateMetadata({
   params,
@@ -73,5 +74,10 @@ export default async function CustomerQueuePage({
     })),
   };
 
-  return <CustomerFlow queue={queueData} />;
+  return (
+    <>
+      <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_CUSTOMER ?? ""} />
+      <CustomerFlow queue={queueData} />
+    </>
+  );
 }

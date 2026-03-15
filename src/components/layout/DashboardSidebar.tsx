@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import AdBanner from "@/components/AdBanner";
 
 type User = {
   name?: string | null;
@@ -82,6 +83,10 @@ export default function DashboardSidebar({ user }: { user: User }) {
           );
         })}
       </nav>
+
+      <div className="px-3 py-2">
+        <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ADMIN ?? ""} />
+      </div>
 
       <div className="p-4 border-t border-gray-100">
         <div className="flex items-center gap-3 mb-3">

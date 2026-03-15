@@ -32,6 +32,8 @@ export const StreamInputSchema = z.object({
   counters: z.array(CounterInputSchema).min(1, "At least one counter required"),
 });
 
+const CollectModeSchema = z.enum(["HIDDEN", "OPTIONAL", "REQUIRED"]);
+
 export const CreateQueueSchema = z.object({
   name: z.string().min(1, "Queue name required").max(100),
   logoUrl: z.string().url().optional().or(z.literal("")),
@@ -41,11 +43,13 @@ export const CreateQueueSchema = z.object({
   qrRotationType: z.enum(["FIXED", "DAILY"]).default("FIXED"),
   streams: z.array(StreamInputSchema).min(1, "At least one stream required"),
   requireCustomerInfo: z.boolean().default(false),
+  collectName: CollectModeSchema.default("HIDDEN"),
+  collectPhone: CollectModeSchema.default("HIDDEN"),
+  collectEmail: CollectModeSchema.default("HIDDEN"),
   customFields: z.array(CustomFieldSchema).optional(),
   redirectUrl: z.string().url().optional().or(z.literal("")),
   allowTransfer: z.boolean().default(false),
   transferQueueId: z.string().optional(),
-  adBannerSlotId: z.string().optional(),
   greeting: z.string().max(500).optional(),
 });
 
@@ -56,3 +60,4 @@ export type UpdateQueueInput = z.infer<typeof UpdateQueueSchema>;
 export type StreamInput = z.infer<typeof StreamInputSchema>;
 export type CounterInput = z.infer<typeof CounterInputSchema>;
 export type CustomField = z.infer<typeof CustomFieldSchema>;
+export type CollectMode = "HIDDEN" | "OPTIONAL" | "REQUIRED";
