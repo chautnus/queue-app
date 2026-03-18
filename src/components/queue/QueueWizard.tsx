@@ -20,20 +20,21 @@ const TIMEZONES = [
   "UTC",
 ];
 
-const DAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 const DAYS_FULL = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
 
-const SECTIONS = [
-  "Thông tin cơ bản",
-  "Luồng & Cửa phục vụ",
-  "Hành vi khách hàng",
-  "Cài đặt QR",
+const TABS = [
+  { id: 0, label: "Cơ bản" },
+  { id: 1, label: "Luồng & Cửa" },
+  { id: 2, label: "Khách hàng" },
+  { id: 3, label: "QR & Xuất bản" },
 ];
 
-function ChevronIcon({ open }: { open: boolean }) {
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+function ChevronIcon({ open, className = "" }: { open: boolean; className?: string }) {
   return (
     <svg
-      className={`w-5 h-5 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+      className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""} ${className}`}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -43,33 +44,15 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
-function SectionHeader({
-  title,
-  open,
-  hasError,
-  onClick,
-}: {
-  title: string;
-  open: boolean;
-  hasError: boolean;
-  onClick: () => void;
-}) {
+function UploadIcon() {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full flex items-center justify-between px-5 py-4 text-left"
-    >
-      <span className="font-semibold text-gray-900 flex items-center gap-2">
-        {title}
-        {hasError && (
-          <span className="inline-block w-2 h-2 rounded-full bg-red-500" />
-        )}
-      </span>
-      <ChevronIcon open={open} />
-    </button>
+    <svg className="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
   );
 }
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 type QueueWizardProps = {
   mode?: "create" | "edit";
@@ -78,6 +61,8 @@ type QueueWizardProps = {
   initialLogoUrl?: string;
 };
 
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function QueueWizard({
   mode = "create",
   queueId,
@@ -85,11 +70,12 @@ export default function QueueWizard({
   initialLogoUrl,
 }: QueueWizardProps) {
   const router = useRouter();
-  const [openSections, setOpenSections] = useState([true, false, false, false]);
+  const [activeTab, setActiveTab] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(initialLogoUrl ?? null);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -112,10 +98,10 @@ export default function QueueWizard({
       allowTransfer: false,
       streams: [
         {
-          name: "Main",
+          name: "Tổng quát",
           ticketPrefix: "A",
           avgProcessingSeconds: 300,
-          counters: [{ name: "Counter 1" }],
+          counters: [{ name: "Cửa 1" }],
         },
       ],
       customFields: [],
@@ -128,15 +114,18 @@ export default function QueueWizard({
     remove: removeStream,
   } = useFieldArray({ control, name: "streams" });
 
-  const toggleSection = (i: number) => {
-    setOpenSections((prev) => prev.map((v, idx) => (idx === i ? !v : v)));
-  };
+  // Tab error detection
+  const tabHasError = [
+    !!(errors.name || errors.startAt || errors.endAt || errors.timezone),
+    !!(errors.streams),
+    !!(errors.customFields),
+    false,
+  ];
 
   const onSubmit = async (data: CreateQueueInput) => {
     setSubmitting(true);
     setError(null);
 
-    // Auto-set requireCustomerInfo based on collect modes + custom fields
     const hasInfo =
       data.collectName !== "HIDDEN" ||
       data.collectPhone !== "HIDDEN" ||
@@ -145,7 +134,6 @@ export default function QueueWizard({
     data.requireCustomerInfo = !!hasInfo;
 
     if (mode === "edit" && queueId) {
-      // Update queue fields
       const { streams, ...queueFields } = data;
       const [r1, r2] = await Promise.all([
         fetch(`/api/queues/${queueId}`, {
@@ -159,7 +147,6 @@ export default function QueueWizard({
           body: JSON.stringify({ streams }),
         }),
       ]);
-
       if (r1.ok && r2.ok) {
         router.push(`/dashboard/queues/${queueId}`);
       } else {
@@ -173,7 +160,6 @@ export default function QueueWizard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-
       if (res.ok) {
         const { queue } = await res.json();
         router.push(`/dashboard/queues/${queue.id}`);
@@ -187,13 +173,11 @@ export default function QueueWizard({
 
   const handleLogoFile = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) {
-      setError("Logo file must be under 10 MB");
+      setError("Logo phải nhỏ hơn 10 MB");
       return;
     }
     setLogoUploading(true);
-    const preview = URL.createObjectURL(file);
-    setLogoPreview(preview);
-
+    setLogoPreview(URL.createObjectURL(file));
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -202,331 +186,429 @@ export default function QueueWizard({
         const { url } = await res.json();
         setValue("logoUrl", url);
       } else {
-        setError("Logo upload failed");
+        setError("Tải logo thất bại");
+        setLogoPreview(null);
       }
     } finally {
       setLogoUploading(false);
     }
   };
 
-  // Section error detection
-  const sectionHasError = [
-    !!(errors.name || errors.startAt || errors.endAt || errors.timezone),
-    !!(errors.streams),
-    !!(errors.customFields),
-    false,
-  ];
-
   return (
-    <div className="max-w-2xl space-y-3">
+    <div className="max-w-2xl">
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Section 0: Basic Info */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <SectionHeader
-            title={SECTIONS[0]}
-            open={openSections[0]}
-            hasError={sectionHasError[0]}
-            onClick={() => toggleSection(0)}
-          />
-          {openSections[0] && (
-            <div className="px-5 pb-5 space-y-4 border-t border-gray-50">
+        {/* ── Sticky header ── */}
+        <div className="sticky top-0 z-10 bg-white border-b border-slate-200 -mx-4 px-4 mb-0">
+          <div className="flex items-center justify-between py-3">
+            <h1 className="font-bold text-lg text-slate-900">
+              {mode === "edit" ? "Chỉnh sửa hàng đợi" : "Tạo hàng đợi mới"}
+            </h1>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="btn-ghost text-sm py-2 px-3"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="btn-primary text-sm py-2"
+              >
+                {submitting
+                  ? mode === "edit" ? "Đang lưu..." : "Đang tạo..."
+                  : mode === "edit" ? "Lưu thay đổi" : "Tạo hàng đợi"}
+              </button>
+            </div>
+          </div>
+
+          {/* ── Tab nav ── */}
+          <div className="flex gap-0">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? "text-blue-600 border-blue-600"
+                    : "text-slate-500 border-transparent hover:text-slate-700"
+                }`}
+              >
+                {tab.label}
+                {tabHasError[tab.id] && (
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Error banner ── */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2">
+            <span className="mt-0.5">⚠</span>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* ── Tab content ── */}
+        <div className="py-6 space-y-5">
+
+          {/* TAB 0: Cơ bản */}
+          {activeTab === 0 && (
+            <>
               {/* Logo upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Logo (tùy chọn, tối đa 10 MB)
-                </label>
-                <div className="flex items-center gap-3">
-                  {logoPreview && (
-                    <img
-                      src={logoPreview}
-                      alt="Logo preview"
-                      className="w-16 h-16 rounded-xl object-cover border border-gray-200"
-                    />
+              <Section title="Logo hàng đợi">
+                <div
+                  className={`relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${
+                    dragOver
+                      ? "border-blue-400 bg-blue-50"
+                      : logoPreview
+                      ? "border-slate-200 bg-slate-50"
+                      : "border-slate-200 hover:border-blue-300 hover:bg-slate-50"
+                  }`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOver(false);
+                    const f = e.dataTransfer.files[0];
+                    if (f) handleLogoFile(f);
+                  }}
+                >
+                  {logoPreview ? (
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={logoPreview}
+                        alt="Logo preview"
+                        className="w-20 h-20 rounded-2xl object-cover border border-slate-200 shrink-0"
+                      />
+                      <div className="text-left">
+                        <p className="text-sm font-medium text-slate-700">
+                          {logoUploading ? "Đang tải lên..." : "Logo đã chọn"}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5">Click để thay đổi · PNG/JPG tối đa 10 MB</p>
+                        {logoUploading && (
+                          <div className="mt-2 h-1 bg-slate-200 rounded-full overflow-hidden w-32">
+                            <div className="h-full bg-blue-500 animate-pulse w-2/3" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <UploadIcon />
+                      <p className="text-sm font-medium text-slate-600">Kéo thả hoặc click để tải lên</p>
+                      <p className="text-xs text-slate-400 mt-1">PNG, JPG · Tối đa 10 MB</p>
+                    </>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={logoUploading}
-                    className="px-4 py-2 border border-gray-300 rounded-xl text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    {logoUploading ? "Đang tải lên..." : "Chọn ảnh"}
-                  </button>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) handleLogoFile(f);
-                    }}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleLogoFile(f); }}
                   />
                 </div>
-              </div>
+              </Section>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tên hàng đợi *
-                </label>
-                <input
-                  {...register("name")}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="VD: Chi nhánh Ngân hàng A"
-                />
-                {errors.name && (
-                  <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Lời chào
-                </label>
-                <input
-                  {...register("greeting")}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="VD: Chào mừng! Chúng tôi sẽ phục vụ bạn sớm."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Bắt đầu *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    {...register("startAt")}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Kết thúc *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    {...register("endAt")}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Múi giờ *
-                </label>
-                <select
-                  {...register("timezone")}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {TIMEZONES.map((tz) => (
-                    <option key={tz} value={tz}>{tz}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL chuyển hướng (tùy chọn)
-                </label>
-                <input
-                  {...register("redirectUrl")}
-                  type="url"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://... Mở sau khi khách lấy số"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Section 1: Streams & Counters */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <SectionHeader
-            title={SECTIONS[1]}
-            open={openSections[1]}
-            hasError={sectionHasError[1]}
-            onClick={() => toggleSection(1)}
-          />
-          {openSections[1] && (
-            <div className="px-5 pb-5 border-t border-gray-50 space-y-3 pt-4">
-              {streamFields.map((streamField, si) => (
-                <StreamEditor
-                  key={streamField.id}
-                  streamIndex={si}
-                  register={register}
-                  control={control}
-                  errors={errors}
-                  onRemove={() => removeStream(si)}
-                  canRemove={streamFields.length > 1}
-                />
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  appendStream({
-                    name: `Luồng ${streamFields.length + 1}`,
-                    ticketPrefix: String.fromCharCode(65 + streamFields.length),
-                    avgProcessingSeconds: 300,
-                    counters: [{ name: "Cửa 1" }],
-                  })
-                }
-                className="w-full py-3 border-2 border-dashed border-gray-300 text-gray-600 rounded-xl hover:border-blue-400 hover:text-blue-600 font-medium text-sm"
-              >
-                + Thêm luồng
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Section 2: Customer Behavior */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <SectionHeader
-            title={SECTIONS[2]}
-            open={openSections[2]}
-            hasError={sectionHasError[2]}
-            onClick={() => toggleSection(2)}
-          />
-          {openSections[2] && (
-            <div className="px-5 pb-5 border-t border-gray-50 space-y-4 pt-4">
-              <p className="text-sm text-gray-500">Thông tin thu thập từ khách hàng</p>
-
-              {/* Standard fields */}
-              <div className="space-y-2">
-                {(
-                  [
-                    { key: "collectName" as const, label: "Tên khách hàng" },
-                    { key: "collectPhone" as const, label: "Số điện thoại" },
-                    { key: "collectEmail" as const, label: "Email" },
-                  ] as { key: "collectName" | "collectPhone" | "collectEmail"; label: string }[]
-                ).map(({ key, label }) => (
-                  <div key={key} className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl">
-                    <span className="flex-1 text-sm font-medium text-gray-800">{label}</span>
-                    <Controller
-                      control={control}
-                      name={key}
-                      render={({ field }) => (
-                        <select
-                          value={field.value as string}
-                          onChange={(e) => field.onChange(e.target.value as CollectMode)}
-                          className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="HIDDEN">Ẩn</option>
-                          <option value="OPTIONAL">Tùy chọn</option>
-                          <option value="REQUIRED">Bắt buộc</option>
-                        </select>
-                      )}
+              {/* Basic info */}
+              <Section title="Thông tin chung">
+                <div className="space-y-4">
+                  <FormField label="Tên hàng đợi" required error={errors.name?.message}>
+                    <input
+                      {...register("name")}
+                      className={`input ${errors.name ? "input-error" : ""}`}
+                      placeholder="VD: Chi nhánh Ngân hàng A"
                     />
-                  </div>
-                ))}
-              </div>
-
-              {/* Custom fields */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Trường tùy chỉnh</p>
-                <CustomFieldsEditor control={control} watch={watch} setValue={setValue} register={register} />
-              </div>
-
-              {/* Transfer */}
-              <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
-                <input
-                  type="checkbox"
-                  {...register("allowTransfer")}
-                  className="w-5 h-5 rounded text-blue-600"
-                />
-                <div>
-                  <p className="font-medium text-gray-900">Cho phép chuyển hàng đợi</p>
-                  <p className="text-sm text-gray-500">Khách có thể được chuyển sang hàng đợi khác</p>
+                  </FormField>
+                  <FormField label="Lời chào">
+                    <input
+                      {...register("greeting")}
+                      className="input"
+                      placeholder="VD: Chào mừng! Chúng tôi sẽ phục vụ bạn sớm."
+                    />
+                  </FormField>
                 </div>
-              </label>
-            </div>
-          )}
-        </div>
+              </Section>
 
-        {/* Section 3: QR Settings */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <SectionHeader
-            title={SECTIONS[3]}
-            open={openSections[3]}
-            hasError={sectionHasError[3]}
-            onClick={() => toggleSection(3)}
-          />
-          {openSections[3] && (
-            <div className="px-5 pb-5 border-t border-gray-50 space-y-3 pt-4">
+              {/* Operating hours */}
+              <Section title="Thời gian hoạt động">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField label="Bắt đầu" required error={errors.startAt?.message}>
+                      <input
+                        type="datetime-local"
+                        {...register("startAt")}
+                        className={`input ${errors.startAt ? "input-error" : ""}`}
+                      />
+                    </FormField>
+                    <FormField label="Kết thúc" required error={errors.endAt?.message}>
+                      <input
+                        type="datetime-local"
+                        {...register("endAt")}
+                        className={`input ${errors.endAt ? "input-error" : ""}`}
+                      />
+                    </FormField>
+                  </div>
+                  <FormField label="Múi giờ" required>
+                    <select {...register("timezone")} className="input">
+                      {TIMEZONES.map((tz) => (
+                        <option key={tz} value={tz}>{tz}</option>
+                      ))}
+                    </select>
+                  </FormField>
+                </div>
+              </Section>
+
+              {/* Advanced */}
+              <Section title="Tùy chọn nâng cao">
+                <FormField label="URL chuyển hướng sau khi lấy số">
+                  <input
+                    {...register("redirectUrl")}
+                    type="url"
+                    className="input"
+                    placeholder="https://... (Mở sau khi khách lấy số)"
+                  />
+                </FormField>
+              </Section>
+            </>
+          )}
+
+          {/* TAB 1: Streams & Counters */}
+          {activeTab === 1 && (
+            <Section
+              title="Luồng phục vụ"
+              action={
+                <button
+                  type="button"
+                  onClick={() =>
+                    appendStream({
+                      name: `Luồng ${streamFields.length + 1}`,
+                      ticketPrefix: String.fromCharCode(65 + streamFields.length),
+                      avgProcessingSeconds: 300,
+                      counters: [{ name: "Cửa 1" }],
+                    })
+                  }
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  + Thêm luồng
+                </button>
+              }
+            >
+              <div className="space-y-3">
+                {streamFields.map((streamField, si) => (
+                  <StreamEditor
+                    key={streamField.id}
+                    streamIndex={si}
+                    register={register}
+                    control={control}
+                    errors={errors}
+                    onRemove={() => removeStream(si)}
+                    canRemove={streamFields.length > 1}
+                  />
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    appendStream({
+                      name: `Luồng ${streamFields.length + 1}`,
+                      ticketPrefix: String.fromCharCode(65 + streamFields.length),
+                      avgProcessingSeconds: 300,
+                      counters: [{ name: "Cửa 1" }],
+                    })
+                  }
+                  className="w-full py-4 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl hover:border-blue-300 hover:text-blue-600 font-medium text-sm transition-colors"
+                >
+                  + Thêm luồng phục vụ
+                </button>
+              </div>
+            </Section>
+          )}
+
+          {/* TAB 2: Customer behavior */}
+          {activeTab === 2 && (
+            <>
+              <Section title="Thông tin thu thập">
+                <p className="text-xs text-slate-400 mb-4">Chọn chế độ cho từng trường thông tin</p>
+                <div className="space-y-2">
+                  {(
+                    [
+                      { key: "collectName" as const, label: "Họ tên" },
+                      { key: "collectPhone" as const, label: "Số điện thoại" },
+                      { key: "collectEmail" as const, label: "Email" },
+                    ] as { key: "collectName" | "collectPhone" | "collectEmail"; label: string }[]
+                  ).map(({ key, label }) => (
+                    <div key={key} className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white">
+                      <span className="text-sm font-medium text-slate-800">{label}</span>
+                      <Controller
+                        control={control}
+                        name={key}
+                        render={({ field }) => (
+                          <div className="flex rounded-lg border border-slate-200 overflow-hidden">
+                            {[
+                              { val: "HIDDEN", text: "Ẩn" },
+                              { val: "OPTIONAL", text: "Tùy chọn" },
+                              { val: "REQUIRED", text: "Bắt buộc" },
+                            ].map(({ val, text }) => (
+                              <button
+                                key={val}
+                                type="button"
+                                onClick={() => field.onChange(val as CollectMode)}
+                                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                                  field.value === val
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-white text-slate-500 hover:bg-slate-50"
+                                }`}
+                              >
+                                {text}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </Section>
+
+              <Section
+                title="Trường tùy chỉnh"
+                action={null}
+              >
+                <CustomFieldsEditor control={control} watch={watch} setValue={setValue} register={register} />
+              </Section>
+
+              <Section title="Chuyển hàng đợi">
+                <label className="flex items-center gap-3 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    {...register("allowTransfer")}
+                    className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Cho phép chuyển hàng đợi</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Khách có thể được chuyển sang hàng đợi khác</p>
+                  </div>
+                </label>
+              </Section>
+            </>
+          )}
+
+          {/* TAB 3: QR & Publish */}
+          {activeTab === 3 && (
+            <Section title="Chế độ mã QR">
               <Controller
                 control={control}
                 name="qrRotationType"
                 render={({ field }) => (
-                  <>
-                    <label
-                      className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
-                        field.value === "FIXED"
-                          ? "border-blue-600 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        value="FIXED"
-                        checked={field.value === "FIXED"}
-                        onChange={() => field.onChange("FIXED")}
-                        className="mt-0.5"
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900">Mã QR cố định</p>
-                        <p className="text-sm text-gray-500">Cùng một mã QR mãi mãi. Dễ in và dán.</p>
-                      </div>
-                    </label>
-                    <label
-                      className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
-                        field.value === "DAILY"
-                          ? "border-blue-600 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        value="DAILY"
-                        checked={field.value === "DAILY"}
-                        onChange={() => field.onChange("DAILY")}
-                        className="mt-0.5"
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900">Mã QR xoay theo ngày</p>
-                        <p className="text-sm text-gray-500">Mã QR thay đổi mỗi ngày. Bảo mật hơn.</p>
-                      </div>
-                    </label>
-                  </>
+                  <div className="space-y-3">
+                    {[
+                      {
+                        val: "FIXED",
+                        title: "Mã QR cố định",
+                        desc: "Cùng một mã QR mãi mãi. Phù hợp khi in poster, banner cố định.",
+                      },
+                      {
+                        val: "DAILY",
+                        title: "Mã QR xoay theo ngày",
+                        desc: "Mã QR thay đổi lúc nửa đêm. Bảo mật hơn, phù hợp môi trường kiểm soát cao.",
+                      },
+                    ].map(({ val, title, desc }) => (
+                      <label
+                        key={val}
+                        className={`flex items-start gap-4 p-4 border-2 rounded-2xl cursor-pointer transition-colors ${
+                          field.value === val
+                            ? "border-blue-600 bg-blue-50"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          value={val}
+                          checked={field.value === val}
+                          onChange={() => field.onChange(val)}
+                          className="mt-0.5 text-blue-600"
+                        />
+                        <div>
+                          <p className="font-medium text-slate-900 text-sm">{title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 )}
               />
-            </div>
+            </Section>
           )}
+
         </div>
 
-        {/* Error display */}
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 disabled:opacity-50 text-base"
-        >
-          {submitting
-            ? mode === "edit" ? "Đang lưu..." : "Đang tạo..."
-            : mode === "edit" ? "Lưu thay đổi" : "Tạo hàng đợi"}
-        </button>
+        {/* Bottom submit (mobile) */}
+        <div className="pb-8 pt-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn-primary w-full py-3.5 text-base"
+          >
+            {submitting
+              ? mode === "edit" ? "Đang lưu..." : "Đang tạo..."
+              : mode === "edit" ? "Lưu thay đổi" : "Tạo hàng đợi"}
+          </button>
+        </div>
       </form>
     </div>
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Section wrapper ───────────────────────────────────────────────────────────
+
+function Section({
+  title,
+  children,
+  action,
+}: {
+  title: string;
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">{title}</h3>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ─── FormField ────────────────────────────────────────────────────────────────
+
+function FormField({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className={`label ${required ? "label-required" : ""}`}>{label}</label>
+      {children}
+      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+    </div>
+  );
+}
+
+// ─── StreamEditor ─────────────────────────────────────────────────────────────
 
 function StreamEditor({
   streamIndex: si,
@@ -550,78 +632,77 @@ function StreamEditor({
   } = useFieldArray({ control, name: `streams.${si}.counters` });
 
   return (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-gray-900 text-sm">Luồng {si + 1}</h3>
+    <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden">
+      {/* Stream header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
+        <span className="text-sm font-semibold text-slate-700">Luồng {si + 1}</span>
         {canRemove && (
-          <button type="button" onClick={onRemove} className="text-red-500 hover:text-red-700 text-xs">
+          <button type="button" onClick={onRemove} className="text-xs text-red-500 hover:text-red-700 font-medium">
             Xóa luồng
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-3">
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Tên luồng *</label>
-          <input
-            {...register(`streams.${si}.name`)}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            placeholder="VD: Gửi tiền"
-          />
-          {errors.streams?.[si]?.name && (
-            <p className="text-xs text-red-600 mt-1">{errors.streams[si]?.name?.message}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Tiền tố số vé</label>
-          <input
-            {...register(`streams.${si}.ticketPrefix`)}
-            maxLength={3}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            placeholder="A"
-          />
-        </div>
-      </div>
-
-      <div className="mb-3">
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Thời gian phục vụ trung bình (giây)
-        </label>
-        <input
-          type="number"
-          {...register(`streams.${si}.avgProcessingSeconds`, { valueAsNumber: true })}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-          placeholder="300"
-        />
-      </div>
-
-      {/* Counters */}
-      <div>
-        <label className="text-xs font-medium text-gray-600 mb-2 block">Cửa phục vụ</label>
-        <div className="space-y-2">
-          {counterFields.map((cf, ci) => (
-            <CounterEditor
-              key={cf.id}
-              streamIndex={si}
-              counterIndex={ci}
-              register={register}
-              control={control}
-              onRemove={() => removeCounter(ci)}
-              canRemove={counterFields.length > 1}
+      <div className="p-4 space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Tên luồng" required error={errors.streams?.[si]?.name?.message}>
+            <input
+              {...register(`streams.${si}.name`)}
+              className="input text-sm"
+              placeholder="VD: Tổng quát"
             />
-          ))}
+          </FormField>
+          <FormField label="Tiền tố số vé">
+            <input
+              {...register(`streams.${si}.ticketPrefix`)}
+              maxLength={3}
+              className="input text-sm font-mono"
+              placeholder="A"
+            />
+          </FormField>
         </div>
-        <button
-          type="button"
-          onClick={() => appendCounter({ name: `Cửa ${counterFields.length + 1}` })}
-          className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium"
-        >
-          + Thêm cửa
-        </button>
+
+        <FormField label="Thời gian phục vụ TB (giây)">
+          <input
+            type="number"
+            {...register(`streams.${si}.avgProcessingSeconds`, { valueAsNumber: true })}
+            className="input text-sm"
+            placeholder="300"
+          />
+        </FormField>
+
+        {/* Counters */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Cửa phục vụ</span>
+            <button
+              type="button"
+              onClick={() => appendCounter({ name: `Cửa ${counterFields.length + 1}` })}
+              className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+            >
+              + Thêm cửa
+            </button>
+          </div>
+          <div className="space-y-2">
+            {counterFields.map((cf, ci) => (
+              <CounterEditor
+                key={cf.id}
+                streamIndex={si}
+                counterIndex={ci}
+                register={register}
+                control={control}
+                onRemove={() => removeCounter(ci)}
+                canRemove={counterFields.length > 1}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+// ─── CounterEditor ────────────────────────────────────────────────────────────
 
 function CounterEditor({
   streamIndex: si,
@@ -644,13 +725,12 @@ function CounterEditor({
     name: `streams.${si}.counters.${ci}.schedule`,
   });
 
-  // Initialize schedule if opening for first time
   const initSchedule = () => {
     if (scheduleFields.length === 0) {
       replace(
-        DAYS.map((_, dayOfWeek) => ({
+        Array.from({ length: 7 }, (_, dayOfWeek) => ({
           dayOfWeek,
-          isOpen: dayOfWeek >= 1 && dayOfWeek <= 5, // Mon-Fri open by default
+          isOpen: dayOfWeek >= 1 && dayOfWeek <= 5,
           openTime: "08:00",
           closeTime: "17:00",
         }))
@@ -660,30 +740,60 @@ function CounterEditor({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-3">
+    <div className="bg-slate-50 rounded-xl border border-slate-100 p-3">
       <div className="flex items-center gap-2">
         <input
           {...register(`streams.${si}.counters.${ci}.name`)}
-          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder={`Cửa ${ci + 1}`}
         />
         <button
           type="button"
           onClick={() => (scheduleOpen ? setScheduleOpen(false) : initSchedule())}
-          className="px-2 py-2 text-xs text-gray-500 hover:text-blue-600 border border-gray-200 rounded-lg whitespace-nowrap"
-          title="Lịch hoạt động"
+          className={`flex items-center gap-1 px-2.5 py-2 text-xs font-medium border rounded-lg transition-colors ${
+            scheduleOpen
+              ? "bg-blue-50 border-blue-200 text-blue-600"
+              : "bg-white border-slate-200 text-slate-500 hover:text-blue-600"
+          }`}
         >
-          📅
+          Lịch
+          <ChevronIcon open={scheduleOpen} />
         </button>
         {canRemove && (
-          <button type="button" onClick={onRemove} className="px-2 text-gray-400 hover:text-red-500 text-lg leading-none">
+          <button
+            type="button"
+            onClick={onRemove}
+            className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+          >
             ×
           </button>
         )}
       </div>
 
       {scheduleOpen && scheduleFields.length === 7 && (
-        <div className="mt-3 space-y-1.5">
+        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-500">Lịch hoạt động</span>
+            <button
+              type="button"
+              onClick={() => {
+                const first = scheduleFields[1]; // Mon
+                const openTime = (first as { openTime?: string }).openTime ?? "08:00";
+                const closeTime = (first as { closeTime?: string }).closeTime ?? "17:00";
+                replace(
+                  Array.from({ length: 7 }, (_, dayOfWeek) => ({
+                    dayOfWeek,
+                    isOpen: dayOfWeek >= 1 && dayOfWeek <= 5,
+                    openTime,
+                    closeTime,
+                  }))
+                );
+              }}
+              className="text-xs text-blue-600 hover:text-blue-700"
+            >
+              Áp dụng cho tất cả
+            </button>
+          </div>
           {DAYS_FULL.map((dayName, dayIdx) => (
             <DayScheduleRow
               key={dayIdx}
@@ -701,6 +811,8 @@ function CounterEditor({
     </div>
   );
 }
+
+// ─── DayScheduleRow ───────────────────────────────────────────────────────────
 
 function DayScheduleRow({
   dayIdx,
@@ -725,7 +837,7 @@ function DayScheduleRow({
   });
 
   return (
-    <div className="flex items-center gap-2 text-xs">
+    <div className="flex items-center gap-3 text-xs">
       <input
         type="hidden"
         {...register(`streams.${si}.counters.${ci}.schedule.${scheduleIndex}.dayOfWeek`, {
@@ -733,34 +845,36 @@ function DayScheduleRow({
         })}
         value={dayIdx}
       />
-      <label className="flex items-center gap-1.5 w-20">
+      <label className="flex items-center gap-2 w-24 cursor-pointer">
         <input
           type="checkbox"
           {...register(`streams.${si}.counters.${ci}.schedule.${scheduleIndex}.isOpen`)}
-          className="rounded"
+          className="rounded border-slate-300 text-blue-600"
         />
-        <span className={isOpen ? "text-gray-800 font-medium" : "text-gray-400"}>{dayName}</span>
+        <span className={isOpen ? "text-slate-800 font-medium" : "text-slate-400"}>{dayName}</span>
       </label>
       {isOpen ? (
-        <>
+        <div className="flex items-center gap-2">
           <input
             type="time"
             {...register(`streams.${si}.counters.${ci}.schedule.${scheduleIndex}.openTime`)}
-            className="px-2 py-1 border border-gray-200 rounded text-xs"
+            className="px-2 py-1 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
-          <span className="text-gray-400">–</span>
+          <span className="text-slate-300">–</span>
           <input
             type="time"
             {...register(`streams.${si}.counters.${ci}.schedule.${scheduleIndex}.closeTime`)}
-            className="px-2 py-1 border border-gray-200 rounded text-xs"
+            className="px-2 py-1 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
-        </>
+        </div>
       ) : (
-        <span className="text-gray-400 text-xs">Nghỉ</span>
+        <span className="text-slate-300 text-xs">Nghỉ</span>
       )}
     </div>
   );
 }
+
+// ─── CustomFieldsEditor ───────────────────────────────────────────────────────
 
 function CustomFieldsEditor({
   control,
@@ -777,20 +891,7 @@ function CustomFieldsEditor({
   const [optionInputs, setOptionInputs] = useState<Record<number, string>>({});
 
   return (
-    <div className="border border-gray-200 rounded-xl p-3 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-gray-600">Trường tùy chỉnh thêm</p>
-        <button
-          type="button"
-          onClick={() =>
-            append({ name: `field${fields.length}`, label: "", type: "text", required: false })
-          }
-          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-        >
-          + Thêm trường
-        </button>
-      </div>
-
+    <div className="space-y-3">
       {fields.map((f, i) => {
         const fieldType = watch(`customFields.${i}.type`);
         const currentOptions = watch(`customFields.${i}.options`) ?? [];
@@ -803,13 +904,8 @@ function CustomFieldsEditor({
           }
         };
 
-        const removeOption = (oi: number) => {
-          const updated = currentOptions.filter((_, idx) => idx !== oi);
-          setValue(`customFields.${i}.options`, updated);
-        };
-
         return (
-          <div key={f.id} className="p-3 bg-gray-50 rounded-lg space-y-2">
+          <div key={f.id} className="bg-slate-50 rounded-xl border border-slate-200 p-3 space-y-3">
             <div className="flex gap-2 items-center">
               <Controller
                 control={control}
@@ -818,7 +914,7 @@ function CustomFieldsEditor({
                   <input
                     {...field}
                     placeholder="Nhãn trường"
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 )}
               />
@@ -828,7 +924,7 @@ function CustomFieldsEditor({
                 render={({ field }) => (
                   <select
                     {...field}
-                    className="px-2 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="px-2 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="text">Văn bản</option>
                     <option value="number">Số</option>
@@ -838,53 +934,49 @@ function CustomFieldsEditor({
                   </select>
                 )}
               />
-              <label className="flex items-center gap-1 text-xs text-gray-600 whitespace-nowrap">
-                <input
-                  type="checkbox"
-                  {...register(`customFields.${i}.required`)}
-                  className="rounded"
-                />
+              <label className="flex items-center gap-1.5 text-xs text-slate-600 whitespace-nowrap">
+                <input type="checkbox" {...register(`customFields.${i}.required`)} className="rounded" />
                 Bắt buộc
               </label>
-              <button type="button" onClick={() => remove(i)} className="text-gray-400 hover:text-red-500 text-lg leading-none">
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 rounded-lg hover:bg-red-50 text-base transition-colors"
+              >
                 ×
               </button>
             </div>
 
-            {/* Select options */}
             {fieldType === "select" && (
-              <div className="pl-2 space-y-1.5">
-                <p className="text-xs text-gray-500">Các lựa chọn:</p>
-                {currentOptions.map((opt, oi) => (
-                  <div key={oi} className="flex gap-1.5 items-center">
-                    <span className="flex-1 px-2 py-1 bg-white border border-gray-200 rounded text-xs">{opt}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeOption(oi)}
-                      className="text-gray-400 hover:text-red-500 text-xs px-1"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                <div className="flex gap-1.5">
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-slate-500">Các lựa chọn:</p>
+                <div className="space-y-1.5">
+                  {currentOptions.map((opt: string, oi: number) => (
+                    <div key={oi} className="flex gap-2 items-center">
+                      <span className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700">{opt}</span>
+                      <button
+                        type="button"
+                        onClick={() => setValue(`customFields.${i}.options`, currentOptions.filter((_: string, idx: number) => idx !== oi))}
+                        className="text-slate-300 hover:text-red-500 text-xs px-1"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
                   <input
                     type="text"
                     value={optionInputs[i] ?? ""}
                     onChange={(e) => setOptionInputs((prev) => ({ ...prev, [i]: e.target.value }))}
                     placeholder="Nhập lựa chọn rồi nhấn Thêm..."
-                    className="flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addOption();
-                      }
-                    }}
+                    className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOption(); } }}
                   />
                   <button
                     type="button"
                     onClick={addOption}
-                    className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700"
                   >
                     Thêm
                   </button>
@@ -895,12 +987,17 @@ function CustomFieldsEditor({
         );
       })}
 
+      <button
+        type="button"
+        onClick={() => append({ name: `field${fields.length}`, label: "", type: "text", required: false })}
+        className="w-full py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-xl hover:border-blue-300 hover:text-blue-600 text-sm font-medium transition-colors"
+      >
+        + Thêm trường tùy chỉnh
+      </button>
+
       {fields.length === 0 && (
-        <p className="text-xs text-gray-400 text-center py-2">Chưa có trường tùy chỉnh</p>
+        <p className="text-xs text-slate-400 text-center py-1">Chưa có trường tùy chỉnh nào</p>
       )}
     </div>
   );
 }
-
-// Suppress unused var warning
-void DAYS;

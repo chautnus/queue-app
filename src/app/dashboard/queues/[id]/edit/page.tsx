@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import QueueWizard from "@/components/queue/QueueWizard";
@@ -58,23 +57,11 @@ export default async function EditQueuePage({
   };
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <Link
-          href={`/dashboard/queues/${id}`}
-          className="text-gray-500 hover:text-gray-700 text-sm"
-        >
-          ← Quay lại
-        </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Chỉnh sửa hàng đợi</h1>
-      </div>
-
-      <QueueWizard
-        mode="edit"
-        queueId={id}
-        initialValues={initialValues}
-        initialLogoUrl={queue.logoUrl ?? undefined}
-      />
-    </div>
+    <QueueWizard
+      mode="edit"
+      queueId={id}
+      initialValues={initialValues}
+      initialLogoUrl={queue.logoUrl ?? undefined}
+    />
   );
 }
