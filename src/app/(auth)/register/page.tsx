@@ -3,29 +3,29 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import RegisterForm from "@/components/auth/RegisterForm";
 
-export const metadata: Metadata = { title: "Register" };
+export const metadata: Metadata = { title: "Đăng ký" };
 
 export default async function RegisterPage() {
   const session = await auth();
   if (session?.user) redirect("/dashboard/queues");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">QueueApp</h1>
-          <p className="mt-2 text-gray-600">Create your admin account</p>
+          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-2xl">Q</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">Tạo tài khoản</h1>
+          <p className="mt-1 text-sm text-slate-500">Bắt đầu quản lý hàng đợi</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="card p-6">
           <RegisterForm />
         </div>
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Already have an account?{" "}
-          <a
-            href="/login"
-            className="font-medium text-blue-600 hover:text-blue-700"
-          >
-            Sign in
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Đã có tài khoản?{" "}
+          <a href="/login" className="font-medium text-blue-600 hover:text-blue-700">
+            Đăng nhập
           </a>
         </p>
       </div>
