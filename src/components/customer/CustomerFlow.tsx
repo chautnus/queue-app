@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import AdBanner from "./AdBanner";
 import CaptchaVerify from "./CaptchaVerify";
 import CustomerForm from "./CustomerForm";
@@ -24,6 +25,10 @@ type QueueData = {
   status: string;
   timezone: string;
   requireCustomerInfo: boolean;
+  collectName: string;
+  collectPhone: string;
+  collectAge: string;
+  collectAddress: string;
   customFields: Array<{
     name: string;
     label: string;
@@ -82,9 +87,32 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
     init();
   }, [queue.id]);
 
+  // Build system fields from collect settings
+  const collectModes: Record<string, string> = {
+    collectName: queue.collectName,
+    collectPhone: queue.collectPhone,
+    collectAge: queue.collectAge,
+    collectAddress: queue.collectAddress,
+  };
+  const systemFields = [
+    { key: "collectName", name: "_name", label: "Họ tên", type: "text" },
+    { key: "collectPhone", name: "_phone", label: "Số điện thoại", type: "tel" },
+    { key: "collectAge", name: "_age", label: "Tuổi", type: "number" },
+    { key: "collectAddress", name: "_address", label: "Địa chỉ", type: "text" },
+  ]
+    .filter(({ key }) => collectModes[key] !== "HIDDEN")
+    .map(({ name, label, type, key }) => ({
+      name,
+      label,
+      type,
+      required: collectModes[key] === "REQUIRED",
+    }));
+
+  const allFields = [...systemFields, ...(queue.customFields ?? [])];
+
   const handleCaptchaComplete = (token: string) => {
     setCaptchaToken(token);
-    if (queue.requireCustomerInfo && queue.customFields?.length) {
+    if (allFields.length > 0) {
       setState("form");
     } else {
       handleJoin(token, {});
@@ -222,7 +250,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
         {/* ── Form ── */}
         {state === "form" && (
           <CustomerForm
-            fields={queue.customFields ?? []}
+            fields={allFields}
             onSubmit={(info) => { setCustomerInfo(info); handleJoin(captchaToken, info); }}
             onBack={() => setState("captcha")}
           />
@@ -243,6 +271,16 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
             {showRating && <RatingPrompt ticketId={ticket.id} onDone={() => setShowRating(false)} />}
           </>
         )}
+      </div>
+
+      {/* Footer */}
+      <div className="pb-8 text-center">
+        <Link
+          href={`/q/${queue.id}/guide`}
+          className="text-xs text-slate-400 hover:text-slate-600 underline underline-offset-2"
+        >
+          Hướng dẫn sử dụng
+        </Link>
       </div>
 
       {/* Suppress unused warning */}

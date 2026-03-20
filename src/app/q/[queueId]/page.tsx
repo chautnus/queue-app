@@ -55,6 +55,10 @@ export default async function CustomerQueuePage({
     status: queue.status,
     timezone: queue.timezone,
     requireCustomerInfo: queue.requireCustomerInfo,
+    collectName: queue.collectName as string,
+    collectPhone: queue.collectPhone as string,
+    collectAge: queue.collectAge as string,
+    collectAddress: queue.collectAddress as string,
     customFields: queue.customFields as
       | Array<{
           name: string;

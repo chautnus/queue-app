@@ -20,6 +20,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
   const [selectedCounterId, setSelectedCounterId] = useState<string>(
     streams[0]?.counters[0]?.id ?? ""
   );
+  const [plannedEndTime, setPlannedEndTime] = useState("17:00");
   const [submitting, setSubmitting] = useState(false);
 
   const toggleStream = (streamId: string) => {
@@ -45,6 +46,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
         counterId: selectedCounterId,
         queueId,
         streamIds: selectedStreamIds,
+        plannedEndTime,
       }),
     });
 
@@ -60,13 +62,13 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
       <p className="text-sm text-gray-600">
-        Welcome, <strong>{staffName}</strong>. Please select your work setup.
+        Xin chào, <strong>{staffName}</strong>. Vui lòng chọn thông tin ca làm việc.
       </p>
 
       {/* Stream selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Streams to serve
+          Luồng phục vụ
         </label>
         <div className="space-y-2">
           {streams.map((s) => (
@@ -105,7 +107,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
       {allCounters.length > 0 && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Your counter
+            Cửa phục vụ
           </label>
           <select
             value={selectedCounterId}
@@ -121,6 +123,19 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
         </div>
       )}
 
+      {/* Planned end time */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Dự kiến kết thúc ca
+        </label>
+        <input
+          type="time"
+          value={plannedEndTime}
+          onChange={(e) => setPlannedEndTime(e.target.value)}
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       <button
         onClick={handleStart}
         disabled={
@@ -130,7 +145,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
         }
         className="w-full py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
-        {submitting ? "Starting..." : "Start Session"}
+        {submitting ? "Đang bắt đầu..." : "Bắt đầu ca làm việc"}
       </button>
     </div>
   );

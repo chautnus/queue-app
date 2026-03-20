@@ -20,6 +20,24 @@ const TIMEZONES = [
   "UTC",
 ];
 
+const CATEGORIES = [
+  "Nhà hàng / Quán ăn",
+  "Bệnh viện / Phòng khám",
+  "Ngân hàng / Tài chính",
+  "Cơ quan hành chính",
+  "Salon tóc / Làm đẹp",
+  "Trung tâm thể dục",
+  "Cửa hàng bán lẻ",
+  "Bưu điện / Chuyển phát",
+  "Khách sạn / Du lịch",
+  "Trường học / Giáo dục",
+  "Siêu thị / Tạp hóa",
+  "Bảo hiểm",
+  "Viễn thông",
+  "Dịch vụ xe cộ",
+  "Khác",
+];
+
 const DAYS_FULL = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
 
 const TABS = [
@@ -95,6 +113,8 @@ export default function QueueWizard({
       collectName: "HIDDEN",
       collectPhone: "HIDDEN",
       collectEmail: "HIDDEN",
+      collectAge: "HIDDEN",
+      collectAddress: "HIDDEN",
       allowTransfer: false,
       streams: [
         {
@@ -130,6 +150,8 @@ export default function QueueWizard({
       data.collectName !== "HIDDEN" ||
       data.collectPhone !== "HIDDEN" ||
       data.collectEmail !== "HIDDEN" ||
+      data.collectAge !== "HIDDEN" ||
+      data.collectAddress !== "HIDDEN" ||
       (data.customFields && data.customFields.length > 0);
     data.requireCustomerInfo = !!hasInfo;
 
@@ -364,6 +386,18 @@ export default function QueueWizard({
                 </div>
               </Section>
 
+              {/* Category */}
+              <Section title="Lĩnh vực">
+                <FormField label="Lĩnh vực / Loại hình dịch vụ">
+                  <select {...register("category")} className="input">
+                    <option value="">-- Chọn lĩnh vực --</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </FormField>
+              </Section>
+
               {/* Advanced */}
               <Section title="Tùy chọn nâng cao">
                 <FormField label="URL chuyển hướng sau khi lấy số">
@@ -439,8 +473,10 @@ export default function QueueWizard({
                     [
                       { key: "collectName" as const, label: "Họ tên" },
                       { key: "collectPhone" as const, label: "Số điện thoại" },
+                      { key: "collectAge" as const, label: "Tuổi" },
+                      { key: "collectAddress" as const, label: "Địa chỉ" },
                       { key: "collectEmail" as const, label: "Email" },
-                    ] as { key: "collectName" | "collectPhone" | "collectEmail"; label: string }[]
+                    ] as { key: "collectName" | "collectPhone" | "collectAge" | "collectAddress" | "collectEmail"; label: string }[]
                   ).map(({ key, label }) => (
                     <div key={key} className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white">
                       <span className="text-sm font-medium text-slate-800">{label}</span>

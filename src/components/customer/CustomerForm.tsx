@@ -29,16 +29,16 @@ export default function CustomerForm({ fields, onSubmit, onBack }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-1">Your Information</h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Please fill in the required details.
+    <div className="card p-6">
+      <h2 className="text-lg font-semibold text-slate-900 mb-1">Thông tin của bạn</h2>
+      <p className="text-sm text-slate-500 mb-6">
+        Vui lòng điền thông tin trước khi lấy số.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {fields.map((field) => (
           <div key={field.name}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -48,9 +48,9 @@ export default function CustomerForm({ fields, onSubmit, onBack }: Props) {
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
                 required={field.required}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input"
               >
-                <option value="">Select...</option>
+                <option value="">Chọn...</option>
                 {field.options.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
@@ -59,11 +59,11 @@ export default function CustomerForm({ fields, onSubmit, onBack }: Props) {
               </select>
             ) : (
               <input
-                type={field.type === "number" ? "number" : field.type === "phone" ? "tel" : field.type === "email" ? "email" : "text"}
+                type={field.type === "number" ? "number" : field.type === "tel" ? "tel" : field.type === "email" ? "email" : "text"}
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
                 required={field.required}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input"
                 placeholder={field.label}
               />
             )}
@@ -74,15 +74,15 @@ export default function CustomerForm({ fields, onSubmit, onBack }: Props) {
           <button
             type="button"
             onClick={onBack}
-            className="flex-1 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50"
+            className="btn-ghost flex-1 py-3 border border-slate-200"
           >
-            Back
+            Quay lại
           </button>
           <button
             type="submit"
-            className="flex-1 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700"
+            className="btn-primary flex-1 py-3"
           >
-            Continue
+            Tiếp tục
           </button>
         </div>
       </form>

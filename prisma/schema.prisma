@@ -92,11 +92,16 @@ model Queue {
   collectName         CollectMode @default(HIDDEN)
   collectPhone        CollectMode @default(HIDDEN)
   collectEmail        CollectMode @default(HIDDEN)
+  collectAge          CollectMode @default(HIDDEN)
+  collectAddress      CollectMode @default(HIDDEN)
   // JSON: Array<{ name, label, type: 'text'|'number'|'select', required, options?, streamCondition? }>
   customFields        Json?
   redirectUrl         String?
   allowTransfer       Boolean     @default(false)
   transferQueueId     String?
+
+  // Category (Google business type)
+  category String?
 
   // Ad banner (AdSense override or custom)
   adBannerSlotId String?
@@ -197,6 +202,7 @@ model StaffSession {
   startAt             DateTime  @default(now())
   endAt               DateTime?
   pausedAt            DateTime?
+  plannedEndAt        DateTime?
   servedCount         Int       @default(0)
   totalServiceSeconds Int       @default(0)
 
