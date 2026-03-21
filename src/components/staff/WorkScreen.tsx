@@ -7,6 +7,7 @@ type TicketInfo = {
   id: string;
   displayNumber: string;
   streamName: string;
+  verifyCode?: string;
   status: string;
 };
 
@@ -145,6 +146,11 @@ export default function WorkScreen({
           {currentTicket ? (
             <>
               <div className="ticket-number text-slate-900">{currentTicket.displayNumber}</div>
+              {currentTicket.verifyCode && (
+                <p className="text-lg font-mono font-semibold text-slate-500 mt-1 tracking-widest">
+                  {currentTicket.verifyCode}
+                </p>
+              )}
               <p className="text-sm text-slate-400 mt-2">{currentTicket.streamName}</p>
             </>
           ) : (

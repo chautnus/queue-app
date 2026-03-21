@@ -60,13 +60,14 @@ export async function POST(
     },
   });
 
-  // Broadcast to staff session
+  // Broadcast to staff session (include verifyCode for staff display)
   broadcastToSession(id, {
     type: "ticket:called",
     data: {
       ticketId: updated.id,
       displayNumber: updated.displayNumber,
       streamName: nextTicket.stream.name,
+      verifyCode: updated.verifyCode,
     },
   });
 
@@ -86,6 +87,7 @@ export async function POST(
       id: updated.id,
       displayNumber: updated.displayNumber,
       streamName: nextTicket.stream.name,
+      verifyCode: updated.verifyCode,
       status: updated.status,
     },
   });
