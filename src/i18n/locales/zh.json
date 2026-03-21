@@ -15,7 +15,14 @@
     "copied": "已复制！",
     "login": "登录",
     "register": "注册",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "back_to_home": "返回首页",
+    "all_rights": "版权所有。",
+    "contact": "联系我们",
+    "get_started": "开始使用",
+    "continue": "继续",
+    "submit": "提交",
+    "skip": "跳过"
   },
   "landing": {
     "hero_title": "智能排队管理",
@@ -48,7 +55,10 @@
     "footer_about": "关于我们",
     "footer_terms": "服务条款",
     "footer_privacy": "隐私政策",
-    "footer_contact": "联系我们"
+    "footer_contact": "联系我们",
+    "how_it_works_subtitle": "三个简单步骤即可开始",
+    "features_subtitle": "强大的功能优化您的排队运营",
+    "cta_start_today": "立即免费开始"
   },
   "staff": {
     "now_serving": "当前服务",
@@ -76,7 +86,8 @@
   "display": {
     "now_serving": "当前服务",
     "waiting": "等候中",
-    "no_customers": "等待客户中..."
+    "no_customers": "等待客户中...",
+    "serving": "服务中"
   },
   "customer": {
     "take_ticket": "取号",
@@ -89,7 +100,37 @@
     "status_serving": "服务中",
     "status_completed": "已完成",
     "status_absent": "标记缺席",
-    "go_to_counter": "请前往"
+    "go_to_counter": "请前往",
+    "select_service": "选择服务类型",
+    "waiting_count": "等候中",
+    "your_info": "您的信息",
+    "your_info_desc": "请在取号前填写您的信息。",
+    "select_option": "请选择...",
+    "joining": "正在取号...",
+    "queue_not_open": "排队尚未开放",
+    "queue_paused": "排队已暂停",
+    "queue_closed": "排队已关闭",
+    "cannot_take_number": "无法取号",
+    "usage_guide": "使用指南",
+    "keep_page_open": "请保持此页面打开，以便在轮到您时收到通知",
+    "waiting_ahead": "人在您前面",
+    "estimated_wait_time": "预计等待时间",
+    "verify_code": "验证码",
+    "waiting_in_queue": "排队等候中",
+    "your_turn": "到您了！请前往柜台。",
+    "being_served": "正在服务中",
+    "completed": "已完成",
+    "est_wait": "预计等待",
+    "captcha_title": "验证您是人类",
+    "captcha_desc": "回答数学题以继续。",
+    "captcha_answer": "答案",
+    "captcha_wrong": "答案错误，请重试。",
+    "rating_title": "您的体验如何？",
+    "rating_desc": "评价服务质量",
+    "rating_thanks": "感谢您的反馈！",
+    "rating_comment": "评论（可选）...",
+    "rating_skip": "跳过",
+    "rating_submit": "提交"
   },
   "about": {
     "title": "关于QueueDrop",
@@ -97,7 +138,17 @@
     "mission_title": "我们的使命",
     "mission_text": "让等待变得公平、透明、无压力，无论是对客户还是工作人员。",
     "contact_title": "联系我们",
-    "contact_email": "support@queuedrop.app"
+    "contact_email": "support@queuedrop.app",
+    "what_is_title": "什么是QueueApp？",
+    "what_is_text": "QueueApp是一个现代化的数字排队管理平台，适用于各种规模的企业。它用无缝的移动优先体验取代了传统的纸质票据系统。无需购买硬件，无需安装应用——只需扫描二维码即可加入排队。",
+    "benefits_title": "主要优势",
+    "benefit_1": "60秒内完成设置，无需任何硬件",
+    "benefit_2": "客户通过二维码加入——无需下载应用",
+    "benefit_3": "实时更新和推送通知",
+    "benefit_4": "每个排队支持多种服务和柜台",
+    "benefit_5": "等候区显示屏",
+    "benefit_6": "分析和统计以优化运营",
+    "contact_text": "有问题、反馈或合作咨询？我们很乐意听取您的意见。"
   },
   "terms": {
     "title": "服务条款",
@@ -111,7 +162,13 @@
     "section4_title": "数据使用",
     "section4_text": "我们按照隐私政策中的说明收集和处理数据。使用本服务即表示您同意此类处理。",
     "section5_title": "责任限制",
-    "section5_text": "QueueDrop按「原样」提供。我们不对因使用本服务而产生的任何损害承担责任。"
+    "section5_text": "QueueDrop按「原样」提供。我们不对因使用本服务而产生的任何损害承担责任。",
+    "section6_title": "知识产权",
+    "section6_text": "与QueueApp相关的所有内容、商标和知识产权归QueueApp及其许可方所有。未经事先书面同意，您不得复制、修改、分发或逆向工程本服务的任何部分。",
+    "section7_title": "终止",
+    "section7_text": "我们可以随时因违反这些条款而暂停或终止您对服务的访问。您也可以随时通过账户设置删除您的账户。",
+    "section8_title": "联系方式",
+    "section8_text": "如果您对这些条款有疑问，请联系我们"
   },
   "privacy": {
     "title": "隐私政策",
@@ -125,6 +182,12 @@
     "section4_title": "数据保留",
     "section4_text": "只要您的账户处于活跃状态，我们就会保留您的数据。您可以随时请求删除。",
     "section5_title": "您的权利",
-    "section5_text": "您有权访问、更正或删除您的个人数据。请联系我们行使这些权利。"
+    "section5_text": "您有权访问、更正或删除您的个人数据。请联系我们行使这些权利。",
+    "section6_title": "数据安全",
+    "section6_text": "我们采用行业标准安全措施保护您的数据，包括传输和存储加密、安全认证和定期安全审查。",
+    "section7_title": "Cookie",
+    "section7_text": "我们使用必要的Cookie用于认证和会话管理。我们也可能使用分析Cookie来了解服务的使用情况。",
+    "section8_title": "联系方式",
+    "section8_text": "如果您对本隐私政策或您的数据有疑问，请联系我们"
   }
 }

@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function PublicFooter() {
+  const t = useTranslations("landing");
+  const tc = useTranslations("common");
   return (
     <footer className="border-t border-slate-200 bg-white py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -16,15 +19,15 @@ export default function PublicFooter() {
             QueueApp
           </Link>
           <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
-            <Link href="/about" className="hover:text-slate-900 transition-colors">About</Link>
-            <Link href="/terms" className="hover:text-slate-900 transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-slate-900 transition-colors">Privacy</Link>
-            <Link href="mailto:support@queueapp.dev" className="hover:text-slate-900 transition-colors">Contact</Link>
+            <Link href="/about" className="hover:text-slate-900 transition-colors">{t("footer_about")}</Link>
+            <Link href="/terms" className="hover:text-slate-900 transition-colors">{t("footer_terms")}</Link>
+            <Link href="/privacy" className="hover:text-slate-900 transition-colors">{t("footer_privacy")}</Link>
+            <Link href="mailto:support@queueapp.dev" className="hover:text-slate-900 transition-colors">{t("footer_contact")}</Link>
             <LanguageSwitcher />
           </nav>
         </div>
         <div className="mt-6 text-center text-xs text-slate-400">
-          &copy; {new Date().getFullYear()} QueueApp. All rights reserved.
+          &copy; {new Date().getFullYear()} QueueApp. {tc("all_rights")}
         </div>
       </div>
     </footer>

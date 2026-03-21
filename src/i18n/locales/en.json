@@ -15,7 +15,14 @@
     "copied": "Copied!",
     "login": "Log In",
     "register": "Register",
-    "logout": "Log Out"
+    "logout": "Log Out",
+    "back_to_home": "Back to Home",
+    "all_rights": "All rights reserved.",
+    "contact": "Contact",
+    "get_started": "Get Started",
+    "continue": "Continue",
+    "submit": "Submit",
+    "skip": "Skip"
   },
   "landing": {
     "hero_title": "Smart Queue Management",
@@ -48,7 +55,10 @@
     "footer_about": "About",
     "footer_terms": "Terms",
     "footer_privacy": "Privacy",
-    "footer_contact": "Contact"
+    "footer_contact": "Contact",
+    "how_it_works_subtitle": "Get up and running in three simple steps",
+    "features_subtitle": "Powerful features to streamline your queue operations",
+    "cta_start_today": "Start Free Today"
   },
   "staff": {
     "now_serving": "Now Serving",
@@ -76,7 +86,8 @@
   "display": {
     "now_serving": "Now Serving",
     "waiting": "Waiting",
-    "no_customers": "Waiting for customers..."
+    "no_customers": "Waiting for customers...",
+    "serving": "Serving"
   },
   "customer": {
     "take_ticket": "Take a Number",
@@ -89,7 +100,37 @@
     "status_serving": "Being served",
     "status_completed": "Completed",
     "status_absent": "Marked absent",
-    "go_to_counter": "Please go to"
+    "go_to_counter": "Please go to",
+    "select_service": "Select service type",
+    "waiting_count": "waiting",
+    "your_info": "Your Information",
+    "your_info_desc": "Please fill in your information before taking a number.",
+    "select_option": "Select...",
+    "joining": "Getting your number...",
+    "queue_not_open": "Queue is not open",
+    "queue_paused": "Queue is paused",
+    "queue_closed": "Queue is closed",
+    "cannot_take_number": "Could not take a number",
+    "usage_guide": "Usage guide",
+    "keep_page_open": "Keep this page open to get notified when it is your turn",
+    "waiting_ahead": "waiting ahead",
+    "estimated_wait_time": "estimated wait",
+    "verify_code": "Verification code",
+    "waiting_in_queue": "Waiting in queue",
+    "your_turn": "Your turn! Please go to the counter.",
+    "being_served": "Being served",
+    "completed": "Completed",
+    "est_wait": "Est. wait",
+    "captcha_title": "Verify you are human",
+    "captcha_desc": "Answer the math question to continue.",
+    "captcha_answer": "Answer",
+    "captcha_wrong": "Wrong answer. Try again.",
+    "rating_title": "How was your experience?",
+    "rating_desc": "Rate your service quality",
+    "rating_thanks": "Thank you for your feedback!",
+    "rating_comment": "Optional comments...",
+    "rating_skip": "Skip",
+    "rating_submit": "Submit"
   },
   "about": {
     "title": "About QueueDrop",
@@ -97,7 +138,17 @@
     "mission_title": "Our Mission",
     "mission_text": "To make waiting fair, transparent, and stress-free for customers and staff alike.",
     "contact_title": "Contact Us",
-    "contact_email": "support@queuedrop.app"
+    "contact_email": "support@queuedrop.app",
+    "what_is_title": "What is QueueApp?",
+    "what_is_text": "QueueApp is a modern, digital queue management platform designed for businesses of all sizes. It replaces traditional paper ticket systems with a seamless, mobile-first experience that customers and staff love. No hardware to buy, no apps to install -- just scan a QR code and join the queue.",
+    "benefits_title": "Key Benefits",
+    "benefit_1": "Set up in under 60 seconds with zero hardware",
+    "benefit_2": "Customers join via QR code -- no app download needed",
+    "benefit_3": "Real-time updates and push notifications",
+    "benefit_4": "Multiple services and counters per queue",
+    "benefit_5": "Display board for waiting areas",
+    "benefit_6": "Analytics and insights to optimize operations",
+    "contact_text": "Have questions, feedback, or partnership inquiries? We would love to hear from you."
   },
   "terms": {
     "title": "Terms of Service",
@@ -111,7 +162,13 @@
     "section4_title": "Data Usage",
     "section4_text": "We collect and process data as described in our Privacy Policy. By using the service, you consent to such processing.",
     "section5_title": "Limitation of Liability",
-    "section5_text": "QueueDrop is provided 'as is'. We are not liable for any damages arising from the use of our service."
+    "section5_text": "QueueDrop is provided 'as is'. We are not liable for any damages arising from the use of our service.",
+    "section6_title": "Intellectual Property",
+    "section6_text": "All content, trademarks, and intellectual property associated with QueueApp are owned by QueueApp and its licensors. You may not copy, modify, distribute, or reverse-engineer any part of the service without prior written consent.",
+    "section7_title": "Termination",
+    "section7_text": "We may suspend or terminate your access to the service at any time for violation of these terms or for any reason at our sole discretion. You may also delete your account at any time through the account settings.",
+    "section8_title": "Contact",
+    "section8_text": "If you have questions about these terms, please contact us at"
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -125,6 +182,12 @@
     "section4_title": "Data Retention",
     "section4_text": "We retain your data as long as your account is active. You may request deletion at any time.",
     "section5_title": "Your Rights",
-    "section5_text": "You have the right to access, correct, or delete your personal data. Contact us to exercise these rights."
+    "section5_text": "You have the right to access, correct, or delete your personal data. Contact us to exercise these rights.",
+    "section6_title": "Data Security",
+    "section6_text": "We implement industry-standard security measures to protect your data, including encryption in transit and at rest, secure authentication, and regular security reviews.",
+    "section7_title": "Cookies",
+    "section7_text": "We use essential cookies for authentication and session management. We may also use analytics cookies to understand how the service is used.",
+    "section8_title": "Contact",
+    "section8_text": "If you have questions or concerns about this privacy policy or your data, please contact us at"
   }
 }

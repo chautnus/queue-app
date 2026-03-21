@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type TicketInfo = {
   id: string;
@@ -29,6 +30,7 @@ export default function WorkScreen({
   initialServedCount,
 }: Props) {
   const router = useRouter();
+  const t = useTranslations("staff");
   const [status, setStatus] = useState(initialStatus);
   const [servedCount, setServedCount] = useState(initialServedCount);
   const [currentTicket, setCurrentTicket] = useState<TicketInfo | null>(null);
@@ -63,9 +65,9 @@ export default function WorkScreen({
     const data = await res.json();
     if (res.ok) {
       setCurrentTicket(data.ticket ?? null);
-      if (!data.ticket) showMsg("Không còn khách đang chờ", true);
+      if (!data.ticket) showMsg(t("no_waiting"), true);
     } else {
-      showMsg(data.error ?? "Lỗi", false);
+      showMsg(data.error ?? t("invalid_ticket"), false);
     }
     setLoading(false);
   };
@@ -84,9 +86,9 @@ export default function WorkScreen({
       setInputNumber("");
       setInputCode("");
       setShowManual(false);
-      showMsg("Đã chấp nhận số vé ✓", true);
+      showMsg(t("accepted"), true);
     } else {
-      showMsg(data.error ?? "Số vé không hợp lệ", false);
+      showMsg(data.error ?? t("invalid_ticket"), false);
     }
     setLoading(false);
   };
@@ -104,7 +106,7 @@ export default function WorkScreen({
   };
 
   const endSession = async () => {
-    if (!confirm("Kết thúc phiên làm việc?")) return;
+    if (!confirm(t("end_confirm"))) return;
     await fetch(`/api/staff/session/${sessionId}/end`, { method: "POST" });
     router.push("/staff");
   };
@@ -117,7 +119,7 @@ export default function WorkScreen({
       {/* ── Paused banner ── */}
       {isPaused && (
         <div className="bg-amber-100 border-b border-amber-200 px-4 py-3 text-center">
-          <p className="text-sm font-semibold text-amber-800">⏸ Đang tạm dừng — không nhận khách mới</p>
+          <p className="text-sm font-semibold text-amber-800">⏸ {t("paused_banner")}</p>
         </div>
       )}
 
@@ -130,7 +132,7 @@ export default function WorkScreen({
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-slate-900">{servedCount}</p>
-            <p className="text-xs text-slate-400">đã phục vụ</p>
+            <p className="text-xs text-slate-400">{t("served")}</p>
           </div>
         </div>
       </div>
@@ -141,7 +143,7 @@ export default function WorkScreen({
         {/* Current ticket */}
         <div className={`card p-8 text-center ${currentTicket ? "" : "border-dashed"}`}>
           <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
-            Đang phục vụ
+            {t("now_serving")}
           </p>
           {currentTicket ? (
             <>
@@ -176,7 +178,7 @@ export default function WorkScreen({
               disabled={loading}
               className="w-full py-5 bg-blue-600 text-white font-bold text-xl rounded-2xl hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 transition-colors shadow-sm shadow-blue-200"
             >
-              {loading ? "Đang gọi..." : "Gọi tiếp theo →"}
+              {loading ? t("calling") : t("call_next")}
             </button>
 
             {/* Secondary: absent + manual */}
@@ -187,27 +189,27 @@ export default function WorkScreen({
                   disabled={loading}
                   className="flex-1 py-3 border border-amber-200 bg-amber-50 text-amber-700 font-medium rounded-xl hover:bg-amber-100 transition-colors text-sm"
                 >
-                  Vắng mặt
+                  {t("absent")}
                 </button>
               )}
               <button
                 onClick={() => setShowManual((v) => !v)}
                 className="flex-1 py-3 btn-outline text-sm"
               >
-                {showManual ? "Ẩn" : "Nhập mã"}
+                {showManual ? t("hide") : t("enter_code")}
               </button>
             </div>
 
             {/* Manual entry */}
             {showManual && (
               <div className="card p-4 space-y-3">
-                <p className="text-sm font-medium text-slate-700">Nhập số vé thủ công</p>
+                <p className="text-sm font-medium text-slate-700">{t("manual_entry")}</p>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={inputNumber}
                     onChange={(e) => setInputNumber(e.target.value.toUpperCase())}
-                    placeholder="Số vé"
+                    placeholder={t("ticket_number")}
                     className="flex-1 input text-center font-mono font-bold"
                   />
                   <input
@@ -215,7 +217,7 @@ export default function WorkScreen({
                     value={inputCode}
                     onChange={(e) => setInputCode(e.target.value)}
                     maxLength={4}
-                    placeholder="Mã"
+                    placeholder={t("code")}
                     className="w-20 input text-center font-mono font-bold"
                   />
                 </div>
@@ -224,7 +226,7 @@ export default function WorkScreen({
                   disabled={loading || !inputNumber || inputCode.length !== 4}
                   className="w-full py-2.5 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 disabled:opacity-40 text-sm"
                 >
-                  Chấp nhận
+                  {t("accept")}
                 </button>
               </div>
             )}
@@ -236,7 +238,7 @@ export default function WorkScreen({
             onClick={togglePause}
             className="w-full py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 text-lg"
           >
-            Tiếp tục làm việc
+            {t("resume")}
           </button>
         )}
       </div>
@@ -249,14 +251,14 @@ export default function WorkScreen({
               onClick={togglePause}
               className="flex-1 py-3 btn-amber text-sm"
             >
-              Tạm dừng
+              {t("pause")}
             </button>
           )}
           <button
             onClick={endSession}
             className="flex-1 py-3 btn-danger border border-red-100 rounded-xl text-sm"
           >
-            Kết thúc ca
+            {t("end_session")}
           </button>
         </div>
       </div>

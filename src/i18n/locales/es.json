@@ -15,7 +15,14 @@
     "copied": "¡Copiado!",
     "login": "Iniciar sesión",
     "register": "Registrarse",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "back_to_home": "Volver al inicio",
+    "all_rights": "Todos los derechos reservados.",
+    "contact": "Contacto",
+    "get_started": "Comenzar",
+    "continue": "Continuar",
+    "submit": "Enviar",
+    "skip": "Omitir"
   },
   "landing": {
     "hero_title": "Gestión inteligente de colas",
@@ -48,7 +55,10 @@
     "footer_about": "Acerca de",
     "footer_terms": "Términos",
     "footer_privacy": "Privacidad",
-    "footer_contact": "Contacto"
+    "footer_contact": "Contacto",
+    "how_it_works_subtitle": "Comienza a funcionar en tres simples pasos",
+    "features_subtitle": "Funciones potentes para optimizar tus operaciones de cola",
+    "cta_start_today": "Comenzar gratis hoy"
   },
   "staff": {
     "now_serving": "Atendiendo ahora",
@@ -76,7 +86,8 @@
   "display": {
     "now_serving": "Atendiendo ahora",
     "waiting": "En espera",
-    "no_customers": "Esperando clientes..."
+    "no_customers": "Esperando clientes...",
+    "serving": "Atendiendo"
   },
   "customer": {
     "take_ticket": "Tomar un número",
@@ -89,7 +100,37 @@
     "status_serving": "Siendo atendido",
     "status_completed": "Completado",
     "status_absent": "Marcado ausente",
-    "go_to_counter": "Por favor, dirígete a"
+    "go_to_counter": "Por favor, dirígete a",
+    "select_service": "Seleccionar tipo de servicio",
+    "waiting_count": "en espera",
+    "your_info": "Tu información",
+    "your_info_desc": "Por favor, completa tu información antes de tomar un número.",
+    "select_option": "Seleccionar...",
+    "joining": "Obteniendo tu número...",
+    "queue_not_open": "La cola no está abierta",
+    "queue_paused": "La cola está en pausa",
+    "queue_closed": "La cola está cerrada",
+    "cannot_take_number": "No se pudo obtener un número",
+    "usage_guide": "Guía de uso",
+    "keep_page_open": "Mantén esta página abierta para recibir una notificación cuando sea tu turno",
+    "waiting_ahead": "personas delante de ti",
+    "estimated_wait_time": "tiempo de espera estimado",
+    "verify_code": "Código de verificación",
+    "waiting_in_queue": "Esperando en la cola",
+    "your_turn": "¡Es tu turno! Por favor, dirígete al mostrador.",
+    "being_served": "Siendo atendido",
+    "completed": "Completado",
+    "est_wait": "Espera est.",
+    "captcha_title": "Verifica que eres humano",
+    "captcha_desc": "Responde el cálculo para continuar.",
+    "captcha_answer": "Respuesta",
+    "captcha_wrong": "Respuesta incorrecta. Inténtalo de nuevo.",
+    "rating_title": "¿Cómo fue tu experiencia?",
+    "rating_desc": "Califica la calidad del servicio",
+    "rating_thanks": "¡Gracias por tu opinión!",
+    "rating_comment": "Comentarios (opcional)...",
+    "rating_skip": "Omitir",
+    "rating_submit": "Enviar"
   },
   "about": {
     "title": "Acerca de QueueDrop",
@@ -97,7 +138,17 @@
     "mission_title": "Nuestra misión",
     "mission_text": "Hacer que la espera sea justa, transparente y sin estrés para clientes y personal por igual.",
     "contact_title": "Contáctenos",
-    "contact_email": "support@queuedrop.app"
+    "contact_email": "support@queuedrop.app",
+    "what_is_title": "¿Qué es QueueApp?",
+    "what_is_text": "QueueApp es una plataforma moderna de gestión de colas digitales diseñada para empresas de todos los tamaños. Reemplaza los sistemas de tickets en papel con una experiencia móvil fluida. Sin hardware que comprar, sin aplicaciones que instalar -- solo escanea un código QR y únete a la cola.",
+    "benefits_title": "Beneficios clave",
+    "benefit_1": "Configuración en menos de 60 segundos sin hardware",
+    "benefit_2": "Los clientes se unen mediante código QR -- sin descargar aplicaciones",
+    "benefit_3": "Actualizaciones en tiempo real y notificaciones push",
+    "benefit_4": "Múltiples servicios y mostradores por cola",
+    "benefit_5": "Pantalla de visualización para áreas de espera",
+    "benefit_6": "Análisis y estadísticas para optimizar operaciones",
+    "contact_text": "¿Tienes preguntas, comentarios o consultas de asociación? Nos encantaría saber de ti."
   },
   "terms": {
     "title": "Términos de servicio",
@@ -111,7 +162,13 @@
     "section4_title": "Uso de datos",
     "section4_text": "Recopilamos y procesamos datos como se describe en nuestra Política de privacidad. Al usar el servicio, consientes dicho procesamiento.",
     "section5_title": "Limitación de responsabilidad",
-    "section5_text": "QueueDrop se proporciona 'tal cual'. No somos responsables de ningún daño derivado del uso de nuestro servicio."
+    "section5_text": "QueueDrop se proporciona 'tal cual'. No somos responsables de ningún daño derivado del uso de nuestro servicio.",
+    "section6_title": "Propiedad intelectual",
+    "section6_text": "Todo el contenido, marcas y propiedad intelectual asociados con QueueApp pertenecen a QueueApp y sus licenciantes. No puedes copiar, modificar, distribuir ni aplicar ingeniería inversa a ninguna parte del servicio sin consentimiento previo por escrito.",
+    "section7_title": "Terminación",
+    "section7_text": "Podemos suspender o terminar tu acceso al servicio en cualquier momento por violación de estos términos. También puedes eliminar tu cuenta en cualquier momento a través de la configuración.",
+    "section8_title": "Contacto",
+    "section8_text": "Si tienes preguntas sobre estos términos, contáctanos en"
   },
   "privacy": {
     "title": "Política de privacidad",
@@ -125,6 +182,12 @@
     "section4_title": "Retención de datos",
     "section4_text": "Retenemos tus datos mientras tu cuenta esté activa. Puedes solicitar la eliminación en cualquier momento.",
     "section5_title": "Tus derechos",
-    "section5_text": "Tienes derecho a acceder, corregir o eliminar tus datos personales. Contáctanos para ejercer estos derechos."
+    "section5_text": "Tienes derecho a acceder, corregir o eliminar tus datos personales. Contáctanos para ejercer estos derechos.",
+    "section6_title": "Seguridad de datos",
+    "section6_text": "Implementamos medidas de seguridad estándar de la industria para proteger tus datos, incluyendo cifrado en tránsito y en reposo, autenticación segura y revisiones de seguridad periódicas.",
+    "section7_title": "Cookies",
+    "section7_text": "Utilizamos cookies esenciales para autenticación y gestión de sesiones. También podemos usar cookies analíticas para comprender cómo se usa el servicio.",
+    "section8_title": "Contacto",
+    "section8_text": "Si tienes preguntas sobre esta política de privacidad o tus datos, contáctanos en"
   }
 }

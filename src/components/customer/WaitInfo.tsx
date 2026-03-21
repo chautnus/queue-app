@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { formatWaitTime } from "@/lib/wait-time";
 
 type Stream = {
@@ -14,6 +17,7 @@ export default function WaitInfo({
   streams: Stream[];
   timezone: string;
 }) {
+  const t = useTranslations("customer");
   const totalWaiting = streams.reduce((s, r) => s + r.waitingCount, 0);
   const avgSeconds = streams[0]?.avgProcessingSeconds ?? 300;
   const estimatedWait = totalWaiting * avgSeconds;
@@ -23,14 +27,14 @@ export default function WaitInfo({
       <div className="flex gap-4">
         <div className="flex-1 text-center">
           <p className="text-3xl font-bold text-blue-700">{totalWaiting}</p>
-          <p className="text-sm text-blue-600 mt-1">Waiting</p>
+          <p className="text-sm text-blue-600 mt-1">{t("status_waiting")}</p>
         </div>
         <div className="w-px bg-blue-200" />
         <div className="flex-1 text-center">
           <p className="text-3xl font-bold text-blue-700">
             {formatWaitTime(estimatedWait)}
           </p>
-          <p className="text-sm text-blue-600 mt-1">Est. wait</p>
+          <p className="text-sm text-blue-600 mt-1">{t("est_wait")}</p>
         </div>
       </div>
     </div>

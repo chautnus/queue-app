@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import AdBanner from "@/components/AdBanner";
 
 export async function generateMetadata({
   params,
@@ -135,6 +136,11 @@ export default async function GuidePage({
         >
           Lấy số ngay
         </Link>
+
+        {/* Ad Banner */}
+        <div className="mt-4">
+          <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_CUSTOMER ?? ""} />
+        </div>
       </div>
     </div>
   );

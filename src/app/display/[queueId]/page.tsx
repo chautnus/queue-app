@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import { useTranslations } from "next-intl";
+import AdBanner from "@/components/AdBanner";
 
 type TicketInfo = {
   displayNumber: string;
@@ -18,6 +20,7 @@ export default function DisplayBoardPage({
   params: Promise<{ queueId: string }>;
 }) {
   const { queueId } = use(params);
+  const t = useTranslations("display");
   const [serving, setServing] = useState<TicketInfo[]>([]);
   const [queueName, setQueueName] = useState("Queue Display");
   const [stats, setStats] = useState<QueueStats>({ totalWaiting: 0, totalServing: 0 });
@@ -108,19 +111,19 @@ export default function DisplayBoardPage({
       {/* Header */}
       <div className="text-center py-8 border-b border-white/10">
         <h1 className="text-4xl font-extrabold tracking-tight">{queueName}</h1>
-        <p className="text-blue-200 text-lg mt-2 font-medium">Now Serving</p>
+        <p className="text-blue-200 text-lg mt-2 font-medium">{t("now_serving")}</p>
       </div>
 
       {/* Stats bar */}
       <div className="flex justify-center gap-8 py-4 bg-white/5 border-b border-white/10">
         <div className="text-center">
           <p className="text-3xl font-bold text-yellow-300">{stats.totalWaiting}</p>
-          <p className="text-xs text-blue-200 uppercase tracking-wider mt-1">Waiting</p>
+          <p className="text-xs text-blue-200 uppercase tracking-wider mt-1">{t("waiting")}</p>
         </div>
         <div className="w-px bg-white/20" />
         <div className="text-center">
           <p className="text-3xl font-bold text-green-300">{serving.length}</p>
-          <p className="text-xs text-blue-200 uppercase tracking-wider mt-1">Serving</p>
+          <p className="text-xs text-blue-200 uppercase tracking-wider mt-1">{t("serving")}</p>
         </div>
       </div>
 
@@ -129,7 +132,7 @@ export default function DisplayBoardPage({
         {serving.length === 0 ? (
           <div className="text-center text-blue-300">
             <div className="text-6xl mb-4 opacity-30">⏳</div>
-            <p className="text-2xl font-light">Waiting for customers...</p>
+            <p className="text-2xl font-light">{t("no_customers")}</p>
           </div>
         ) : (
           <div className="grid gap-6 w-full max-w-5xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -148,6 +151,11 @@ export default function DisplayBoardPage({
             ))}
           </div>
         )}
+      </div>
+
+      {/* Ad Banner */}
+      <div className="px-4 py-2">
+        <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_DISPLAY ?? ""} />
       </div>
 
       {/* Footer with clock */}

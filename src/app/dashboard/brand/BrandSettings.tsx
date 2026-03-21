@@ -2,6 +2,10 @@
 
 import { useState, useRef } from "react";
 
+const ACCEPTED_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
+const ACCEPTED_TYPES_SET = new Set(ACCEPTED_TYPES.split(","));
+const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+
 function UploadIcon() {
   return (
     <svg className="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,38 +24,96 @@ export default function BrandSettings() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const validateFile = (file: File): string | null => {
+    if (!ACCEPTED_TYPES_SET.has(file.type)) {
+      return "Chỉ chấp nhận file PNG, JPEG, WebP hoặc SVG.";
+    }
+    if (file.size > MAX_SIZE) {
+      return "Logo phải nhỏ hơn 10 MB.";
+    }
+    return null;
+  };
+
   const handleFile = async (file: File) => {
-    if (file.size > 10 * 1024 * 1024) {
-      setError("Logo phải nhỏ hơn 10 MB");
+    const validationError = validateFile(file);
+    if (validationError) {
+      setError(validationError);
       return;
     }
+
+    setError(null);
     setUploading(true);
     setLogoPreview(URL.createObjectURL(file));
+
     try {
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/upload/logo", { method: "POST", body: fd });
+      const data = await res.json();
+
       if (res.ok) {
-        const { url } = await res.json();
-        setLogoUrl(url);
+        setLogoUrl(data.url);
       } else {
-        setError("Tải logo thất bại");
+        setError(data.error || "Tải logo thất bại. Vui lòng thử lại.");
         setLogoPreview(null);
       }
+    } catch {
+      setError("Không thể kết nối đến server. Vui lòng thử lại.");
+      setLogoPreview(null);
     } finally {
       setUploading(false);
     }
   };
 
   const handleSave = async () => {
+    if (!logoUrl) return;
+
     setSaving(true);
     setError(null);
-    // Brand settings are per-queue; this page can save to user profile
-    // For now just show saved feedback
-    await new Promise((r) => setTimeout(r, 600));
-    setSaved(true);
-    setSaving(false);
-    setTimeout(() => setSaved(false), 3000);
+
+    try {
+      // Fetch user's queues and update each with the new default logo
+      const queuesRes = await fetch("/api/queues");
+      if (!queuesRes.ok) {
+        throw new Error("Không thể tải danh sách hàng đợi.");
+      }
+
+      const { queues } = await queuesRes.json();
+
+      if (!queues || queues.length === 0) {
+        setError("Chưa có hàng đợi nào. Hãy tạo hàng đợi trước khi cập nhật logo.");
+        setSaving(false);
+        return;
+      }
+
+      const results = await Promise.allSettled(
+        queues.map((q: { id: string }) =>
+          fetch(`/api/queues/${q.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ logoUrl }),
+          })
+        )
+      );
+
+      const failures = results.filter((r) => r.status === "rejected");
+      if (failures.length > 0) {
+        setError(
+          `Cập nhật thành công ${queues.length - failures.length}/${queues.length} hàng đợi. Một số hàng đợi không thể cập nhật.`
+        );
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Lưu thất bại. Vui lòng thử lại."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -79,20 +141,20 @@ export default function BrandSettings() {
               <img src={logoPreview} alt="Logo" className="w-20 h-20 rounded-2xl object-cover border border-slate-100 shrink-0" />
               <div className="text-left">
                 <p className="text-sm font-medium text-slate-700">{uploading ? "Đang tải lên..." : "Logo đã chọn"}</p>
-                <p className="text-xs text-slate-400 mt-0.5">Click để thay đổi · PNG/JPG tối đa 10 MB</p>
+                <p className="text-xs text-slate-400 mt-0.5">Click để thay đổi · PNG/JPG/WebP/SVG tối đa 10 MB</p>
               </div>
             </div>
           ) : (
             <>
               <UploadIcon />
               <p className="text-sm font-medium text-slate-600">Kéo thả hoặc click để tải lên</p>
-              <p className="text-xs text-slate-400 mt-1">PNG, JPG · Tối đa 10 MB</p>
+              <p className="text-xs text-slate-400 mt-1">PNG, JPG, WebP, SVG · Tối đa 10 MB</p>
             </>
           )}
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept={ACCEPTED_TYPES}
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
           />
@@ -101,7 +163,7 @@ export default function BrandSettings() {
         {logoPreview && (
           <button
             type="button"
-            onClick={() => { setLogoPreview(null); setLogoUrl(null); }}
+            onClick={() => { setLogoPreview(null); setLogoUrl(null); setError(null); }}
             className="btn-danger text-xs mt-3"
           >
             Xóa logo
@@ -122,19 +184,16 @@ export default function BrandSettings() {
       )}
 
       {saved && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">✓ Đã lưu thay đổi</div>
+        <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">Da luu thay doi thanh cong cho tat ca hang doi.</div>
       )}
 
       <button
         onClick={handleSave}
-        disabled={saving || !logoUrl}
+        disabled={saving || uploading || !logoUrl}
         className="btn-primary"
       >
         {saving ? "Đang lưu..." : "Lưu thay đổi"}
       </button>
-
-      {/* Suppress unused warning */}
-      {logoUrl && null}
     </div>
   );
 }

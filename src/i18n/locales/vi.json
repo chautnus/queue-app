@@ -15,7 +15,14 @@
     "copied": "Đã sao chép!",
     "login": "Đăng nhập",
     "register": "Đăng ký",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "back_to_home": "Quay lại trang chủ",
+    "all_rights": "Bảo lưu mọi quyền.",
+    "contact": "Liên hệ",
+    "get_started": "Bắt đầu",
+    "continue": "Tiếp tục",
+    "submit": "Gửi",
+    "skip": "Bỏ qua"
   },
   "landing": {
     "hero_title": "Quản lý hàng đợi thông minh",
@@ -48,7 +55,10 @@
     "footer_about": "Giới thiệu",
     "footer_terms": "Điều khoản",
     "footer_privacy": "Quyền riêng tư",
-    "footer_contact": "Liên hệ"
+    "footer_contact": "Liên hệ",
+    "how_it_works_subtitle": "Bắt đầu với ba bước đơn giản",
+    "features_subtitle": "Tính năng mạnh mẽ để tối ưu hóa hoạt động hàng đợi",
+    "cta_start_today": "Bắt đầu miễn phí ngay"
   },
   "staff": {
     "now_serving": "Đang phục vụ",
@@ -76,7 +86,8 @@
   "display": {
     "now_serving": "Đang phục vụ",
     "waiting": "Đang chờ",
-    "no_customers": "Đang chờ khách hàng..."
+    "no_customers": "Đang chờ khách hàng...",
+    "serving": "Đang phục vụ"
   },
   "customer": {
     "take_ticket": "Lấy số",
@@ -89,7 +100,37 @@
     "status_serving": "Đang được phục vụ",
     "status_completed": "Hoàn thành",
     "status_absent": "Đánh dấu vắng mặt",
-    "go_to_counter": "Vui lòng đến"
+    "go_to_counter": "Vui lòng đến",
+    "select_service": "Chọn loại dịch vụ",
+    "waiting_count": "đang chờ",
+    "your_info": "Thông tin của bạn",
+    "your_info_desc": "Vui lòng điền thông tin trước khi lấy số.",
+    "select_option": "Chọn...",
+    "joining": "Đang lấy số...",
+    "queue_not_open": "Hàng đợi chưa mở",
+    "queue_paused": "Hàng đợi tạm dừng",
+    "queue_closed": "Hàng đợi đã đóng",
+    "cannot_take_number": "Không thể lấy số",
+    "usage_guide": "Hướng dẫn sử dụng",
+    "keep_page_open": "Giữ trang này mở để nhận thông báo khi đến lượt bạn",
+    "waiting_ahead": "người đang chờ trước",
+    "estimated_wait_time": "thời gian chờ ước tính",
+    "verify_code": "Mã xác nhận",
+    "waiting_in_queue": "Đang chờ trong hàng",
+    "your_turn": "Đến lượt bạn! Vui lòng đến quầy.",
+    "being_served": "Đang được phục vụ",
+    "completed": "Đã hoàn thành",
+    "est_wait": "Chờ ước tính",
+    "captcha_title": "Xác minh bạn là người",
+    "captcha_desc": "Trả lời phép tính để tiếp tục.",
+    "captcha_answer": "Đáp án",
+    "captcha_wrong": "Sai đáp án. Thử lại.",
+    "rating_title": "Trải nghiệm của bạn thế nào?",
+    "rating_desc": "Đánh giá chất lượng dịch vụ",
+    "rating_thanks": "Cảm ơn phản hồi của bạn!",
+    "rating_comment": "Nhận xét (tùy chọn)...",
+    "rating_skip": "Bỏ qua",
+    "rating_submit": "Gửi"
   },
   "about": {
     "title": "Về QueueDrop",
@@ -97,7 +138,17 @@
     "mission_title": "Sứ mệnh của chúng tôi",
     "mission_text": "Làm cho việc chờ đợi trở nên công bằng, minh bạch và không căng thẳng cho cả khách hàng lẫn nhân viên.",
     "contact_title": "Liên hệ với chúng tôi",
-    "contact_email": "support@queuedrop.app"
+    "contact_email": "support@queuedrop.app",
+    "what_is_title": "QueueApp là gì?",
+    "what_is_text": "QueueApp là nền tảng quản lý hàng đợi kỹ thuật số hiện đại, được thiết kế cho mọi quy mô doanh nghiệp. Thay thế hệ thống vé giấy truyền thống bằng trải nghiệm di động liền mạch. Không cần mua phần cứng, không cần cài ứng dụng -- chỉ cần quét mã QR và tham gia hàng đợi.",
+    "benefits_title": "Lợi ích chính",
+    "benefit_1": "Thiết lập trong chưa đầy 60 giây, không cần phần cứng",
+    "benefit_2": "Khách hàng tham gia qua mã QR -- không cần tải ứng dụng",
+    "benefit_3": "Cập nhật thời gian thực và thông báo đẩy",
+    "benefit_4": "Nhiều dịch vụ và quầy cho mỗi hàng đợi",
+    "benefit_5": "Bảng hiển thị cho khu vực chờ",
+    "benefit_6": "Phân tích và thống kê để tối ưu hoạt động",
+    "contact_text": "Có câu hỏi, phản hồi hoặc yêu cầu hợp tác? Chúng tôi rất muốn nghe từ bạn."
   },
   "terms": {
     "title": "Điều khoản dịch vụ",
@@ -111,7 +162,13 @@
     "section4_title": "Sử dụng dữ liệu",
     "section4_text": "Chúng tôi thu thập và xử lý dữ liệu như được mô tả trong Chính sách Quyền riêng tư. Bằng việc sử dụng dịch vụ, bạn đồng ý với việc xử lý đó.",
     "section5_title": "Giới hạn trách nhiệm",
-    "section5_text": "QueueDrop được cung cấp 'nguyên trạng'. Chúng tôi không chịu trách nhiệm cho bất kỳ thiệt hại nào phát sinh từ việc sử dụng dịch vụ."
+    "section5_text": "QueueDrop được cung cấp 'nguyên trạng'. Chúng tôi không chịu trách nhiệm cho bất kỳ thiệt hại nào phát sinh từ việc sử dụng dịch vụ.",
+    "section6_title": "Sở hữu trí tuệ",
+    "section6_text": "Tất cả nội dung, thương hiệu và sở hữu trí tuệ liên quan đến QueueApp thuộc về QueueApp và các bên cấp phép. Bạn không được sao chép, sửa đổi, phân phối hoặc dịch ngược bất kỳ phần nào của dịch vụ mà không có sự đồng ý bằng văn bản.",
+    "section7_title": "Chấm dứt",
+    "section7_text": "Chúng tôi có thể tạm ngừng hoặc chấm dứt quyền truy cập dịch vụ của bạn bất kỳ lúc nào vì vi phạm các điều khoản này. Bạn cũng có thể xóa tài khoản bất kỳ lúc nào thông qua cài đặt tài khoản.",
+    "section8_title": "Liên hệ",
+    "section8_text": "Nếu bạn có câu hỏi về các điều khoản này, vui lòng liên hệ chúng tôi tại"
   },
   "privacy": {
     "title": "Chính sách quyền riêng tư",
@@ -125,6 +182,12 @@
     "section4_title": "Lưu giữ dữ liệu",
     "section4_text": "Chúng tôi lưu giữ dữ liệu của bạn khi tài khoản còn hoạt động. Bạn có thể yêu cầu xóa bất kỳ lúc nào.",
     "section5_title": "Quyền của bạn",
-    "section5_text": "Bạn có quyền truy cập, chỉnh sửa hoặc xóa dữ liệu cá nhân của mình. Liên hệ với chúng tôi để thực hiện các quyền này."
+    "section5_text": "Bạn có quyền truy cập, chỉnh sửa hoặc xóa dữ liệu cá nhân của mình. Liên hệ với chúng tôi để thực hiện các quyền này.",
+    "section6_title": "Bảo mật dữ liệu",
+    "section6_text": "Chúng tôi áp dụng các biện pháp bảo mật tiêu chuẩn ngành để bảo vệ dữ liệu của bạn, bao gồm mã hóa trong quá trình truyền và lưu trữ, xác thực an toàn và kiểm tra bảo mật thường xuyên.",
+    "section7_title": "Cookie",
+    "section7_text": "Chúng tôi sử dụng cookie thiết yếu cho xác thực và quản lý phiên. Chúng tôi cũng có thể sử dụng cookie phân tích để hiểu cách dịch vụ được sử dụng.",
+    "section8_title": "Liên hệ",
+    "section8_text": "Nếu bạn có câu hỏi hoặc thắc mắc về chính sách quyền riêng tư này hoặc dữ liệu của bạn, vui lòng liên hệ chúng tôi tại"
   }
 }

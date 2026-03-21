@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import AdBanner from "./AdBanner";
 import CaptchaVerify from "./CaptchaVerify";
 import CustomerForm from "./CustomerForm";
@@ -61,6 +62,7 @@ type FlowState =
   | "rating";
 
 export default function CustomerFlow({ queue }: { queue: QueueData }) {
+  const t = useTranslations("customer");
   const [state, setState] = useState<FlowState>("loading");
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState("");
@@ -148,7 +150,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
         setState("ticket");
       } else {
         setState("info");
-        alert(data.error || "Không thể lấy số");
+        alert(data.error || t("cannot_take_number"));
       }
     }
   };
@@ -172,9 +174,9 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-1">Hàng đợi chưa mở</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-1">{t("queue_not_open")}</h2>
           <p className="text-sm text-slate-500">
-            {queue.status === "PAUSED" ? "Hàng đợi tạm dừng" : "Hàng đợi đã đóng"}
+            {queue.status === "PAUSED" ? t("queue_paused") : t("queue_closed")}
           </p>
         </div>
       </div>
@@ -212,7 +214,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
 
             {queue.streams.length > 1 && (
               <div>
-                <p className="text-sm font-medium text-slate-700 mb-2">Chọn loại dịch vụ</p>
+                <p className="text-sm font-medium text-slate-700 mb-2">{t("select_service")}</p>
                 <div className="space-y-2">
                   {queue.streams.map((s) => (
                     <button
@@ -226,7 +228,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-slate-900 text-sm">{s.name}</span>
-                        <span className="text-xs text-slate-400">{s.waitingCount} đang chờ</span>
+                        <span className="text-xs text-slate-400">{s.waitingCount} {t("waiting_count")}</span>
                       </div>
                     </button>
                   ))}
@@ -238,7 +240,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
               onClick={() => setState("captcha")}
               className="btn-primary w-full py-4 text-base font-semibold rounded-2xl"
             >
-              Lấy số
+              {t("take_ticket")}
             </button>
           </>
         )}
@@ -261,7 +263,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
         {state === "joining" && (
           <div className="flex flex-col items-center py-16 gap-4">
             <div className="w-10 h-10 border-[3px] border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-slate-500">Đang lấy số...</p>
+            <p className="text-sm text-slate-500">{t("joining")}</p>
           </div>
         )}
 
@@ -280,7 +282,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
           href={`/q/${queue.id}/guide`}
           className="text-xs text-slate-400 hover:text-slate-600 underline underline-offset-2"
         >
-          Hướng dẫn sử dụng
+          {t("usage_guide")}
         </Link>
       </div>
 

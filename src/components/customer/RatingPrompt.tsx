@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 const STARS = [1, 2, 3, 4, 5];
 
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function RatingPrompt({ ticketId, onDone }: Props) {
+  const t = useTranslations("customer");
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
@@ -32,7 +34,7 @@ export default function RatingPrompt({ ticketId, onDone }: Props) {
     return (
       <div className="bg-green-50 rounded-2xl border border-green-200 p-6 text-center">
         <div className="text-4xl mb-2">🙏</div>
-        <p className="font-semibold text-green-800">Thank you for your feedback!</p>
+        <p className="font-semibold text-green-800">{t("rating_thanks")}</p>
       </div>
     );
   }
@@ -40,10 +42,10 @@ export default function RatingPrompt({ ticketId, onDone }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6">
       <h3 className="text-lg font-semibold text-gray-900 text-center mb-1">
-        How was your experience?
+        {t("rating_title")}
       </h3>
       <p className="text-sm text-gray-500 text-center mb-5">
-        Rate your service quality
+        {t("rating_desc")}
       </p>
 
       <div className="flex justify-center gap-2 mb-4">
@@ -70,7 +72,7 @@ export default function RatingPrompt({ ticketId, onDone }: Props) {
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Optional comments..."
+          placeholder={t("rating_comment")}
           rows={2}
           className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
         />
@@ -81,14 +83,14 @@ export default function RatingPrompt({ ticketId, onDone }: Props) {
           onClick={onDone}
           className="flex-1 py-2.5 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-gray-50 text-sm"
         >
-          Skip
+          {t("rating_skip")}
         </button>
         <button
           onClick={handleSubmit}
           disabled={!rating}
           className="flex-1 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 disabled:opacity-40 text-sm"
         >
-          Submit
+          {t("rating_submit")}
         </button>
       </div>
     </div>

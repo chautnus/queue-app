@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   onComplete: (token: string, answer: number) => void;
@@ -8,6 +9,8 @@ type Props = {
 };
 
 export default function CaptchaVerify({ onComplete, onBack }: Props) {
+  const t = useTranslations("customer");
+  const tc = useTranslations("common");
   const [question, setQuestion] = useState("");
   const [token, setToken] = useState("");
   const [answer, setAnswer] = useState("");
@@ -44,10 +47,10 @@ export default function CaptchaVerify({ onComplete, onBack }: Props) {
   return (
     <div className="card p-6">
       <h2 className="text-lg font-semibold text-slate-900 mb-2">
-        Xac minh ban la nguoi
+        {t("captcha_title")}
       </h2>
       <p className="text-sm text-slate-500 mb-6">
-        Tra loi phep tinh de tiep tuc.
+        {t("captcha_desc")}
       </p>
 
       {loading ? (
@@ -65,13 +68,13 @@ export default function CaptchaVerify({ onComplete, onBack }: Props) {
             value={answer}
             onChange={(e) => { setAnswer(e.target.value); setError(false); }}
             className="input text-center text-xl font-bold"
-            placeholder="Dap an"
+            placeholder={t("captcha_answer")}
             autoFocus
           />
 
           {error && (
             <p className="text-sm text-red-600 text-center">
-              Sai dap an. Thu lai.
+              {t("captcha_wrong")}
             </p>
           )}
 
@@ -81,14 +84,14 @@ export default function CaptchaVerify({ onComplete, onBack }: Props) {
               onClick={onBack}
               className="flex-1 py-3 btn-outline"
             >
-              Quay lai
+              {tc("back")}
             </button>
             <button
               type="submit"
               disabled={!answer}
               className="flex-1 py-3 btn-primary"
             >
-              Tiep tuc
+              {tc("continue")}
             </button>
           </div>
         </form>

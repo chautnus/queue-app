@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { formatWaitTime } from "@/lib/wait-time";
 
 type TicketInfo = {
@@ -19,14 +20,8 @@ type Props = {
   onRatingRequest: () => void;
 };
 
-const STATUS_TEXT: Record<string, string> = {
-  WAITING: "Đang chờ trong hàng",
-  CALLED: "Đến lượt bạn! Vui lòng đến quầy.",
-  SERVING: "Đang được phục vụ",
-  COMPLETED: "Đã hoàn thành",
-};
-
 export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Props) {
+  const t = useTranslations("customer");
   const pushRequestedRef = useRef(false);
 
   useEffect(() => {
@@ -63,7 +58,7 @@ export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Prop
       {/* ── Ticket card ── */}
       <div className={`card p-8 text-center ${isCalled ? "border-green-300 bg-green-50" : ""}`}>
         <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">{ticket.streamName}</p>
-        <p className="text-sm text-slate-500 mb-2">Số của bạn</p>
+        <p className="text-sm text-slate-500 mb-2">{t("your_number")}</p>
 
         <div className={`ticket-number my-3 ${isCalled ? "text-green-600" : "text-blue-600"}`}>
           {ticket.displayNumber}
@@ -79,12 +74,12 @@ export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Prop
         }`}>
           {isCalled && <span className="live-dot bg-green-500" />}
           {isWaiting && <span className="w-2 h-2 rounded-full bg-blue-400" />}
-          {STATUS_TEXT[ticket.status] ?? ticket.status}
+          {ticket.status === "WAITING" ? t("waiting_in_queue") : ticket.status === "CALLED" ? t("your_turn") : ticket.status === "SERVING" ? t("being_served") : ticket.status === "COMPLETED" ? t("completed") : ticket.status}
         </div>
 
         {/* Verify code */}
         <div className="mt-2">
-          <p className="text-xs text-slate-400 mb-1">Mã xác nhận</p>
+          <p className="text-xs text-slate-400 mb-1">{t("verify_code")}</p>
           <span className="inline-block font-mono font-bold text-2xl tracking-[0.3em] bg-slate-100 px-4 py-2 rounded-xl text-slate-700">
             {ticket.verifyCode}
           </span>
@@ -97,19 +92,19 @@ export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Prop
           <div className="flex gap-4 text-center">
             <div className="flex-1">
               <p className="text-2xl font-bold text-blue-700">{ticket.waitingAhead}</p>
-              <p className="text-xs text-blue-500 mt-0.5">người đang chờ trước</p>
+              <p className="text-xs text-blue-500 mt-0.5">{t("waiting_ahead")}</p>
             </div>
             <div className="w-px bg-blue-200" />
             <div className="flex-1">
               <p className="text-2xl font-bold text-blue-700">{formatWaitTime(ticket.estimatedSeconds)}</p>
-              <p className="text-xs text-blue-500 mt-0.5">thời gian chờ ước tính</p>
+              <p className="text-xs text-blue-500 mt-0.5">{t("estimated_wait_time")}</p>
             </div>
           </div>
         </div>
       )}
 
       <p className="text-xs text-center text-slate-400">
-        Giữ trang này mở để nhận thông báo khi đến lượt bạn
+        {t("keep_page_open")}
       </p>
     </div>
   );

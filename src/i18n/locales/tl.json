@@ -15,7 +15,14 @@
     "copied": "Nakopya na!",
     "login": "Mag-log in",
     "register": "Mag-register",
-    "logout": "Mag-log out"
+    "logout": "Mag-log out",
+    "back_to_home": "Bumalik sa Home",
+    "all_rights": "Lahat ng karapatan ay nakalaan.",
+    "contact": "Makipag-ugnayan",
+    "get_started": "Magsimula",
+    "continue": "Magpatuloy",
+    "submit": "I-submit",
+    "skip": "Laktawan"
   },
   "landing": {
     "hero_title": "Matalinong Pamamahala ng Pila",
@@ -48,7 +55,10 @@
     "footer_about": "Tungkol sa Amin",
     "footer_terms": "Mga Tuntunin",
     "footer_privacy": "Privacy",
-    "footer_contact": "Makipag-ugnayan"
+    "footer_contact": "Makipag-ugnayan",
+    "how_it_works_subtitle": "Magsimula sa tatlong simpleng hakbang",
+    "features_subtitle": "Mga makapangyarihang feature para i-streamline ang iyong pila",
+    "cta_start_today": "Magsimula nang Libre Ngayon"
   },
   "staff": {
     "now_serving": "Kasalukuyang Sini-serve",
@@ -76,7 +86,8 @@
   "display": {
     "now_serving": "Kasalukuyang Sini-serve",
     "waiting": "Naghihintay",
-    "no_customers": "Naghihintay ng mga customer..."
+    "no_customers": "Naghihintay ng mga customer...",
+    "serving": "Sini-serve"
   },
   "customer": {
     "take_ticket": "Kumuha ng Numero",
@@ -89,7 +100,37 @@
     "status_serving": "Sini-serve na",
     "status_completed": "Tapos na",
     "status_absent": "Na-mark na absent",
-    "go_to_counter": "Pumunta sa"
+    "go_to_counter": "Pumunta sa",
+    "select_service": "Pumili ng uri ng serbisyo",
+    "waiting_count": "naghihintay",
+    "your_info": "Ang Impormasyon Mo",
+    "your_info_desc": "Punan ang impormasyon bago kumuha ng numero.",
+    "select_option": "Pumili...",
+    "joining": "Kinukuha ang numero mo...",
+    "queue_not_open": "Hindi pa bukas ang pila",
+    "queue_paused": "Naka-pause ang pila",
+    "queue_closed": "Sarado na ang pila",
+    "cannot_take_number": "Hindi makakuha ng numero",
+    "usage_guide": "Gabay sa paggamit",
+    "keep_page_open": "Panatilihing bukas ang pahinang ito para ma-notify ka kapag ikaw na",
+    "waiting_ahead": "naghihintay sa unahan",
+    "estimated_wait_time": "tinatayang paghihintay",
+    "verify_code": "Verification code",
+    "waiting_in_queue": "Naghihintay sa pila",
+    "your_turn": "Ikaw na! Pumunta sa counter.",
+    "being_served": "Sini-serve na",
+    "completed": "Tapos na",
+    "est_wait": "Tinatayang hintay",
+    "captcha_title": "I-verify na ikaw ay tao",
+    "captcha_desc": "Sagutin ang math para magpatuloy.",
+    "captcha_answer": "Sagot",
+    "captcha_wrong": "Maling sagot. Subukan ulit.",
+    "rating_title": "Kumusta ang karanasan mo?",
+    "rating_desc": "I-rate ang kalidad ng serbisyo",
+    "rating_thanks": "Salamat sa iyong feedback!",
+    "rating_comment": "Mga komento (opsyonal)...",
+    "rating_skip": "Laktawan",
+    "rating_submit": "I-submit"
   },
   "about": {
     "title": "Tungkol sa QueueDrop",
@@ -97,7 +138,17 @@
     "mission_title": "Ang Aming Misyon",
     "mission_text": "Gawing patas, transparent, at walang stress ang paghihintay para sa mga customer at staff.",
     "contact_title": "Makipag-ugnayan sa Amin",
-    "contact_email": "support@queuedrop.app"
+    "contact_email": "support@queuedrop.app",
+    "what_is_title": "Ano ang QueueApp?",
+    "what_is_text": "Ang QueueApp ay isang modernong digital na platform para sa pamamahala ng pila na dinisenyo para sa lahat ng laki ng negosyo. Pinapalitan nito ang mga tradisyunal na papel na ticket system ng isang seamless na mobile-first na karanasan. Walang hardware na bibilhin, walang app na i-install -- mag-scan lang ng QR code at sumali sa pila.",
+    "benefits_title": "Mga Pangunahing Benepisyo",
+    "benefit_1": "I-set up sa loob ng 60 segundo nang walang hardware",
+    "benefit_2": "Sumali ang mga customer sa pamamagitan ng QR code -- hindi kailangan mag-download ng app",
+    "benefit_3": "Real-time na update at push notification",
+    "benefit_4": "Maraming serbisyo at counter sa bawat pila",
+    "benefit_5": "Display board para sa waiting area",
+    "benefit_6": "Analytics at insights para i-optimize ang operasyon",
+    "contact_text": "May mga tanong, feedback, o partnership inquiries? Gusto naming marinig mula sa iyo."
   },
   "terms": {
     "title": "Mga Tuntunin ng Serbisyo",
@@ -111,7 +162,13 @@
     "section4_title": "Paggamit ng Data",
     "section4_text": "Nangongolekta at nagpo-proseso kami ng data ayon sa aming Privacy Policy. Sa paggamit ng serbisyo, pumapayag ka sa naturang pagpo-proseso.",
     "section5_title": "Limitasyon ng Pananagutan",
-    "section5_text": "Ang QueueDrop ay ibinibigay 'as is'. Hindi kami responsable sa anumang pinsalang maaaring magmula sa paggamit ng aming serbisyo."
+    "section5_text": "Ang QueueDrop ay ibinibigay 'as is'. Hindi kami responsable sa anumang pinsalang maaaring magmula sa paggamit ng aming serbisyo.",
+    "section6_title": "Intellectual Property",
+    "section6_text": "Lahat ng content, trademark, at intellectual property na nauugnay sa QueueApp ay pag-aari ng QueueApp at ng mga licensor nito. Hindi mo maaaring kopyahin, baguhin, ipamahagi, o i-reverse-engineer ang anumang bahagi ng serbisyo nang walang nakasulat na pahintulot.",
+    "section7_title": "Pagwawakas",
+    "section7_text": "Maaari naming i-suspend o wakasan ang iyong access sa serbisyo anumang oras dahil sa paglabag sa mga tuntuning ito. Maaari mo ring burahin ang iyong account anumang oras sa pamamagitan ng mga setting.",
+    "section8_title": "Makipag-ugnayan",
+    "section8_text": "Kung may mga tanong ka tungkol sa mga tuntuning ito, makipag-ugnayan sa amin sa"
   },
   "privacy": {
     "title": "Patakaran sa Privacy",
@@ -125,6 +182,12 @@
     "section4_title": "Pag-iingat ng Data",
     "section4_text": "Iniingatan namin ang iyong data habang aktibo ang iyong account. Maaari kang humiling ng pagbura anumang oras.",
     "section5_title": "Mga Karapatan Mo",
-    "section5_text": "May karapatan kang i-access, itama, o burahin ang iyong personal na data. Makipag-ugnayan sa amin para magamit ang mga karapatang ito."
+    "section5_text": "May karapatan kang i-access, itama, o burahin ang iyong personal na data. Makipag-ugnayan sa amin para magamit ang mga karapatang ito.",
+    "section6_title": "Seguridad ng Data",
+    "section6_text": "Gumagamit kami ng mga pamantayang pang-industriya na hakbang sa seguridad upang protektahan ang iyong data, kasama ang encryption sa transit at sa storage, secure na authentication, at regular na security review.",
+    "section7_title": "Cookies",
+    "section7_text": "Gumagamit kami ng mga essential cookie para sa authentication at session management. Maaari rin kaming gumamit ng analytics cookie para maintindihan kung paano ginagamit ang serbisyo.",
+    "section8_title": "Makipag-ugnayan",
+    "section8_text": "Kung may mga tanong o alalahanin ka tungkol sa privacy policy na ito o sa iyong data, makipag-ugnayan sa amin sa"
   }
 }

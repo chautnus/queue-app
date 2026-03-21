@@ -4,6 +4,7 @@ import { staffAuth } from "@/lib/staff-auth";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import SessionSetup from "@/components/staff/SessionSetup";
+import AdBanner from "@/components/AdBanner";
 
 export const metadata: Metadata = { title: "Start Session" };
 
@@ -51,6 +52,11 @@ export default async function StaffJoinPage({
             counters: s.counters.map((c) => ({ id: c.id, name: c.name })),
           }))}
         />
+
+        {/* Ad Banner */}
+        <div className="mt-6">
+          <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_STAFF ?? ""} />
+        </div>
       </div>
     </div>
   );

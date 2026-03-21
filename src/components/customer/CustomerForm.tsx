@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 type Field = {
   name: string;
@@ -17,6 +18,8 @@ type Props = {
 };
 
 export default function CustomerForm({ fields, onSubmit, onBack }: Props) {
+  const t = useTranslations("customer");
+  const tc = useTranslations("common");
   const [values, setValues] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,9 +33,9 @@ export default function CustomerForm({ fields, onSubmit, onBack }: Props) {
 
   return (
     <div className="card p-6">
-      <h2 className="text-lg font-semibold text-slate-900 mb-1">Thông tin của bạn</h2>
+      <h2 className="text-lg font-semibold text-slate-900 mb-1">{t("your_info")}</h2>
       <p className="text-sm text-slate-500 mb-6">
-        Vui lòng điền thông tin trước khi lấy số.
+        {t("your_info_desc")}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -50,7 +53,7 @@ export default function CustomerForm({ fields, onSubmit, onBack }: Props) {
                 required={field.required}
                 className="input"
               >
-                <option value="">Chọn...</option>
+                <option value="">{t("select_option")}</option>
                 {field.options.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
@@ -76,13 +79,13 @@ export default function CustomerForm({ fields, onSubmit, onBack }: Props) {
             onClick={onBack}
             className="btn-ghost flex-1 py-3 border border-slate-200"
           >
-            Quay lại
+            {tc("back")}
           </button>
           <button
             type="submit"
             className="btn-primary flex-1 py-3"
           >
-            Tiếp tục
+            {tc("continue")}
           </button>
         </div>
       </form>
