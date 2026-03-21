@@ -104,7 +104,7 @@ export default function WorkScreen({
 
   const endSession = async () => {
     if (!confirm("Kết thúc phiên làm việc?")) return;
-    await fetch(`/api/staff/session/${sessionId}/pause`, { method: "POST" });
+    await fetch(`/api/staff/session/${sessionId}/end`, { method: "POST" });
     router.push("/staff");
   };
 

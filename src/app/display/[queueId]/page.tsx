@@ -17,8 +17,8 @@ export default function DisplayBoardPage({
   const [queueName, setQueueName] = useState("Queue Display");
 
   useEffect(() => {
-    // Fetch initial stats
-    fetch(`/api/queues/${queueId}/stats`)
+    // Fetch initial stats (public endpoint — no auth required)
+    fetch(`/api/queues/${queueId}/public-stats`)
       .then((r) => r.json())
       .then((data) => {
         if (data.stats?.queue?.name) setQueueName(data.stats.queue.name);
