@@ -8,7 +8,7 @@ import { verifyToken } from "@/app/api/captcha/route";
 
 const JoinSchema = z.object({
   deviceId: z.string().min(1),
-  streamId: z.string().optional(),
+  streamId: z.string().nullable().optional(),
   customerInfo: z.record(z.unknown()).optional(),
   captchaAnswer: z.number(),
   captchaToken: z.string(),
@@ -118,21 +118,39 @@ export async function POST(
     }
 
     // Determine target stream
+    const isStaffAssign = queue.streamAssignMode === "STAFF_ASSIGN";
     const targetStreamId =
-      streamId ?? queue.streams[0]?.id;
+      isStaffAssign && !streamId ? null : (streamId ?? queue.streams[0]?.id);
 
-    if (!targetStreamId) {
+    if (!isStaffAssign && !targetStreamId) {
       return NextResponse.json(
         { error: "No stream available" },
         { status: 400 }
       );
     }
 
-    // Allocate ticket number atomically
-    const { number, displayNumber } = await allocateTicketNumber(
-      targetStreamId,
-      queue.timezone
-    );
+    let number: number;
+    let displayNumber: string;
+
+    if (targetStreamId) {
+      // Allocate ticket number atomically via stream counter
+      const allocated = await allocateTicketNumber(
+        targetStreamId,
+        queue.timezone
+      );
+      number = allocated.number;
+      displayNumber = allocated.displayNumber;
+    } else {
+      // STAFF_ASSIGN with no stream: use queue-level counter based on total waiting tickets
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const count = await prisma.ticket.count({
+        where: { queueId: id, createdAt: { gte: todayStart } },
+      });
+      number = count + 1;
+      displayNumber = `Q${String(number).padStart(3, "0")}`;
+    }
+
     const verifyCode = generateVerifyCode();
 
     // Create ticket + device registration in a transaction
@@ -160,11 +178,22 @@ export async function POST(
     });
 
     // Calculate wait time
-    const { waitingAhead, estimatedSeconds } = await estimateWaitTime(
-      targetStreamId,
-      number,
-      queue.timezone
-    );
+    let waitingAhead = 0;
+    let estimatedSeconds = 0;
+    if (targetStreamId) {
+      const waitInfo = await estimateWaitTime(
+        targetStreamId,
+        number,
+        queue.timezone
+      );
+      waitingAhead = waitInfo.waitingAhead;
+      estimatedSeconds = waitInfo.estimatedSeconds;
+    } else {
+      // For unassigned tickets, count all waiting tickets in queue
+      waitingAhead = await prisma.ticket.count({
+        where: { queueId: id, status: "WAITING", ticketNumber: { lt: number } },
+      });
+    }
 
     // Broadcast to queue subscribers
     broadcastToQueue(id, {
@@ -177,7 +206,7 @@ export async function POST(
         id: ticket.id,
         displayNumber: ticket.displayNumber,
         verifyCode: ticket.verifyCode,
-        streamName: ticket.stream.name,
+        streamName: ticket.stream?.name ?? "",
         status: ticket.status,
         waitingAhead,
         estimatedSeconds,

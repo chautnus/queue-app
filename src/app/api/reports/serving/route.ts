@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
   const data = tickets.map((t) => ({
     id: t.id,
     displayNumber: t.displayNumber,
-    stream: t.stream.name,
+    stream: t.stream?.name ?? "",
     status: t.status,
     createdAt: t.createdAt,
     calledAt: t.calledAt,

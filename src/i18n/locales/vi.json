@@ -60,6 +60,11 @@
     "features_subtitle": "Tính năng mạnh mẽ để tối ưu hóa hoạt động hàng đợi",
     "cta_start_today": "Bắt đầu miễn phí ngay"
   },
+  "queue": {
+    "stream_assign_mode": "Chế độ chọn luồng",
+    "customer_choice": "Khách hàng tự chọn",
+    "staff_assign": "Nhân viên chỉ định"
+  },
   "staff": {
     "now_serving": "Đang phục vụ",
     "verify_code": "Mã xác nhận",
@@ -81,7 +86,9 @@
     "end_session": "Kết thúc phiên",
     "end_confirm": "Kết thúc phiên làm việc này?",
     "served": "đã phục vụ",
-    "setup_title": "Thiết lập phiên làm việc"
+    "setup_title": "Thiết lập phiên làm việc",
+    "assign_stream": "Chỉ định luồng",
+    "unassigned_ticket": "Chưa chỉ định"
   },
   "display": {
     "now_serving": "Đang phục vụ",
@@ -130,7 +137,8 @@
     "rating_thanks": "Cảm ơn phản hồi của bạn!",
     "rating_comment": "Nhận xét (tùy chọn)...",
     "rating_skip": "Bỏ qua",
-    "rating_submit": "Gửi"
+    "rating_submit": "Gửi",
+    "staff_will_assign": "Nhân viên sẽ chỉ định dịch vụ phù hợp cho bạn."
   },
   "about": {
     "title": "Về QueueDrop",

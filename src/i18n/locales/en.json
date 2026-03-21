@@ -60,6 +60,11 @@
     "features_subtitle": "Powerful features to streamline your queue operations",
     "cta_start_today": "Start Free Today"
   },
+  "queue": {
+    "stream_assign_mode": "Stream Assignment Mode",
+    "customer_choice": "Customer Choice",
+    "staff_assign": "Staff Assign"
+  },
   "staff": {
     "now_serving": "Now Serving",
     "verify_code": "Verification Code",
@@ -81,7 +86,9 @@
     "end_session": "End Session",
     "end_confirm": "End this work session?",
     "served": "served",
-    "setup_title": "Set up your work session"
+    "setup_title": "Set up your work session",
+    "assign_stream": "Assign to stream",
+    "unassigned_ticket": "Unassigned"
   },
   "display": {
     "now_serving": "Now Serving",
@@ -130,7 +137,8 @@
     "rating_thanks": "Thank you for your feedback!",
     "rating_comment": "Optional comments...",
     "rating_skip": "Skip",
-    "rating_submit": "Submit"
+    "rating_submit": "Submit",
+    "staff_will_assign": "Staff will assign you to the appropriate service."
   },
   "about": {
     "title": "About QueueDrop",

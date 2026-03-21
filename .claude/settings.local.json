@@ -17,7 +17,20 @@
       "Bash(echo \"EXIT:$?\")",
       "Bash(curl -s \"https://api.github.com/repos/chautnus/queue-app\")",
       "Bash(node -e \"const d=JSON.parse\\(require\\(''''fs''''\\).readFileSync\\(''''/dev/stdin'''',''''utf8''''\\)\\); console.log\\(''''Repo:'''',d.full_name,''''| Branch:'''',d.default_branch,''''| Size:'''',d.size,''''KB | Empty:'''',d.size===0\\)\")",
-      "WebFetch(domain:api.github.com)"
+      "WebFetch(domain:api.github.com)",
+      "Bash(head -50 /c/dev/queue-app/src/app/api/queues/[id]/route.ts)",
+      "Bash(head -100 /c/dev/queue-app/src/app/api/queues/[id]/join/route.ts)",
+      "Bash(find /c/dev/queue-app/src/app -type d -name \"*brand\\\\|*profile\\\\|*settings\")",
+      "Bash(xargs grep:*)",
+      "Bash(ls /c/dev/queue-app/src/app/dashboard/queues/[id]/)",
+      "Bash(ls /c/dev/queue-app/src/app/dashboard/queues/[id]/edit/)",
+      "Bash(\"/c/dev/queue-app/prisma/migrations/20260315000000_initial/migration.sql\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:www.qrq.app)",
+      "WebFetch(domain:app.qrq.app)",
+      "Bash(npm run:*)"
     ]
   }
 }

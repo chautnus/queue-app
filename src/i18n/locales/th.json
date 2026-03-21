@@ -60,6 +60,11 @@
     "features_subtitle": "ฟีเจอร์ที่ทรงพลังเพื่อเพิ่มประสิทธิภาพการจัดการคิว",
     "cta_start_today": "เริ่มใช้ฟรีวันนี้"
   },
+  "queue": {
+    "stream_assign_mode": "โหมดการจัดสรรบริการ",
+    "customer_choice": "ลูกค้าเลือกเอง",
+    "staff_assign": "เจ้าหน้าที่จัดสรร"
+  },
   "staff": {
     "now_serving": "กำลังให้บริการ",
     "verify_code": "รหัสยืนยัน",
@@ -81,7 +86,9 @@
     "end_session": "จบเซสชัน",
     "end_confirm": "จบเซสชันการทำงานนี้?",
     "served": "ให้บริการแล้ว",
-    "setup_title": "ตั้งค่าเซสชันการทำงานของคุณ"
+    "setup_title": "ตั้งค่าเซสชันการทำงานของคุณ",
+    "assign_stream": "จัดสรรไปยังบริการ",
+    "unassigned_ticket": "ยังไม่ได้จัดสรร"
   },
   "display": {
     "now_serving": "กำลังให้บริการ",
@@ -130,7 +137,8 @@
     "rating_thanks": "ขอบคุณสำหรับความคิดเห็นของคุณ!",
     "rating_comment": "ความคิดเห็น (ไม่บังคับ)...",
     "rating_skip": "ข้าม",
-    "rating_submit": "ส่ง"
+    "rating_submit": "ส่ง",
+    "staff_will_assign": "เจ้าหน้าที่จะจัดสรรบริการที่เหมาะสมให้คุณ"
   },
   "about": {
     "title": "เกี่ยวกับ QueueDrop",

@@ -60,6 +60,11 @@
     "features_subtitle": "强大的功能优化您的排队运营",
     "cta_start_today": "立即免费开始"
   },
+  "queue": {
+    "stream_assign_mode": "服务分配模式",
+    "customer_choice": "客户自选",
+    "staff_assign": "工作人员分配"
+  },
   "staff": {
     "now_serving": "当前服务",
     "verify_code": "验证码",
@@ -81,7 +86,9 @@
     "end_session": "结束会话",
     "end_confirm": "结束当前工作会话？",
     "served": "已服务",
-    "setup_title": "设置您的工作会话"
+    "setup_title": "设置您的工作会话",
+    "assign_stream": "分配到服务",
+    "unassigned_ticket": "未分配"
   },
   "display": {
     "now_serving": "当前服务",
@@ -130,7 +137,8 @@
     "rating_thanks": "感谢您的反馈！",
     "rating_comment": "评论（可选）...",
     "rating_skip": "跳过",
-    "rating_submit": "提交"
+    "rating_submit": "提交",
+    "staff_will_assign": "工作人员将为您分配适当的服务。"
   },
   "about": {
     "title": "关于QueueDrop",

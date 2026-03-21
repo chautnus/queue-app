@@ -60,6 +60,11 @@
     "features_subtitle": "Funciones potentes para optimizar tus operaciones de cola",
     "cta_start_today": "Comenzar gratis hoy"
   },
+  "queue": {
+    "stream_assign_mode": "Modo de asignación de servicio",
+    "customer_choice": "Elección del cliente",
+    "staff_assign": "Asignación del personal"
+  },
   "staff": {
     "now_serving": "Atendiendo ahora",
     "verify_code": "Código de verificación",
@@ -81,7 +86,9 @@
     "end_session": "Finalizar sesión",
     "end_confirm": "¿Finalizar esta sesión de trabajo?",
     "served": "atendidos",
-    "setup_title": "Configura tu sesión de trabajo"
+    "setup_title": "Configura tu sesión de trabajo",
+    "assign_stream": "Asignar al servicio",
+    "unassigned_ticket": "Sin asignar"
   },
   "display": {
     "now_serving": "Atendiendo ahora",
@@ -130,7 +137,8 @@
     "rating_thanks": "¡Gracias por tu opinión!",
     "rating_comment": "Comentarios (opcional)...",
     "rating_skip": "Omitir",
-    "rating_submit": "Enviar"
+    "rating_submit": "Enviar",
+    "staff_will_assign": "El personal le asignará al servicio apropiado."
   },
   "about": {
     "title": "Acerca de QueueDrop",

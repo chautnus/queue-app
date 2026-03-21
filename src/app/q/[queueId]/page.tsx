@@ -68,6 +68,7 @@ export default async function CustomerQueuePage({
           options?: string[];
         }>
       | null,
+    streamAssignMode: queue.streamAssignMode as string,
     redirectUrl: queue.redirectUrl,
     adBannerSlotId: queue.adBannerSlotId,
     streams: queue.streams.map((s) => ({

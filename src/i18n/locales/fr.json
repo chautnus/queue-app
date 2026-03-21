@@ -60,6 +60,11 @@
     "features_subtitle": "Des fonctionnalités puissantes pour optimiser vos files d'attente",
     "cta_start_today": "Commencer gratuitement"
   },
+  "queue": {
+    "stream_assign_mode": "Mode d'attribution du service",
+    "customer_choice": "Choix du client",
+    "staff_assign": "Attribution par le personnel"
+  },
   "staff": {
     "now_serving": "En cours de service",
     "verify_code": "Code de vérification",
@@ -81,7 +86,9 @@
     "end_session": "Terminer la session",
     "end_confirm": "Terminer cette session de travail ?",
     "served": "servis",
-    "setup_title": "Configurez votre session de travail"
+    "setup_title": "Configurez votre session de travail",
+    "assign_stream": "Attribuer au service",
+    "unassigned_ticket": "Non attribué"
   },
   "display": {
     "now_serving": "En cours de service",
@@ -130,7 +137,8 @@
     "rating_thanks": "Merci pour votre retour !",
     "rating_comment": "Commentaires (optionnel)...",
     "rating_skip": "Passer",
-    "rating_submit": "Envoyer"
+    "rating_submit": "Envoyer",
+    "staff_will_assign": "Le personnel vous attribuera au service approprié."
   },
   "about": {
     "title": "À propos de QueueDrop",

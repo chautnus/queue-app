@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
 
     const row = [
       t.displayNumber,
-      t.stream.name,
+      t.stream?.name ?? "",
       t.status,
       t.createdAt.toISOString(),
       t.completedAt?.toISOString() ?? "",

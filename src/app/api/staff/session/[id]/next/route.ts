@@ -5,7 +5,7 @@ import { broadcastToQueue, broadcastToSession } from "@/lib/sse";
 import { sendPushToTicket } from "@/lib/push";
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getStaffUser();
@@ -14,6 +14,15 @@ export async function POST(
   }
 
   const { id } = await params;
+
+  // Parse optional assignStreamId from request body
+  let assignStreamId: string | undefined;
+  try {
+    const body = await req.json();
+    assignStreamId = body?.assignStreamId;
+  } catch {
+    // No body or invalid JSON is fine
+  }
 
   const staffSession = await prisma.staffSession.findUnique({
     where: { id, userId: user.id, status: "ACTIVE" },
@@ -30,12 +39,15 @@ export async function POST(
     data: { status: "COMPLETED", completedAt: new Date() },
   });
 
-  // Find next WAITING ticket in any of the staff's streams
+  // Find next WAITING ticket: either in staff's streams OR unassigned (null streamId)
   const nextTicket = await prisma.ticket.findFirst({
     where: {
       queueId: staffSession.queueId,
-      streamId: { in: staffSession.streamIds },
       status: "WAITING",
+      OR: [
+        { streamId: { in: staffSession.streamIds } },
+        { streamId: null },
+      ],
     },
     orderBy: { ticketNumber: "asc" },
     include: { stream: { select: { name: true } } },
@@ -45,10 +57,24 @@ export async function POST(
     return NextResponse.json({ ticket: null, message: "No waiting tickets" });
   }
 
+  // If ticket has no stream and staff provided assignStreamId, assign it
+  const updateData: Record<string, unknown> = {
+    status: "CALLED",
+    calledAt: new Date(),
+    staffSessionId: id,
+  };
+
+  if (!nextTicket.streamId && assignStreamId) {
+    updateData.streamId = assignStreamId;
+  }
+
   const updated = await prisma.ticket.update({
     where: { id: nextTicket.id },
-    data: { status: "CALLED", calledAt: new Date(), staffSessionId: id },
+    data: updateData,
+    include: { stream: { select: { name: true } } },
   });
+
+  const streamName = updated.stream?.name ?? "";
 
   // Broadcast queue event
   broadcastToQueue(staffSession.queueId, {
@@ -66,7 +92,7 @@ export async function POST(
     data: {
       ticketId: updated.id,
       displayNumber: updated.displayNumber,
-      streamName: nextTicket.stream.name,
+      streamName,
       verifyCode: updated.verifyCode,
     },
   });
@@ -74,7 +100,7 @@ export async function POST(
   // Send push notification to customer
   try {
     await sendPushToTicket(updated.id, {
-      title: "Your turn! 🎉",
+      title: "Your turn!",
       body: `Ticket ${updated.displayNumber} - please proceed to ${staffSession.counter.name}`,
       data: { queueId: staffSession.queueId, ticketId: updated.id },
     });
@@ -86,7 +112,8 @@ export async function POST(
     ticket: {
       id: updated.id,
       displayNumber: updated.displayNumber,
-      streamName: nextTicket.stream.name,
+      streamName,
+      streamId: updated.streamId,
       verifyCode: updated.verifyCode,
       status: updated.status,
     },

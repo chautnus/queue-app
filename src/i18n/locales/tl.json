@@ -60,6 +60,11 @@
     "features_subtitle": "Mga makapangyarihang feature para i-streamline ang iyong pila",
     "cta_start_today": "Magsimula nang Libre Ngayon"
   },
+  "queue": {
+    "stream_assign_mode": "Mode ng Pagtatalaga ng Serbisyo",
+    "customer_choice": "Pipiliin ng Customer",
+    "staff_assign": "Itatalaga ng Staff"
+  },
   "staff": {
     "now_serving": "Kasalukuyang Sini-serve",
     "verify_code": "Verification Code",
@@ -81,7 +86,9 @@
     "end_session": "Tapusin ang Session",
     "end_confirm": "Tapusin ang session na ito?",
     "served": "na-serve na",
-    "setup_title": "I-set up ang iyong work session"
+    "setup_title": "I-set up ang iyong work session",
+    "assign_stream": "Italaga sa serbisyo",
+    "unassigned_ticket": "Hindi pa naitalaga"
   },
   "display": {
     "now_serving": "Kasalukuyang Sini-serve",
@@ -130,7 +137,8 @@
     "rating_thanks": "Salamat sa iyong feedback!",
     "rating_comment": "Mga komento (opsyonal)...",
     "rating_skip": "Laktawan",
-    "rating_submit": "I-submit"
+    "rating_submit": "I-submit",
+    "staff_will_assign": "Ang staff ang magtatalaga sa iyo sa tamang serbisyo."
   },
   "about": {
     "title": "Tungkol sa QueueDrop",

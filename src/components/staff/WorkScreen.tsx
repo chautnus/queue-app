@@ -8,8 +8,14 @@ type TicketInfo = {
   id: string;
   displayNumber: string;
   streamName: string;
+  streamId?: string | null;
   verifyCode?: string;
   status: string;
+};
+
+type StreamOption = {
+  id: string;
+  name: string;
 };
 
 type Props = {
@@ -19,6 +25,8 @@ type Props = {
   queueId: string;
   initialStatus: string;
   initialServedCount: number;
+  streamAssignMode?: string;
+  streams?: StreamOption[];
 };
 
 export default function WorkScreen({
@@ -28,6 +36,8 @@ export default function WorkScreen({
   queueId,
   initialStatus,
   initialServedCount,
+  streamAssignMode,
+  streams = [],
 }: Props) {
   const router = useRouter();
   const t = useTranslations("staff");
@@ -39,8 +49,10 @@ export default function WorkScreen({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [showManual, setShowManual] = useState(false);
+  const [assignStreamId, setAssignStreamId] = useState<string>(streams[0]?.id ?? "");
 
   const isPaused = status === "PAUSED";
+  const isStaffAssign = streamAssignMode === "STAFF_ASSIGN";
 
   // SSE for session updates
   useEffect(() => {
@@ -61,7 +73,11 @@ export default function WorkScreen({
 
   const callNext = async () => {
     setLoading(true);
-    const res = await fetch(`/api/staff/session/${sessionId}/next`, { method: "POST" });
+    const res = await fetch(`/api/staff/session/${sessionId}/next`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(isStaffAssign && assignStreamId ? { assignStreamId } : {}),
+    });
     const data = await res.json();
     if (res.ok) {
       setCurrentTicket(data.ticket ?? null);
@@ -153,7 +169,11 @@ export default function WorkScreen({
                   {currentTicket.verifyCode}
                 </p>
               )}
-              <p className="text-sm text-slate-400 mt-2">{currentTicket.streamName}</p>
+              <p className="text-sm text-slate-400 mt-2">
+                {currentTicket.streamName || (
+                  <span className="text-amber-600 font-medium">{t("unassigned_ticket")}</span>
+                )}
+              </p>
             </>
           ) : (
             <p className="text-3xl text-slate-200 font-light py-6">—</p>
@@ -172,6 +192,24 @@ export default function WorkScreen({
         {/* Actions */}
         {!isPaused && (
           <div className="space-y-3">
+            {/* Stream assignment selector for STAFF_ASSIGN mode */}
+            {isStaffAssign && streams.length > 0 && (
+              <div className="card p-4">
+                <label className="text-sm font-medium text-slate-700 mb-2 block">
+                  {t("assign_stream")}
+                </label>
+                <select
+                  value={assignStreamId}
+                  onChange={(e) => setAssignStreamId(e.target.value)}
+                  className="input w-full"
+                >
+                  {streams.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Call next */}
             <button
               onClick={callNext}

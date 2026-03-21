@@ -37,6 +37,7 @@ type QueueData = {
     required: boolean;
     options?: string[];
   }> | null;
+  streamAssignMode: string;
   redirectUrl: string | null;
   adBannerSlotId: string | null;
   streams: Stream[];
@@ -68,8 +69,9 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
   const [captchaToken, setCaptchaToken] = useState("");
   const [customerInfo, setCustomerInfo] = useState<Record<string, unknown>>({});
   const [ticket, setTicket] = useState<TicketInfo | null>(null);
+  const isStaffAssign = queue.streamAssignMode === "STAFF_ASSIGN";
   const [selectedStreamId, setSelectedStreamId] = useState<string>(
-    queue.streams[0]?.id ?? ""
+    isStaffAssign ? "" : (queue.streams[0]?.id ?? "")
   );
   const [showRating, setShowRating] = useState(false);
 
@@ -110,14 +112,23 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
       required: collectModes[key] === "REQUIRED",
     }));
 
-  const allFields = [...systemFields, ...(queue.customFields ?? [])];
+  // In STAFF_ASSIGN mode, always show at least name/phone as optional
+  const staffAssignFallbackFields =
+    isStaffAssign && systemFields.length === 0 && (queue.customFields ?? []).length === 0
+      ? [
+          { name: "_name", label: "Họ tên", type: "text", required: false },
+          { name: "_phone", label: "Số điện thoại", type: "tel", required: false },
+        ]
+      : [];
+
+  const allFields = [...systemFields, ...staffAssignFallbackFields, ...(queue.customFields ?? [])];
 
   const [captchaAnswer, setCaptchaAnswer] = useState<number>(0);
 
   const handleCaptchaComplete = (token: string, answer: number) => {
     setCaptchaToken(token);
     setCaptchaAnswer(answer);
-    if (allFields.length > 0) {
+    if (allFields.length > 0 || isStaffAssign) {
       setState("form");
     } else {
       handleJoin(token, {}, answer);
@@ -132,7 +143,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         deviceId,
-        streamId: selectedStreamId,
+        streamId: isStaffAssign ? null : selectedStreamId,
         customerInfo: info,
         captchaAnswer: answer ?? 0,
         captchaToken: token,
@@ -212,7 +223,11 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
           <>
             <WaitInfo streams={queue.streams} timezone={queue.timezone} />
 
-            {queue.streams.length > 1 && (
+            {isStaffAssign ? (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+                <p className="text-sm text-blue-700 font-medium">{t("staff_will_assign")}</p>
+              </div>
+            ) : queue.streams.length > 1 ? (
               <div>
                 <p className="text-sm font-medium text-slate-700 mb-2">{t("select_service")}</p>
                 <div className="space-y-2">
@@ -234,7 +249,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
             <button
               onClick={() => setState("captcha")}

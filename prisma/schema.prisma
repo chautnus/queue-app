@@ -94,6 +94,7 @@ model Queue {
   collectEmail        CollectMode @default(HIDDEN)
   collectAge          CollectMode @default(HIDDEN)
   collectAddress      CollectMode @default(HIDDEN)
+  streamAssignMode    StreamAssignMode @default(CUSTOMER_CHOICE)
   // JSON: Array<{ name, label, type: 'text'|'number'|'select', required, options?, streamCondition? }>
   customFields        Json?
   redirectUrl         String?
@@ -139,6 +140,11 @@ enum CollectMode {
   HIDDEN
   OPTIONAL
   REQUIRED
+}
+
+enum StreamAssignMode {
+  CUSTOMER_CHOICE
+  STAFF_ASSIGN
 }
 
 // ─── STREAM (luồng) ──────────────────────────────────────────────────────────
@@ -230,7 +236,7 @@ enum StaffSessionStatus {
 model Ticket {
   id            String       @id @default(cuid())
   queueId       String
-  streamId      String
+  streamId      String?
   ticketNumber  Int // Sequential per stream per day
   displayNumber String // e.g. "A042"
   verifyCode    String // 4-digit random code
@@ -250,7 +256,7 @@ model Ticket {
   staffSessionId String?
 
   queue        Queue         @relation(fields: [queueId], references: [id])
-  stream       Stream        @relation(fields: [streamId], references: [id])
+  stream       Stream?       @relation(fields: [streamId], references: [id])
   staffSession StaffSession? @relation("ServingSession", fields: [staffSessionId], references: [id])
 
   @@index([queueId, streamId, status])

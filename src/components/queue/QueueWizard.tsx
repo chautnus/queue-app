@@ -115,6 +115,7 @@ export default function QueueWizard({
       collectEmail: "HIDDEN",
       collectAge: "HIDDEN",
       collectAddress: "HIDDEN",
+      streamAssignMode: "CUSTOMER_CHOICE",
       allowTransfer: false,
       streams: [
         {
@@ -509,6 +510,51 @@ export default function QueueWizard({
                     </div>
                   ))}
                 </div>
+              </Section>
+
+              <Section title="Chế độ chọn luồng">
+                <p className="text-xs text-slate-400 mb-3">Quy định cách khách hàng được gắn vào luồng phục vụ</p>
+                <Controller
+                  control={control}
+                  name="streamAssignMode"
+                  render={({ field }) => (
+                    <div className="space-y-2">
+                      {[
+                        {
+                          val: "CUSTOMER_CHOICE" as const,
+                          title: "Khách hàng tự chọn",
+                          desc: "Khách hàng chọn luồng/dịch vụ trước khi lấy số",
+                        },
+                        {
+                          val: "STAFF_ASSIGN" as const,
+                          title: "Nhân viên chỉ định",
+                          desc: "Khách hàng chỉ cung cấp thông tin, nhân viên sẽ chỉ định luồng sau",
+                        },
+                      ].map(({ val, title, desc }) => (
+                        <label
+                          key={val}
+                          className={`flex items-start gap-3 p-4 border-2 rounded-2xl cursor-pointer transition-colors ${
+                            field.value === val
+                              ? "border-blue-600 bg-blue-50"
+                              : "border-slate-200 hover:border-slate-300 bg-white"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            value={val}
+                            checked={field.value === val}
+                            onChange={() => field.onChange(val)}
+                            className="mt-0.5 text-blue-600"
+                          />
+                          <div>
+                            <p className="font-medium text-slate-900 text-sm">{title}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                />
               </Section>
 
               <Section

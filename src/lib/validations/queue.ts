@@ -42,7 +42,7 @@ const datetimeString = z.string().refine(
 
 export const CreateQueueSchema = z.object({
   name: z.string().min(1, "Queue name required").max(100),
-  logoUrl: z.string().url().optional().or(z.literal("")),
+  logoUrl: z.string().optional().or(z.literal("")),
   startAt: datetimeString,
   endAt: datetimeString,
   timezone: z.string().min(1, "Timezone required"),
@@ -55,6 +55,7 @@ export const CreateQueueSchema = z.object({
   collectEmail: CollectModeSchema.default("HIDDEN"),
   collectAge: CollectModeSchema.default("HIDDEN"),
   collectAddress: CollectModeSchema.default("HIDDEN"),
+  streamAssignMode: z.enum(["CUSTOMER_CHOICE", "STAFF_ASSIGN"]).default("CUSTOMER_CHOICE"),
   customFields: z.array(CustomFieldSchema).optional(),
   redirectUrl: z.string().url().optional().or(z.literal("")),
   allowTransfer: z.boolean().default(false),

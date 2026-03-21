@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
 
   // Per-stream breakdown
   const byStream = queue.streams.map((s) => {
-    const st = tickets.filter((t) => t.stream.id === s.id);
+    const st = tickets.filter((t) => t.stream?.id === s.id);
     return {
       streamId: s.id,
       streamName: s.name,

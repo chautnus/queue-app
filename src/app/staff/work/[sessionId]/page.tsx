@@ -26,7 +26,14 @@ export default async function StaffWorkPage({
     where: { id: sessionId, userId: session.user.id },
     include: {
       counter: { select: { name: true } },
-      queue: { select: { id: true, name: true } },
+      queue: {
+        select: {
+          id: true,
+          name: true,
+          streamAssignMode: true,
+          streams: { select: { id: true, name: true }, orderBy: { order: "asc" } },
+        },
+      },
     },
   });
 
@@ -43,6 +50,8 @@ export default async function StaffWorkPage({
           queueId={ss.queue.id}
           initialStatus={ss.status}
           initialServedCount={ss.servedCount}
+          streamAssignMode={ss.queue.streamAssignMode}
+          streams={ss.queue.streams}
         />
       </div>
     </div>
