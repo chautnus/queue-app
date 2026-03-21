@@ -33,6 +33,7 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [staffQrUrl, setStaffQrUrl] = useState<string | null>(null);
   const [live, setLive] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const fetchStats = useCallback(async () => {
     const res = await fetch(`/api/queues/${queueId}/stats`);
@@ -63,19 +64,70 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
     );
   }
 
+  const toggleStatus = async (newStatus: string) => {
+    setStatusLoading(true);
+    const res = await fetch(`/api/queues/${queueId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (res.ok) await fetchStats();
+    setStatusLoading(false);
+  };
+
   const totalToday = stats.streams.reduce((s, r) => s + r.total, 0);
+  const queueStatus = stats.queue.status;
 
   return (
     <div className="space-y-5">
       {/* ── Page header ── */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900">{stats.queue.name}</h1>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold text-slate-900">{stats.queue.name}</h1>
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+            queueStatus === "ACTIVE" ? "bg-green-50 text-green-700" :
+            queueStatus === "PAUSED" ? "bg-amber-50 text-amber-700" :
+            queueStatus === "CLOSED" ? "bg-red-50 text-red-700" :
+            "bg-slate-100 text-slate-500"
+          }`}>
+            {queueStatus === "ACTIVE" ? "Hoat dong" :
+             queueStatus === "PAUSED" ? "Tam dung" :
+             queueStatus === "CLOSED" ? "Da dong" : "Chua kich hoat"}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
           {live && (
             <span className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
               <span className="live-dot" />
-              Trực tiếp
+              Truc tiep
             </span>
+          )}
+          {queueStatus !== "ACTIVE" && (
+            <button
+              onClick={() => toggleStatus("ACTIVE")}
+              disabled={statusLoading}
+              className="text-xs py-2 px-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 disabled:opacity-50"
+            >
+              Kich hoat
+            </button>
+          )}
+          {queueStatus === "ACTIVE" && (
+            <button
+              onClick={() => toggleStatus("PAUSED")}
+              disabled={statusLoading}
+              className="text-xs py-2 px-3 bg-amber-500 text-white font-medium rounded-xl hover:bg-amber-600 disabled:opacity-50"
+            >
+              Tam dung
+            </button>
+          )}
+          {queueStatus === "PAUSED" && (
+            <button
+              onClick={() => toggleStatus("CLOSED")}
+              disabled={statusLoading}
+              className="text-xs py-2 px-3 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 disabled:opacity-50"
+            >
+              Dong
+            </button>
           )}
           {qrUrl && (
             <a

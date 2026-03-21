@@ -4,6 +4,7 @@ import { z } from "zod";
 import { allocateTicketNumber, generateVerifyCode } from "@/lib/ticket";
 import { broadcastToQueue } from "@/lib/sse";
 import { estimateWaitTime } from "@/lib/wait-time";
+import { verifyToken } from "@/app/api/captcha/route";
 
 const JoinSchema = z.object({
   deviceId: z.string().min(1),
@@ -188,24 +189,18 @@ export async function POST(
   }
 }
 
-// Verify CAPTCHA token (server-side math challenge)
-// Token is a signed timestamp+question stored in a short-lived cookie
+// Verify CAPTCHA token (HMAC-signed, server-side math challenge)
 async function verifyCaptchaToken(
   token: string,
   answer: number
 ): Promise<boolean> {
-  try {
-    // Token format: base64(JSON({ a, b, op, exp }))
-    const decoded = JSON.parse(Buffer.from(token, "base64url").toString("utf-8"));
-    if (decoded.exp < Date.now()) return false;
+  const decoded = verifyToken(token);
+  if (!decoded) return false;
 
-    let expected: number;
-    if (decoded.op === "+") expected = decoded.a + decoded.b;
-    else if (decoded.op === "-") expected = decoded.a - decoded.b;
-    else return false;
+  let expected: number;
+  if (decoded.op === "+") expected = decoded.a + decoded.b;
+  else if (decoded.op === "-") expected = decoded.a - decoded.b;
+  else return false;
 
-    return expected === answer;
-  } catch {
-    return false;
-  }
+  return expected === answer;
 }

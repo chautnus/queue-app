@@ -56,7 +56,9 @@ export const CreateQueueSchema = z.object({
   greeting: z.string().max(500).optional(),
 });
 
-export const UpdateQueueSchema = CreateQueueSchema.partial();
+export const UpdateQueueSchema = CreateQueueSchema.partial().extend({
+  status: z.enum(["INACTIVE", "ACTIVE", "PAUSED", "CLOSED"]).optional(),
+});
 
 export type CreateQueueInput = z.infer<typeof CreateQueueSchema>;
 export type UpdateQueueInput = z.infer<typeof UpdateQueueSchema>;

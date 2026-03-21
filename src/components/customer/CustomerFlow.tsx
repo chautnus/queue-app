@@ -110,19 +110,20 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
 
   const allFields = [...systemFields, ...(queue.customFields ?? [])];
 
-  const handleCaptchaComplete = (token: string) => {
+  const [captchaAnswer, setCaptchaAnswer] = useState<number>(0);
+
+  const handleCaptchaComplete = (token: string, answer: number) => {
     setCaptchaToken(token);
+    setCaptchaAnswer(answer);
     if (allFields.length > 0) {
       setState("form");
     } else {
-      handleJoin(token, {});
+      handleJoin(token, {}, answer);
     }
   };
 
-  const handleJoin = async (token: string, info: Record<string, unknown>) => {
+  const handleJoin = async (token: string, info: Record<string, unknown>, answer?: number) => {
     setState("joining");
-    const decoded = JSON.parse(Buffer.from(token, "base64url").toString("utf-8"));
-    const answer = decoded.op === "+" ? decoded.a + decoded.b : decoded.a - decoded.b;
 
     const res = await fetch(`/api/queues/${queue.id}/join`, {
       method: "POST",
@@ -131,7 +132,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
         deviceId,
         streamId: selectedStreamId,
         customerInfo: info,
-        captchaAnswer: answer,
+        captchaAnswer: answer ?? 0,
         captchaToken: token,
       }),
     });
@@ -251,7 +252,7 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
         {state === "form" && (
           <CustomerForm
             fields={allFields}
-            onSubmit={(info) => { setCustomerInfo(info); handleJoin(captchaToken, info); }}
+            onSubmit={(info) => { setCustomerInfo(info); handleJoin(captchaToken, info, captchaAnswer); }}
             onBack={() => setState("captcha")}
           />
         )}

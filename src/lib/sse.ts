@@ -96,6 +96,7 @@ export function createSSEStream(
   unsubscribeFunc: (controller: Controller) => void
 ): Response {
   let controller: Controller;
+  let heartbeatInterval: ReturnType<typeof setInterval>;
 
   const stream = new ReadableStream<string>({
     start(c) {
@@ -103,8 +104,17 @@ export function createSSEStream(
       subscribeFunc(controller);
       // Send initial heartbeat
       controller.enqueue(": heartbeat\n\n");
+      // Send periodic heartbeat every 25s to keep connection alive through proxies
+      heartbeatInterval = setInterval(() => {
+        try {
+          controller.enqueue(": heartbeat\n\n");
+        } catch {
+          clearInterval(heartbeatInterval);
+        }
+      }, 25_000);
     },
     cancel() {
+      clearInterval(heartbeatInterval);
       unsubscribeFunc(controller);
     },
   });
