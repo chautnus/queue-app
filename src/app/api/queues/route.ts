@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { streams, ...queueData } = parsed.data;
+    const { streams, startAt, endAt, ...queueData } = parsed.data;
 
     const queue = await prisma.$transaction(async (tx) => {
       const q = await tx.queue.create({
@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
           logoUrl: queueData.logoUrl || null,
           redirectUrl: queueData.redirectUrl || null,
           customFields: queueData.customFields ?? undefined,
+          startAt: startAt ? new Date(startAt) : null,
+          endAt: endAt ? new Date(endAt) : null,
         },
       });
 

@@ -34,11 +34,17 @@ export const StreamInputSchema = z.object({
 
 const CollectModeSchema = z.enum(["HIDDEN", "OPTIONAL", "REQUIRED"]);
 
+// Accept both ISO datetime and datetime-local format (YYYY-MM-DDTHH:mm)
+const datetimeString = z.string().refine(
+  (val) => !val || !isNaN(new Date(val).getTime()),
+  { message: "Thoi gian khong hop le" }
+).optional().or(z.literal(""));
+
 export const CreateQueueSchema = z.object({
   name: z.string().min(1, "Queue name required").max(100),
   logoUrl: z.string().url().optional().or(z.literal("")),
-  startAt: z.string().datetime(),
-  endAt: z.string().datetime(),
+  startAt: datetimeString,
+  endAt: datetimeString,
   timezone: z.string().min(1, "Timezone required"),
   qrRotationType: z.enum(["FIXED", "DAILY"]).default("FIXED"),
   streams: z.array(StreamInputSchema).min(1, "At least one stream required"),

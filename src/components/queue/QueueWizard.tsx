@@ -361,14 +361,14 @@ export default function QueueWizard({
               <Section title="Thời gian hoạt động">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <FormField label="Bắt đầu" required error={errors.startAt?.message}>
+                    <FormField label="Bat dau" error={errors.startAt?.message}>
                       <input
                         type="datetime-local"
                         {...register("startAt")}
                         className={`input ${errors.startAt ? "input-error" : ""}`}
                       />
                     </FormField>
-                    <FormField label="Kết thúc" required error={errors.endAt?.message}>
+                    <FormField label="Ket thuc" error={errors.endAt?.message}>
                       <input
                         type="datetime-local"
                         {...register("endAt")}
