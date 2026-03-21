@@ -15,22 +15,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protect /staff/work/* and /staff/join/* routes — require auth
-  if (
-    pathname.startsWith("/staff/work") ||
-    pathname.startsWith("/staff/join")
-  ) {
-    const session = await auth();
-    if (!session?.user) {
-      const loginUrl = new URL("/staff/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
+  // Staff routes (/staff/join/*, /staff/work/*) are NOT protected by middleware
+  // because staff uses a separate NextAuth instance (staff-auth).
+  // Those pages handle their own auth checks internally.
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/staff/work/:path*", "/staff/join/:path*"],
+  matcher: ["/dashboard/:path*"],
 };

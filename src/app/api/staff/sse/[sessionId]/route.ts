@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { getStaffUser } from "@/lib/get-staff-user";
 import {
   createSSEStream,
   subscribeToSession,
@@ -10,8 +10,8 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
+  const user = await getStaffUser();
+  if (!user) {
     return new Response("Unauthorized", { status: 401 });
   }
 

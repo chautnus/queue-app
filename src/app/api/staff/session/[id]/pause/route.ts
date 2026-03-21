@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getStaffUser } from "@/lib/get-staff-user";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
+  const user = await getStaffUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
 
   const staffSession = await prisma.staffSession.findUnique({
-    where: { id, userId: session.user.id },
+    where: { id, userId: user.id },
   });
 
   if (!staffSession) {

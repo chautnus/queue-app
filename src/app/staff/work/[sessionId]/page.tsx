@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { staffAuth } from "@/lib/staff-auth";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import WorkScreen from "@/components/staff/WorkScreen";
@@ -13,10 +14,15 @@ export default async function StaffWorkPage({
   params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
-  const session = await auth();
+
+  // Try staff auth first, then admin auth
+  const staffSession = await staffAuth();
+  const adminSession = await auth();
+  const session = staffSession ?? adminSession;
+
   if (!session?.user) redirect("/staff/login");
 
-  const staffSession = await prisma.staffSession.findUnique({
+  const ss = await prisma.staffSession.findUnique({
     where: { id: sessionId, userId: session.user.id },
     include: {
       counter: { select: { name: true } },
@@ -24,19 +30,19 @@ export default async function StaffWorkPage({
     },
   });
 
-  if (!staffSession) notFound();
+  if (!ss) notFound();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <div className="max-w-md mx-auto px-4 py-6">
         <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_STAFF ?? ""} />
         <WorkScreen
           sessionId={sessionId}
-          counterName={staffSession.counter.name}
-          queueName={staffSession.queue.name}
-          queueId={staffSession.queue.id}
-          initialStatus={staffSession.status}
-          initialServedCount={staffSession.servedCount}
+          counterName={ss.counter.name}
+          queueName={ss.queue.name}
+          queueId={ss.queue.id}
+          initialStatus={ss.status}
+          initialServedCount={ss.servedCount}
         />
       </div>
     </div>

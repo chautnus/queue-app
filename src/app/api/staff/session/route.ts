@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getStaffUser } from "@/lib/get-staff-user";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -11,8 +11,8 @@ const CreateSessionSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const user = await getStaffUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -45,13 +45,13 @@ export async function POST(req: NextRequest) {
 
   // End any existing active sessions for this user
   await prisma.staffSession.updateMany({
-    where: { userId: session.user.id, status: "ACTIVE" },
+    where: { userId: user.id, status: "ACTIVE" },
     data: { status: "ENDED", endAt: new Date() },
   });
 
   const staffSession = await prisma.staffSession.create({
     data: {
-      userId: session.user.id,
+      userId: user.id,
       counterId,
       queueId,
       streamIds,

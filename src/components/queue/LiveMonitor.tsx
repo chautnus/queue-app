@@ -211,30 +211,86 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
         </div>
       )}
 
-      {/* ── QR Codes ── */}
+      {/* ── QR Codes + Links ── */}
       <div className="grid gap-4 sm:grid-cols-2">
         {qrUrl && (
           <div className="card p-5 text-center">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">QR Khách hàng</h3>
-            <Image src={qrUrl} alt="QR Khách hàng" width={180} height={180} className="mx-auto rounded-xl" unoptimized />
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">QR Khach hang</h3>
+            <Image src={qrUrl} alt="QR Khach hang" width={180} height={180} className="mx-auto rounded-xl" unoptimized />
             <div className="flex justify-center gap-3 mt-4">
               <a href={qrUrl} download="qr-khach-hang.png" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                ↓ Tải PNG
+                Tai PNG
               </a>
+            </div>
+            <div className="mt-3 p-2 bg-slate-50 rounded-lg">
+              <p className="text-xs text-slate-400 mb-1">Link truc tiep:</p>
+              <a
+                href={`/q/${queueId}`}
+                target="_blank"
+                className="text-xs text-blue-600 hover:text-blue-700 font-mono break-all"
+              >
+                {typeof window !== "undefined" ? window.location.origin : ""}/q/{queueId}
+              </a>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/q/${queueId}`)}
+                className="mt-1 text-xs text-slate-500 hover:text-slate-700 underline"
+              >
+                Sao chep link
+              </button>
             </div>
           </div>
         )}
         {staffQrUrl && (
           <div className="card p-5 text-center">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">QR Nhân viên</h3>
-            <Image src={staffQrUrl} alt="QR Nhân viên" width={180} height={180} className="mx-auto rounded-xl" unoptimized />
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">QR Nhan vien</h3>
+            <Image src={staffQrUrl} alt="QR Nhan vien" width={180} height={180} className="mx-auto rounded-xl" unoptimized />
             <div className="flex justify-center gap-3 mt-4">
               <a href={staffQrUrl} download="qr-nhan-vien.png" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                ↓ Tải PNG
+                Tai PNG
               </a>
+            </div>
+            <div className="mt-3 p-2 bg-slate-50 rounded-lg">
+              <p className="text-xs text-slate-400 mb-1">Link truc tiep:</p>
+              <a
+                href={`/staff/join/${queueId}`}
+                target="_blank"
+                className="text-xs text-blue-600 hover:text-blue-700 font-mono break-all"
+              >
+                {typeof window !== "undefined" ? window.location.origin : ""}/staff/join/{queueId}
+              </a>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/staff/join/${queueId}`)}
+                className="mt-1 text-xs text-slate-500 hover:text-slate-700 underline"
+              >
+                Sao chep link
+              </button>
             </div>
           </div>
         )}
+      </div>
+
+      {/* ── Display Board Link ── */}
+      <div className="card p-5">
+        <h3 className="text-sm font-semibold text-slate-700 mb-2">Bang thong bao</h3>
+        <p className="text-xs text-slate-400 mb-3">Mo trang nay tren man hinh lon de hien thi so dang phuc vu.</p>
+        <div className="flex items-center gap-3">
+          <a
+            href={`/display/${queueId}`}
+            target="_blank"
+            className="btn-primary text-xs py-2 px-4"
+          >
+            Mo bang thong bao
+          </a>
+          <button
+            type="button"
+            onClick={() => navigator.clipboard.writeText(`${window.location.origin}/display/${queueId}`)}
+            className="btn-outline text-xs py-2 px-4"
+          >
+            Sao chep link
+          </button>
+        </div>
       </div>
     </div>
   );
