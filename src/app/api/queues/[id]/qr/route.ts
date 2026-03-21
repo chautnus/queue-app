@@ -30,7 +30,10 @@ export async function GET(
     queue.timezone
   );
 
-  const baseUrl = req.nextUrl.origin;
+  // Use forwarded host on Railway (proxy passes original host), fallback to nextUrl.origin
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host;
+  const proto = req.headers.get("x-forwarded-proto") ?? "https";
+  const baseUrl = `${proto}://${host}`;
   const qrUrl = `${baseUrl}/q/${queue.id}?token=${token}`;
   const png = await generateQrPng(qrUrl);
 

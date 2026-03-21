@@ -24,7 +24,10 @@ export async function GET(
   }
 
   const token = await signStaffQrToken(queue.id, queue.qrSecret);
-  const baseUrl = req.nextUrl.origin;
+  // Use forwarded host on Railway (proxy passes original host), fallback to nextUrl.origin
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host;
+  const proto = req.headers.get("x-forwarded-proto") ?? "https";
+  const baseUrl = `${proto}://${host}`;
   const qrUrl = `${baseUrl}/staff/join/${queue.id}?token=${token}`;
   const png = await generateQrPng(qrUrl);
 
