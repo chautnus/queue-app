@@ -9,6 +9,8 @@ export default async function LoginPage() {
   const session = await auth();
   if (session?.user) redirect("/dashboard/queues");
 
+  const showGoogle = !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
@@ -20,7 +22,7 @@ export default async function LoginPage() {
           <p className="mt-1 text-sm text-slate-500">Quản lý hàng đợi của bạn</p>
         </div>
         <div className="card p-6">
-          <LoginForm />
+          <LoginForm showGoogle={showGoogle} />
         </div>
         <p className="mt-6 text-center text-sm text-slate-500">
           Chưa có tài khoản?{" "}
