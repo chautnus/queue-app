@@ -14,38 +14,43 @@ export async function GET(
 
   const { id } = await params;
 
-  const queue = await prisma.queue.findUnique({
-    where: { id, ownerId: session.user.id },
-    select: { id: true, qrSecret: true, qrRotationType: true, timezone: true },
-  });
+  try {
+    const queue = await prisma.queue.findUnique({
+      where: { id, ownerId: session.user.id },
+      select: { id: true, qrSecret: true, qrRotationType: true, timezone: true },
+    });
 
-  if (!queue) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!queue) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const token = await signCustomerQrToken(
+      queue.id,
+      queue.qrSecret,
+      queue.qrRotationType,
+      queue.timezone
+    );
+
+    // Use forwarded host on Railway (proxy passes original host), fallback to nextUrl.origin
+    const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host;
+    const proto = req.headers.get("x-forwarded-proto") ?? "https";
+    const baseUrl = `${proto}://${host}`;
+    const qrUrl = `${baseUrl}/q/${queue.id}?token=${token}`;
+    const png = await generateQrPng(qrUrl);
+
+    const cacheHeader =
+      queue.qrRotationType === "DAILY"
+        ? "no-store"
+        : "public, max-age=86400";
+
+    return new NextResponse(new Uint8Array(png), {
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": cacheHeader,
+      },
+    });
+  } catch (err) {
+    console.error("[GET /api/queues/[id]/qr]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const token = await signCustomerQrToken(
-    queue.id,
-    queue.qrSecret,
-    queue.qrRotationType,
-    queue.timezone
-  );
-
-  // Use forwarded host on Railway (proxy passes original host), fallback to nextUrl.origin
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host;
-  const proto = req.headers.get("x-forwarded-proto") ?? "https";
-  const baseUrl = `${proto}://${host}`;
-  const qrUrl = `${baseUrl}/q/${queue.id}?token=${token}`;
-  const png = await generateQrPng(qrUrl);
-
-  const cacheHeader =
-    queue.qrRotationType === "DAILY"
-      ? "no-store"
-      : "public, max-age=86400";
-
-  return new NextResponse(new Uint8Array(png), {
-    headers: {
-      "Content-Type": "image/png",
-      "Cache-Control": cacheHeader,
-    },
-  });
 }

@@ -15,7 +15,7 @@ export async function POST(
   const { id } = await params;
 
   const staffSession = await prisma.staffSession.findUnique({
-    where: { id, userId: user.id },
+    where: { id, userId: user.id, status: "ACTIVE" },
   });
 
   if (!staffSession) {

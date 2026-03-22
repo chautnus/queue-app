@@ -63,16 +63,21 @@ export async function PATCH(
 
   const { streams: _streams, ...updateData } = parsed.data;
 
-  const updated = await prisma.queue.update({
-    where: { id },
-    data: {
-      ...updateData,
-      logoUrl: updateData.logoUrl || null,
-      redirectUrl: updateData.redirectUrl || null,
-    },
-  });
+  try {
+    const updated = await prisma.queue.update({
+      where: { id },
+      data: {
+        ...updateData,
+        ...(updateData.logoUrl !== undefined && { logoUrl: updateData.logoUrl || null }),
+        ...(updateData.redirectUrl !== undefined && { redirectUrl: updateData.redirectUrl || null }),
+      },
+    });
 
-  return NextResponse.json({ queue: updated });
+    return NextResponse.json({ queue: updated });
+  } catch (err) {
+    console.error("[PATCH /api/queues/[id]]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
 export async function DELETE(
@@ -90,7 +95,12 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await prisma.queue.delete({ where: { id } });
+  try {
+    await prisma.queue.delete({ where: { id } });
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[DELETE /api/queues/[id]]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

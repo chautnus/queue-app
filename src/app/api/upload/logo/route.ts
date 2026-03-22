@@ -10,14 +10,12 @@ const ALLOWED_TYPES = new Set([
   "image/png",
   "image/jpeg",
   "image/webp",
-  "image/svg+xml",
 ]);
 
 const EXTENSION_MAP: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/webp": "webp",
-  "image/svg+xml": "svg",
 };
 
 function isCloudinaryConfigured(): boolean {
@@ -93,7 +91,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Invalid file type. Only PNG, JPEG, WebP, and SVG are allowed.",
+          "Invalid file type. Only PNG, JPEG, and WebP are allowed.",
       },
       { status: 400 }
     );

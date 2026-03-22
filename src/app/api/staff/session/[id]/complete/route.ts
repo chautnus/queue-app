@@ -20,75 +20,80 @@ export async function POST(
 
   const { id } = await params;
 
-  const staffSession = await prisma.staffSession.findUnique({
-    where: { id, userId: user.id, status: "ACTIVE" },
-  });
+  try {
+    const staffSession = await prisma.staffSession.findUnique({
+      where: { id, userId: user.id, status: "ACTIVE" },
+    });
 
-  if (!staffSession) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
-  }
+    if (!staffSession) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
 
-  const body = await req.json();
-  const parsed = CompleteSchema.safeParse(body);
+    const body = await req.json();
+    const parsed = CompleteSchema.safeParse(body);
 
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Invalid input" },
-      { status: 400 }
-    );
-  }
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid input" },
+        { status: 400 }
+      );
+    }
 
-  const { displayNumber, verifyCode } = parsed.data;
+    const { displayNumber, verifyCode } = parsed.data;
 
-  // Find the ticket
-  const ticket = await prisma.ticket.findFirst({
-    where: {
-      queueId: staffSession.queueId,
-      displayNumber: { equals: displayNumber, mode: "insensitive" },
-      verifyCode,
-      status: { in: ["WAITING", "CALLED"] },
-    },
-  });
-
-  if (!ticket) {
-    return NextResponse.json(
-      { error: "Invalid ticket number or verification code" },
-      { status: 400 }
-    );
-  }
-
-  const now = new Date();
-  const serviceSeconds = ticket.calledAt
-    ? Math.round((now.getTime() - ticket.calledAt.getTime()) / 1000)
-    : 0;
-
-  const [updatedTicket] = await prisma.$transaction([
-    prisma.ticket.update({
-      where: { id: ticket.id },
-      data: {
-        status: "SERVING",
-        servedAt: now,
-        staffSessionId: id,
+    // Find the ticket
+    const ticket = await prisma.ticket.findFirst({
+      where: {
+        queueId: staffSession.queueId,
+        displayNumber: { equals: displayNumber, mode: "insensitive" },
+        verifyCode,
+        status: { in: ["WAITING", "CALLED"] },
       },
-    }),
-    prisma.staffSession.update({
-      where: { id },
-      data: {
-        servedCount: { increment: 1 },
-        totalServiceSeconds: { increment: serviceSeconds },
-      },
-    }),
-  ]);
+    });
 
-  broadcastToQueue(staffSession.queueId, {
-    type: "ticket:serving",
-    data: { ticketId: ticket.id, displayNumber },
-  });
+    if (!ticket) {
+      return NextResponse.json(
+        { error: "Invalid ticket number or verification code" },
+        { status: 400 }
+      );
+    }
 
-  broadcastToSession(id, {
-    type: "ticket:serving",
-    data: { ticketId: ticket.id, displayNumber },
-  });
+    const now = new Date();
+    const serviceSeconds = ticket.calledAt
+      ? Math.round((now.getTime() - ticket.calledAt.getTime()) / 1000)
+      : 0;
 
-  return NextResponse.json({ ticket: updatedTicket });
+    const [updatedTicket] = await prisma.$transaction([
+      prisma.ticket.update({
+        where: { id: ticket.id },
+        data: {
+          status: "SERVING",
+          servedAt: now,
+          staffSessionId: id,
+        },
+      }),
+      prisma.staffSession.update({
+        where: { id },
+        data: {
+          servedCount: { increment: 1 },
+          totalServiceSeconds: { increment: serviceSeconds },
+        },
+      }),
+    ]);
+
+    broadcastToQueue(staffSession.queueId, {
+      type: "ticket:serving",
+      data: { ticketId: ticket.id, displayNumber },
+    });
+
+    broadcastToSession(id, {
+      type: "ticket:serving",
+      data: { ticketId: ticket.id, displayNumber },
+    });
+
+    return NextResponse.json({ ticket: updatedTicket });
+  } catch (err) {
+    console.error("[POST /api/staff/session/[id]/complete]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

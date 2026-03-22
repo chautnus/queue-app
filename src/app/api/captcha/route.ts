@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-// HMAC secret — falls back to AUTH_SECRET if CAPTCHA_SECRET not set
-const SECRET = process.env.CAPTCHA_SECRET ?? process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "default-captcha-secret";
+// HMAC secret — falls back to AUTH_SECRET if CAPTCHA_SECRET not set.
+// If no env var is available, generate a random secret per process (restarts invalidate tokens).
+const SECRET =
+  process.env.CAPTCHA_SECRET ??
+  process.env.AUTH_SECRET ??
+  process.env.NEXTAUTH_SECRET ??
+  crypto.randomBytes(32).toString("hex");
 
 function signToken(payload: object): string {
   const data = Buffer.from(JSON.stringify(payload)).toString("base64url");

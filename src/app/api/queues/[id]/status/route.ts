@@ -18,30 +18,35 @@ export async function PATCH(
 
   const { id } = await params;
 
-  const queue = await prisma.queue.findUnique({
-    where: { id, ownerId: session.user.id },
-    select: { id: true, status: true },
-  });
+  try {
+    const queue = await prisma.queue.findUnique({
+      where: { id, ownerId: session.user.id },
+      select: { id: true, status: true },
+    });
 
-  if (!queue) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!queue) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const body = await req.json();
+    const parsed = StatusSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const updated = await prisma.queue.update({
+      where: { id },
+      data: { status: parsed.data.status },
+      select: { id: true, name: true, status: true },
+    });
+
+    return NextResponse.json({ queue: updated });
+  } catch (err) {
+    console.error("[PATCH /api/queues/[id]/status]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const body = await req.json();
-  const parsed = StatusSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.flatten().fieldErrors },
-      { status: 400 }
-    );
-  }
-
-  const updated = await prisma.queue.update({
-    where: { id },
-    data: { status: parsed.data.status },
-    select: { id: true, name: true, status: true },
-  });
-
-  return NextResponse.json({ queue: updated });
 }

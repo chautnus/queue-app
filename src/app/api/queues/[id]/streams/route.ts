@@ -19,49 +19,54 @@ export async function PUT(
 
   const { id } = await params;
 
-  // Verify ownership
-  const queue = await prisma.queue.findUnique({
-    where: { id, ownerId: session.user.id },
-    select: { id: true },
-  });
-  if (!queue) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  const body = await req.json();
-  const parsed = PutStreamsSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.flatten().fieldErrors },
-      { status: 400 }
-    );
-  }
-
-  const { streams } = parsed.data;
-
-  await prisma.$transaction(async (tx) => {
-    // Delete all existing streams (cascades to counters via schema)
-    await tx.stream.deleteMany({ where: { queueId: id } });
-
-    // Recreate streams and counters
-    for (let si = 0; si < streams.length; si++) {
-      const { counters, ...streamData } = streams[si];
-      const stream = await tx.stream.create({
-        data: { ...streamData, queueId: id, order: si },
-      });
-
-      for (let ci = 0; ci < counters.length; ci++) {
-        await tx.counter.create({
-          data: {
-            ...counters[ci],
-            streamId: stream.id,
-            order: ci,
-            schedule: counters[ci].schedule ?? undefined,
-          },
-        });
-      }
+  try {
+    // Verify ownership
+    const queue = await prisma.queue.findUnique({
+      where: { id, ownerId: session.user.id },
+      select: { id: true },
+    });
+    if (!queue) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-  });
 
-  return NextResponse.json({ ok: true });
+    const body = await req.json();
+    const parsed = PutStreamsSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const { streams } = parsed.data;
+
+    await prisma.$transaction(async (tx) => {
+      // Delete all existing streams (cascades to counters via schema)
+      await tx.stream.deleteMany({ where: { queueId: id } });
+
+      // Recreate streams and counters
+      for (let si = 0; si < streams.length; si++) {
+        const { counters, ...streamData } = streams[si];
+        const stream = await tx.stream.create({
+          data: { ...streamData, queueId: id, order: si },
+        });
+
+        for (let ci = 0; ci < counters.length; ci++) {
+          await tx.counter.create({
+            data: {
+              ...counters[ci],
+              streamId: stream.id,
+              order: ci,
+              schedule: counters[ci].schedule ?? undefined,
+            },
+          });
+        }
+      }
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[PUT /api/queues/[id]/streams]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

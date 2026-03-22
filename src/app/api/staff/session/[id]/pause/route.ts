@@ -13,24 +13,29 @@ export async function POST(
 
   const { id } = await params;
 
-  const staffSession = await prisma.staffSession.findUnique({
-    where: { id, userId: user.id },
-  });
+  try {
+    const staffSession = await prisma.staffSession.findUnique({
+      where: { id, userId: user.id },
+    });
 
-  if (!staffSession) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    if (!staffSession) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    const now = new Date();
+    const isCurrentlyPaused = staffSession.status === "PAUSED";
+
+    const updated = await prisma.staffSession.update({
+      where: { id },
+      data: {
+        status: isCurrentlyPaused ? "ACTIVE" : "PAUSED",
+        pausedAt: isCurrentlyPaused ? null : now,
+      },
+    });
+
+    return NextResponse.json({ session: updated });
+  } catch (err) {
+    console.error("[POST /api/staff/session/[id]/pause]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const now = new Date();
-  const isCurrentlyPaused = staffSession.status === "PAUSED";
-
-  const updated = await prisma.staffSession.update({
-    where: { id },
-    data: {
-      status: isCurrentlyPaused ? "ACTIVE" : "PAUSED",
-      pausedAt: isCurrentlyPaused ? null : now,
-    },
-  });
-
-  return NextResponse.json({ session: updated });
 }

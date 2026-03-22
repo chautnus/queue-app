@@ -216,9 +216,9 @@ model StaffSession {
   // Which streams this staff serves in this session (Postgres string array)
   streamIds String[]
 
-  user    User    @relation(fields: [userId], references: [id])
-  counter Counter @relation(fields: [counterId], references: [id])
-  queue   Queue   @relation(fields: [queueId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  counter Counter @relation(fields: [counterId], references: [id], onDelete: Cascade)
+  queue   Queue   @relation(fields: [queueId], references: [id], onDelete: Cascade)
   tickets Ticket[] @relation("ServingSession")
 
   @@index([counterId])
@@ -256,9 +256,9 @@ model Ticket {
 
   staffSessionId String?
 
-  queue        Queue         @relation(fields: [queueId], references: [id])
-  stream       Stream?       @relation(fields: [streamId], references: [id])
-  staffSession StaffSession? @relation("ServingSession", fields: [staffSessionId], references: [id])
+  queue        Queue         @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  stream       Stream?       @relation(fields: [streamId], references: [id], onDelete: SetNull)
+  staffSession StaffSession? @relation("ServingSession", fields: [staffSessionId], references: [id], onDelete: SetNull)
 
   @@index([queueId, streamId, status])
   @@index([queueId, createdAt])

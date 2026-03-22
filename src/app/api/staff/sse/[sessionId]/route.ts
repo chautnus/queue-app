@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getStaffUser } from "@/lib/get-staff-user";
+import { prisma } from "@/lib/prisma";
 import {
   createSSEStream,
   subscribeToSession,
@@ -16,6 +17,15 @@ export async function GET(
   }
 
   const { sessionId } = await params;
+
+  // Verify session belongs to this user
+  const staffSession = await prisma.staffSession.findUnique({
+    where: { id: sessionId, userId: user.id },
+  });
+
+  if (!staffSession) {
+    return new Response("Session not found", { status: 404 });
+  }
 
   return createSSEStream(
     (controller) => subscribeToSession(sessionId, controller),

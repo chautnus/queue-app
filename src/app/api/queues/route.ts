@@ -66,8 +66,8 @@ export async function POST(req: NextRequest) {
           logoUrl: queueData.logoUrl || null,
           redirectUrl: queueData.redirectUrl || null,
           customFields: queueData.customFields ?? undefined,
-          startAt: startAt ? new Date(startAt) : null,
-          endAt: endAt ? new Date(endAt) : null,
+          startAt: startAt && startAt !== "" ? new Date(startAt) : null,
+          endAt: endAt && endAt !== "" ? new Date(endAt) : null,
         },
       });
 

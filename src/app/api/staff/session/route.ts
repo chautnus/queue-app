@@ -28,19 +28,19 @@ export async function POST(req: NextRequest) {
 
   const { counterId, queueId, streamIds, plannedEndTime } = parsed.data;
 
-  // Compute plannedEndAt from HH:MM in today's local date
+  // Compute plannedEndAt from HH:MM sent by the client.
+  // The client sends the planned end time in its own local time as HH:MM.
+  // We store it directly as UTC hours/minutes so the value round-trips
+  // without server-timezone drift.
   let plannedEndAt: Date | undefined;
   if (plannedEndTime) {
-    const queue = await prisma.queue.findUnique({ where: { id: queueId }, select: { timezone: true } });
-    const now = new Date();
-    // Build today's date in UTC then set hours/minutes from plannedEndTime
     const [hh, mm] = plannedEndTime.split(":").map(Number);
+    const now = new Date();
     const end = new Date(now);
-    end.setHours(hh, mm, 0, 0);
-    // If end is in the past (e.g. shift set to "09:00" but it's already 17:00), push to tomorrow
-    if (end <= now) end.setDate(end.getDate() + 1);
+    end.setUTCHours(hh, mm, 0, 0);
+    // If end is in the past, push to tomorrow
+    if (end <= now) end.setUTCDate(end.getUTCDate() + 1);
     plannedEndAt = end;
-    void queue; // timezone stored for future use
   }
 
   // End any existing active sessions for this user

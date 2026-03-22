@@ -13,32 +13,37 @@ export async function POST(
 
   const { id } = await params;
 
-  const staffSession = await prisma.staffSession.findUnique({
-    where: { id, userId: user.id },
-  });
+  try {
+    const staffSession = await prisma.staffSession.findUnique({
+      where: { id, userId: user.id },
+    });
 
-  if (!staffSession) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    if (!staffSession) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    if (staffSession.status === "ENDED") {
+      return NextResponse.json({ error: "Session already ended" }, { status: 400 });
+    }
+
+    const now = new Date();
+    const totalSeconds =
+      staffSession.totalServiceSeconds +
+      Math.round((now.getTime() - staffSession.startAt.getTime()) / 1000);
+
+    const updated = await prisma.staffSession.update({
+      where: { id },
+      data: {
+        status: "ENDED",
+        endAt: now,
+        totalServiceSeconds: totalSeconds,
+        pausedAt: null,
+      },
+    });
+
+    return NextResponse.json({ session: updated });
+  } catch (err) {
+    console.error("[POST /api/staff/session/[id]/end]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  if (staffSession.status === "ENDED") {
-    return NextResponse.json({ error: "Session already ended" }, { status: 400 });
-  }
-
-  const now = new Date();
-  const totalSeconds =
-    staffSession.totalServiceSeconds +
-    Math.round((now.getTime() - staffSession.startAt.getTime()) / 1000);
-
-  const updated = await prisma.staffSession.update({
-    where: { id },
-    data: {
-      status: "ENDED",
-      endAt: now,
-      totalServiceSeconds: totalSeconds,
-      pausedAt: null,
-    },
-  });
-
-  return NextResponse.json({ session: updated });
 }
