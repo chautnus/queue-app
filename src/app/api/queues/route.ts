@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { streams, startAt, endAt, ...queueData } = parsed.data;
+    const { streams, operatingHours, ...queueData } = parsed.data;
 
     // Retry slug generation on unique constraint collision
     let slug = generateSlug(queueData.name);
@@ -88,8 +88,7 @@ export async function POST(req: NextRequest) {
           allowTransfer: queueData.allowTransfer,
           transferQueueId: queueData.transferQueueId ?? null,
           greeting: queueData.greeting ?? null,
-          startAt: startAt && startAt !== "" ? new Date(startAt) : null,
-          endAt: endAt && endAt !== "" ? new Date(endAt) : null,
+          operatingHours: operatingHours ?? Prisma.JsonNull,
         },
       });
 

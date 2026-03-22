@@ -125,6 +125,7 @@
     "verify_code": "验证码",
     "waiting_in_queue": "排队等候中",
     "your_turn": "到您了！请前往柜台。",
+    "go_to_counter": "请前往{counter}",
     "being_served": "正在服务中",
     "completed": "已完成",
     "est_wait": "预计等待",

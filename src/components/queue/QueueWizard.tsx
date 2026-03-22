@@ -42,10 +42,20 @@ const DAYS_FULL = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "
 
 const TABS = [
   { id: 0, label: "Cơ bản" },
-  { id: 1, label: "Luồng & Cửa" },
-  { id: 2, label: "Khách hàng" },
-  { id: 3, label: "QR & Xuất bản" },
+  { id: 1, label: "Giờ làm việc" },
+  { id: 2, label: "Luồng & Cửa" },
+  { id: 3, label: "Khách hàng" },
+  { id: 4, label: "QR & Xuất bản" },
 ];
+
+const DEFAULT_OPERATING_HOURS = Array.from({ length: 7 }, (_, day) => ({
+  day,
+  open: "08:00",
+  close: "17:00",
+  enabled: day >= 1 && day <= 5, // Mon-Fri enabled, Sat+Sun disabled
+}));
+
+const OH_DAY_NAMES = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -117,6 +127,7 @@ export default function QueueWizard({
       collectAddress: "HIDDEN",
       streamAssignMode: "CUSTOMER_CHOICE",
       allowTransfer: false,
+      operatingHours: DEFAULT_OPERATING_HOURS,
       streams: [
         {
           name: "Tổng quát",
@@ -137,7 +148,8 @@ export default function QueueWizard({
 
   // Tab error detection
   const tabHasError = [
-    !!(errors.name || errors.startAt || errors.endAt || errors.timezone),
+    !!(errors.name || errors.timezone),
+    !!(errors.operatingHours),
     !!(errors.streams),
     !!(errors.customFields),
     false,
@@ -358,33 +370,15 @@ export default function QueueWizard({
                 </div>
               </Section>
 
-              {/* Operating hours */}
-              <Section title="Thời gian hoạt động">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField label="Bat dau" error={errors.startAt?.message}>
-                      <input
-                        type="datetime-local"
-                        {...register("startAt")}
-                        className={`input ${errors.startAt ? "input-error" : ""}`}
-                      />
-                    </FormField>
-                    <FormField label="Ket thuc" error={errors.endAt?.message}>
-                      <input
-                        type="datetime-local"
-                        {...register("endAt")}
-                        className={`input ${errors.endAt ? "input-error" : ""}`}
-                      />
-                    </FormField>
-                  </div>
-                  <FormField label="Múi giờ" required>
-                    <select {...register("timezone")} className="input">
-                      {TIMEZONES.map((tz) => (
-                        <option key={tz} value={tz}>{tz}</option>
-                      ))}
-                    </select>
-                  </FormField>
-                </div>
+              {/* Timezone */}
+              <Section title="Múi giờ">
+                <FormField label="Múi giờ" required>
+                  <select {...register("timezone")} className="input">
+                    {TIMEZONES.map((tz) => (
+                      <option key={tz} value={tz}>{tz}</option>
+                    ))}
+                  </select>
+                </FormField>
               </Section>
 
               {/* Category */}
@@ -413,8 +407,13 @@ export default function QueueWizard({
             </>
           )}
 
-          {/* TAB 1: Streams & Counters */}
+          {/* TAB 1: Operating Hours */}
           {activeTab === 1 && (
+            <OperatingHoursTab control={control} register={register} watch={watch} setValue={setValue} />
+          )}
+
+          {/* TAB 2: Streams & Counters */}
+          {activeTab === 2 && (
             <Section
               title="Luồng phục vụ"
               action={
@@ -464,8 +463,8 @@ export default function QueueWizard({
             </Section>
           )}
 
-          {/* TAB 2: Customer behavior */}
-          {activeTab === 2 && (
+          {/* TAB 3: Customer behavior */}
+          {activeTab === 3 && (
             <>
               <Section title="Thông tin thu thập">
                 <p className="text-xs text-slate-400 mb-4">Chọn chế độ cho từng trường thông tin</p>
@@ -580,8 +579,8 @@ export default function QueueWizard({
             </>
           )}
 
-          {/* TAB 3: QR & Publish */}
-          {activeTab === 3 && (
+          {/* TAB 4: QR & Publish */}
+          {activeTab === 4 && (
             <Section title="Chế độ mã QR">
               <Controller
                 control={control}
@@ -642,6 +641,117 @@ export default function QueueWizard({
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+// ─── OperatingHoursTab ────────────────────────────────────────────────────────
+
+function OperatingHoursTab({
+  control,
+  register,
+  watch,
+  setValue,
+}: {
+  control: ReturnType<typeof useForm<CreateQueueInput>>["control"];
+  register: ReturnType<typeof useForm<CreateQueueInput>>["register"];
+  watch: ReturnType<typeof useForm<CreateQueueInput>>["watch"];
+  setValue: ReturnType<typeof useForm<CreateQueueInput>>["setValue"];
+}) {
+  const operatingHours = watch("operatingHours") ?? DEFAULT_OPERATING_HOURS;
+
+  // Initialize if empty
+  if (!operatingHours || operatingHours.length === 0) {
+    setValue("operatingHours", DEFAULT_OPERATING_HOURS);
+  }
+
+  const applyFirstToAll = () => {
+    const first = operatingHours.find((h) => h.day === 1); // Monday
+    if (!first) return;
+    const updated = operatingHours.map((h) => ({
+      ...h,
+      open: first.open,
+      close: first.close,
+    }));
+    setValue("operatingHours", updated);
+  };
+
+  return (
+    <div className="card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Giờ làm việc</h3>
+        <button
+          type="button"
+          onClick={applyFirstToAll}
+          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+        >
+          Áp dụng cho tất cả
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        {OH_DAY_NAMES.map((dayName, dayIdx) => {
+          const hourIdx = operatingHours.findIndex((h) => h.day === dayIdx);
+          const idx = hourIdx >= 0 ? hourIdx : dayIdx;
+
+          return (
+            <div
+              key={dayIdx}
+              className="flex items-center gap-3 py-2 px-3 rounded-xl border border-slate-100 bg-white text-sm"
+            >
+              <label className="flex items-center gap-2 w-28 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={operatingHours[idx]?.enabled ?? false}
+                  onChange={(e) => {
+                    const updated = [...operatingHours];
+                    updated[idx] = { ...updated[idx], enabled: e.target.checked };
+                    setValue("operatingHours", updated);
+                  }}
+                  className="rounded border-slate-300 text-blue-600"
+                />
+                <span
+                  className={
+                    operatingHours[idx]?.enabled
+                      ? "text-slate-800 font-medium"
+                      : "text-slate-400"
+                  }
+                >
+                  {dayName}
+                </span>
+              </label>
+
+              {operatingHours[idx]?.enabled ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="time"
+                    value={operatingHours[idx]?.open ?? "08:00"}
+                    onChange={(e) => {
+                      const updated = [...operatingHours];
+                      updated[idx] = { ...updated[idx], open: e.target.value };
+                      setValue("operatingHours", updated);
+                    }}
+                    className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <span className="text-slate-300">-</span>
+                  <input
+                    type="time"
+                    value={operatingHours[idx]?.close ?? "17:00"}
+                    onChange={(e) => {
+                      const updated = [...operatingHours];
+                      updated[idx] = { ...updated[idx], close: e.target.value };
+                      setValue("operatingHours", updated);
+                    }}
+                    className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              ) : (
+                <span className="text-slate-300 text-xs">Nghỉ</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

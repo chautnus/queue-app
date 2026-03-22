@@ -20,13 +20,48 @@ type SessionInfo = {
   startAt: string;
 };
 
+type OperatingHour = {
+  day: number;
+  open: string;
+  close: string;
+  enabled: boolean;
+};
+
 type Stats = {
-  queue: { id: string; name: string; status: string };
+  queue: { id: string; name: string; status: string; operatingHours?: OperatingHour[] | null };
   streams: StreamStats[];
   activeSessions: SessionInfo[];
   totalWaiting: number;
   totalServing: number;
 };
+
+const DAY_NAMES_SHORT = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+
+function formatOperatingHours(hours: OperatingHour[]): string {
+  const enabled = hours.filter((h) => h.enabled).sort((a, b) => a.day - b.day);
+  if (enabled.length === 0) return "Không có lịch";
+
+  // Group consecutive days with same hours
+  const groups: { days: number[]; open: string; close: string }[] = [];
+  for (const h of enabled) {
+    const last = groups[groups.length - 1];
+    if (last && last.open === h.open && last.close === h.close && last.days[last.days.length - 1] === h.day - 1) {
+      last.days.push(h.day);
+    } else {
+      groups.push({ days: [h.day], open: h.open, close: h.close });
+    }
+  }
+
+  return groups
+    .map((g) => {
+      const dayRange =
+        g.days.length === 1
+          ? DAY_NAMES_SHORT[g.days[0]]
+          : `${DAY_NAMES_SHORT[g.days[0]]}-${DAY_NAMES_SHORT[g.days[g.days.length - 1]]}`;
+      return `${dayRange} ${g.open}-${g.close}`;
+    })
+    .join(", ");
+}
 
 export default function LiveMonitor({ queueId }: { queueId: string }) {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -94,6 +129,11 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
              queueStatus === "PAUSED" ? "Tam dung" :
              queueStatus === "CLOSED" ? "Da dong" : "Chua kich hoat"}
           </span>
+          {stats.queue.operatingHours && Array.isArray(stats.queue.operatingHours) && (
+            <span className="text-xs text-slate-400 ml-2">
+              {formatOperatingHours(stats.queue.operatingHours as OperatingHour[])}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {live && (

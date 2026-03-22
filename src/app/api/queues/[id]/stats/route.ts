@@ -17,7 +17,7 @@ export async function GET(
     const [queue, streamStats, activeSessions] = await Promise.all([
       prisma.queue.findUnique({
         where: { id, ownerId: session.user.id },
-        select: { id: true, name: true, status: true },
+        select: { id: true, name: true, status: true, operatingHours: true },
       }),
       prisma.stream.findMany({
         where: { queueId: id },

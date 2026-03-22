@@ -125,6 +125,7 @@
     "verify_code": "Verification code",
     "waiting_in_queue": "Waiting in queue",
     "your_turn": "Your turn! Please go to the counter.",
+    "go_to_counter": "Please go to {counter}",
     "being_served": "Being served",
     "completed": "Completed",
     "est_wait": "Est. wait",

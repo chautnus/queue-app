@@ -9,7 +9,7 @@ export default async function StaffHomePage() {
   // Find active session and redirect to it
   const activeSession = await prisma.staffSession.findFirst({
     where: { userId: session.user.id, status: "ACTIVE" },
-    orderBy: { startAt: "desc" },
+    orderBy: { startAt: "asc" },
   });
 
   if (activeSession) {

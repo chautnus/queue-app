@@ -125,6 +125,7 @@
     "verify_code": "Código de verificación",
     "waiting_in_queue": "Esperando en la cola",
     "your_turn": "¡Es tu turno! Por favor, dirígete al mostrador.",
+    "go_to_counter": "Diríjase a {counter}",
     "being_served": "Siendo atendido",
     "completed": "Completado",
     "est_wait": "Espera est.",

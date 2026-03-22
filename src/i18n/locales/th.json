@@ -125,6 +125,7 @@
     "verify_code": "รหัสยืนยัน",
     "waiting_in_queue": "กำลังรอในคิว",
     "your_turn": "ถึงคิวคุณแล้ว! กรุณาไปที่เคาน์เตอร์",
+    "go_to_counter": "กรุณาไปที่ {counter}",
     "being_served": "กำลังให้บริการ",
     "completed": "เสร็จสิ้น",
     "est_wait": "รอโดยประมาณ",

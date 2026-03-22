@@ -125,6 +125,7 @@
     "verify_code": "Mã xác nhận",
     "waiting_in_queue": "Đang chờ trong hàng",
     "your_turn": "Đến lượt bạn! Vui lòng đến quầy.",
+    "go_to_counter": "Mời đến {counter}",
     "being_served": "Đang được phục vụ",
     "completed": "Đã hoàn thành",
     "est_wait": "Chờ ước tính",

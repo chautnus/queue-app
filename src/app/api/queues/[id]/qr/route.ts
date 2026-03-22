@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { signCustomerQrToken, generateQrPng } from "@/lib/qr";
+import { signCustomerQrToken, generateQrPngWithLogo } from "@/lib/qr";
 
 export async function GET(
   req: NextRequest,
@@ -17,7 +17,7 @@ export async function GET(
   try {
     const queue = await prisma.queue.findUnique({
       where: { id, ownerId: session.user.id },
-      select: { id: true, qrSecret: true, qrRotationType: true, timezone: true },
+      select: { id: true, qrSecret: true, qrRotationType: true, timezone: true, logoUrl: true },
     });
 
     if (!queue) {
@@ -36,7 +36,7 @@ export async function GET(
     const proto = req.headers.get("x-forwarded-proto") ?? "https";
     const baseUrl = `${proto}://${host}`;
     const qrUrl = `${baseUrl}/q/${queue.id}?token=${token}`;
-    const png = await generateQrPng(qrUrl);
+    const png = await generateQrPngWithLogo(qrUrl, queue.logoUrl);
 
     const cacheHeader =
       queue.qrRotationType === "DAILY"

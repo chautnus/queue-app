@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import AdBanner from "@/components/AdBanner";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 type User = {
   name?: string | null;
@@ -87,6 +88,11 @@ export default function DashboardSidebar({ user }: { user: User }) {
           );
         })}
       </nav>
+
+      {/* Language Switcher */}
+      <div className="px-5 py-2">
+        <LanguageSwitcher />
+      </div>
 
       {/* AdSense */}
       <div className="px-3 py-2">

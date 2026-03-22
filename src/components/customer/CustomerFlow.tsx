@@ -51,6 +51,7 @@ type TicketInfo = {
   status: string;
   waitingAhead: number;
   estimatedSeconds: number;
+  counterName?: string;
 };
 
 type FlowState =

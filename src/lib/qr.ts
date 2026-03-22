@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import QRCode from "qrcode";
+import sharp from "sharp";
 import { getTodayInTz, getEndOfDayInTz } from "@/lib/date-utils";
 
 const HUNDRED_YEARS = 60 * 60 * 24 * 365 * 100;
@@ -64,4 +65,83 @@ export async function generateQrPng(url: string): Promise<Buffer> {
     margin: 2,
     color: { dark: "#000000", light: "#ffffff" },
   });
+}
+
+export async function generateQrPngWithLogo(
+  url: string,
+  logoUrl?: string | null
+): Promise<Buffer> {
+  const qrBuffer = await QRCode.toBuffer(url, {
+    type: "png",
+    width: 400,
+    margin: 2,
+    errorCorrectionLevel: "H", // High error correction to survive logo overlay
+    color: { dark: "#000000", light: "#ffffff" },
+  });
+
+  if (!logoUrl) return qrBuffer;
+
+  try {
+    // Fetch the logo image
+    const logoRes = await fetch(logoUrl);
+    if (!logoRes.ok) return qrBuffer;
+    const logoArrayBuffer = await logoRes.arrayBuffer();
+    const logoBuffer = Buffer.from(logoArrayBuffer);
+
+    // QR is 400px; logo should be ~20% = 80px
+    const logoSize = 80;
+    const padding = 8;
+    const bgSize = logoSize + padding * 2;
+
+    // Resize logo to fit and make it a rounded square
+    const resizedLogo = await sharp(logoBuffer)
+      .resize(logoSize, logoSize, { fit: "cover" })
+      .png()
+      .toBuffer();
+
+    // Create white background with padding for scannability
+    const whiteBg = await sharp({
+      create: {
+        width: bgSize,
+        height: bgSize,
+        channels: 4,
+        background: { r: 255, g: 255, b: 255, alpha: 255 },
+      },
+    })
+      .png()
+      .toBuffer();
+
+    // Composite: white bg with logo centered on it
+    const logoWithBg = await sharp(whiteBg)
+      .composite([
+        {
+          input: resizedLogo,
+          left: padding,
+          top: padding,
+        },
+      ])
+      .png()
+      .toBuffer();
+
+    // Composite logo onto QR center
+    const qrSize = 400;
+    const left = Math.round((qrSize - bgSize) / 2);
+    const top = Math.round((qrSize - bgSize) / 2);
+
+    const result = await sharp(qrBuffer)
+      .composite([
+        {
+          input: logoWithBg,
+          left,
+          top,
+        },
+      ])
+      .png()
+      .toBuffer();
+
+    return result;
+  } catch (err) {
+    console.error("[generateQrPngWithLogo] Failed to overlay logo:", err);
+    return qrBuffer; // Fallback to plain QR on any error
+  }
 }

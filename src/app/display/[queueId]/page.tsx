@@ -23,6 +23,7 @@ export default function DisplayBoardPage({
   const t = useTranslations("display");
   const [serving, setServing] = useState<TicketInfo[]>([]);
   const [queueName, setQueueName] = useState("Queue Display");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [stats, setStats] = useState<QueueStats>({ totalWaiting: 0, totalServing: 0 });
   const [clock, setClock] = useState(new Date());
 
@@ -39,6 +40,7 @@ export default function DisplayBoardPage({
         .then((r) => r.json())
         .then((data) => {
           if (data.stats?.queue?.name) setQueueName(data.stats.queue.name);
+          if (data.stats?.queue?.logoUrl) setLogoUrl(data.stats.queue.logoUrl);
           if (data.stats) {
             setStats({
               totalWaiting: data.stats.totalWaiting ?? 0,
@@ -109,9 +111,21 @@ export default function DisplayBoardPage({
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800 text-white flex flex-col">
       {/* Header */}
-      <div className="text-center py-8 border-b border-white/10">
-        <h1 className="text-4xl font-extrabold tracking-tight">{queueName}</h1>
-        <p className="text-blue-200 text-lg mt-2 font-medium">{t("now_serving")}</p>
+      <div className="py-8 border-b border-white/10">
+        <div className="flex items-center justify-center gap-4">
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoUrl}
+              alt={queueName}
+              className="w-12 h-12 rounded-xl object-cover border border-white/20 shrink-0"
+            />
+          ) : null}
+          <div className="text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight">{queueName}</h1>
+            <p className="text-blue-200 text-lg mt-2 font-medium">{t("now_serving")}</p>
+          </div>
+        </div>
       </div>
 
       {/* Stats bar */}

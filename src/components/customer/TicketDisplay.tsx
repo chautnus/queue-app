@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { formatWaitTime } from "@/lib/wait-time";
 
@@ -12,6 +12,7 @@ type TicketInfo = {
   status: string;
   waitingAhead: number;
   estimatedSeconds: number;
+  counterName?: string;
 };
 
 type Props = {
@@ -23,6 +24,7 @@ type Props = {
 export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Props) {
   const t = useTranslations("customer");
   const pushRequestedRef = useRef(false);
+  const [counterName, setCounterName] = useState<string | undefined>(ticket.counterName);
 
   useEffect(() => {
     if (pushRequestedRef.current) return;
@@ -43,6 +45,9 @@ export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Prop
       try {
         const event = JSON.parse(e.data);
         if (event.type === "ticket:called" && event.data.ticketId === ticket.id) {
+          if (event.data.counterName) {
+            setCounterName(event.data.counterName);
+          }
           onRatingRequest();
         }
       } catch { /* ignore */ }
@@ -51,6 +56,7 @@ export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Prop
   }, [queueId, ticket.id, onRatingRequest]);
 
   const isCalled = ticket.status === "CALLED";
+  const isServing = ticket.status === "SERVING";
   const isWaiting = ticket.status === "WAITING";
 
   return (
@@ -76,6 +82,15 @@ export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Prop
           {isWaiting && <span className="w-2 h-2 rounded-full bg-blue-400" />}
           {ticket.status === "WAITING" ? t("waiting_in_queue") : ticket.status === "CALLED" ? t("your_turn") : ticket.status === "SERVING" ? t("being_served") : ticket.status === "COMPLETED" ? t("completed") : ticket.status}
         </div>
+
+        {/* Counter name - shown when called or serving */}
+        {(isCalled || isServing) && counterName && (
+          <div className="mt-2 mb-2 px-4 py-3 bg-green-100 border border-green-200 rounded-2xl">
+            <p className="text-lg font-bold text-green-800">
+              {t("go_to_counter", { counter: counterName })}
+            </p>
+          </div>
+        )}
 
         {/* Verify code */}
         <div className="mt-2">

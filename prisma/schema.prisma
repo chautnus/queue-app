@@ -79,10 +79,9 @@ model Queue {
   slug    String      @unique
   status  QueueStatus @default(INACTIVE)
 
-  // Timing (optional — queue can run without fixed schedule)
-  startAt  DateTime?
-  endAt    DateTime?
-  timezone String     @default("Asia/Ho_Chi_Minh") // IANA tz e.g. "Asia/Ho_Chi_Minh"
+  // Operating hours (JSON array of day schedules)
+  operatingHours Json?
+  timezone       String @default("Asia/Ho_Chi_Minh") // IANA tz e.g. "Asia/Ho_Chi_Minh"
 
   // QR settings
   qrRotationType QrRotationType @default(FIXED)

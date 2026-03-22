@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { signStaffQrToken, generateQrPng } from "@/lib/qr";
+import { signStaffQrToken, generateQrPngWithLogo } from "@/lib/qr";
 
 export async function GET(
   req: NextRequest,
@@ -17,7 +17,7 @@ export async function GET(
   try {
     const queue = await prisma.queue.findUnique({
       where: { id, ownerId: session.user.id },
-      select: { id: true, qrSecret: true },
+      select: { id: true, qrSecret: true, logoUrl: true },
     });
 
     if (!queue) {
@@ -30,7 +30,7 @@ export async function GET(
     const proto = req.headers.get("x-forwarded-proto") ?? "https";
     const baseUrl = `${proto}://${host}`;
     const qrUrl = `${baseUrl}/staff/join/${queue.id}?token=${token}`;
-    const png = await generateQrPng(qrUrl);
+    const png = await generateQrPngWithLogo(qrUrl, queue.logoUrl);
 
     return new NextResponse(new Uint8Array(png), {
       headers: {

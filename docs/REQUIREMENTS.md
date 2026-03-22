@@ -936,3 +936,14 @@ Minimum required: **Node.js >= 20.9.0** (specified in `package.json` engines).
 - The SSE implementation uses in-memory pub/sub, which works on a single instance. Horizontal scaling would require an external message broker (e.g., Redis Pub/Sub).
 - Cloudinary integration is optional; the application falls back to local file storage when Cloudinary credentials are not configured.
 - The health check endpoint at `/api/health` can be used for Railway deployment monitoring.
+
+---
+
+## 10. Known Issues & Change Log
+
+### Sprint 4 Changes
+
+- **Operating hours**: `operatingHours` (weekly schedule JSON on Counter model) replaces the previous `startAt`/`endAt` DateTime fields on Queue, enabling per-counter day-of-week open/close times.
+- **Logo display**: Logo should render in QR code center, display board header, dashboard sidebar, and customer queue page header. Currently blocked by upload/path issues being investigated.
+- **Counter name on customer screen**: When a ticket is called, the SSE broadcast now includes `counterName`. The customer `TicketDisplay` component shows the counter name prominently (e.g., "Mời đến Cửa 3") when the ticket status is CALLED or SERVING.
+- **LanguageSwitcher in dashboard**: The existing `LanguageSwitcher` component has been added to the `DashboardSidebar`, allowing admins to switch the UI language from the dashboard.

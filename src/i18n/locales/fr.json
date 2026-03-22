@@ -125,6 +125,7 @@
     "verify_code": "Code de vérification",
     "waiting_in_queue": "En attente dans la file",
     "your_turn": "C'est votre tour ! Rendez-vous au guichet.",
+    "go_to_counter": "Veuillez vous rendre au {counter}",
     "being_served": "En cours de service",
     "completed": "Terminé",
     "est_wait": "Attente est.",
