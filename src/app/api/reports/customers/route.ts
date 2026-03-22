@@ -28,6 +28,9 @@ export async function GET(req: NextRequest) {
 
     const fromDate = from ? new Date(from) : new Date(0);
     const toDate = to ? new Date(to) : new Date();
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
 
     const tickets = await prisma.ticket.findMany({
       where: {

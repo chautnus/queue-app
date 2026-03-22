@@ -27,7 +27,11 @@ export async function GET(req: NextRequest) {
     }
 
     // Build date filter
-    const dayStart = date ? new Date(`${date}T00:00:00Z`) : new Date(new Date().setHours(0, 0, 0, 0));
+    const parsedDate = date ? new Date(`${date}T00:00:00Z`) : null;
+    if (parsedDate && isNaN(parsedDate.getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
+    const dayStart = parsedDate ?? new Date(new Date().setHours(0, 0, 0, 0));
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
 
     const tickets = await prisma.ticket.findMany({

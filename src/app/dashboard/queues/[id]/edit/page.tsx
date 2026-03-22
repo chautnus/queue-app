@@ -47,7 +47,7 @@ export default async function EditQueuePage({
     transferQueueId: queue.transferQueueId ?? undefined,
     streams: queue.streams.map((s) => ({
       name: s.name,
-      ticketPrefix: s.ticketPrefix ?? undefined,
+      ticketPrefix: s.ticketPrefix ?? null,
       avgProcessingSeconds: s.avgProcessingSeconds,
       counters: s.counters.map((c) => ({
         name: c.name,

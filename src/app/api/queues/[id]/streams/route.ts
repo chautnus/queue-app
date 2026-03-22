@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { StreamInputSchema } from "@/lib/validations/queue";
 
@@ -57,7 +58,7 @@ export async function PUT(
               ...counters[ci],
               streamId: stream.id,
               order: ci,
-              schedule: counters[ci].schedule ?? undefined,
+              schedule: counters[ci].schedule ?? Prisma.JsonNull,
             },
           });
         }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { CreateQueueSchema } from "@/lib/validations/queue";
 import { randomBytes } from "crypto";
 
@@ -56,34 +57,61 @@ export async function POST(req: NextRequest) {
 
     const { streams, startAt, endAt, ...queueData } = parsed.data;
 
+    // Retry slug generation on unique constraint collision
+    let slug = generateSlug(queueData.name);
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const exists = await prisma.queue.findUnique({ where: { slug }, select: { id: true } });
+      if (!exists) break;
+      slug = generateSlug(queueData.name);
+    }
+
     const queue = await prisma.$transaction(async (tx) => {
       const q = await tx.queue.create({
         data: {
-          ...queueData,
+          name: queueData.name,
           ownerId: session.user.id,
-          slug: generateSlug(queueData.name),
+          slug,
           qrSecret: randomBytes(32).toString("hex"),
           logoUrl: queueData.logoUrl || null,
+          timezone: queueData.timezone,
+          qrRotationType: queueData.qrRotationType,
+          category: queueData.category ?? null,
+          requireCustomerInfo: queueData.requireCustomerInfo,
+          collectName: queueData.collectName,
+          collectPhone: queueData.collectPhone,
+          collectEmail: queueData.collectEmail,
+          collectAge: queueData.collectAge,
+          collectAddress: queueData.collectAddress,
+          streamAssignMode: queueData.streamAssignMode,
+          customFields: queueData.customFields ?? Prisma.JsonNull,
           redirectUrl: queueData.redirectUrl || null,
-          customFields: queueData.customFields ?? undefined,
+          allowTransfer: queueData.allowTransfer,
+          transferQueueId: queueData.transferQueueId ?? null,
+          greeting: queueData.greeting ?? null,
           startAt: startAt && startAt !== "" ? new Date(startAt) : null,
           endAt: endAt && endAt !== "" ? new Date(endAt) : null,
         },
       });
 
       for (let si = 0; si < streams.length; si++) {
-        const { counters, ...streamData } = streams[si];
+        const s = streams[si];
         const stream = await tx.stream.create({
-          data: { ...streamData, queueId: q.id, order: si },
+          data: {
+            name: s.name,
+            ticketPrefix: s.ticketPrefix ?? null,
+            avgProcessingSeconds: s.avgProcessingSeconds,
+            queueId: q.id,
+            order: si,
+          },
         });
 
-        for (let ci = 0; ci < counters.length; ci++) {
+        for (let ci = 0; ci < s.counters.length; ci++) {
           await tx.counter.create({
             data: {
-              ...counters[ci],
+              name: s.counters[ci].name,
               streamId: stream.id,
               order: ci,
-              schedule: counters[ci].schedule ?? undefined,
+              schedule: s.counters[ci].schedule ?? Prisma.JsonNull,
             },
           });
         }
@@ -95,6 +123,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ queue }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/queues]", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

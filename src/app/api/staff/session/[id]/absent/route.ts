@@ -14,29 +14,34 @@ export async function POST(
 
   const { id } = await params;
 
-  const staffSession = await prisma.staffSession.findUnique({
-    where: { id, userId: user.id, status: "ACTIVE" },
-  });
-
-  if (!staffSession) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
-  }
-
-  // Mark CALLED ticket as ABSENT
-  const updated = await prisma.ticket.updateMany({
-    where: {
-      staffSessionId: id,
-      status: "CALLED",
-    },
-    data: { status: "ABSENT" },
-  });
-
-  if (updated.count > 0) {
-    broadcastToQueue(staffSession.queueId, {
-      type: "ticket:absent",
-      data: {},
+  try {
+    const staffSession = await prisma.staffSession.findUnique({
+      where: { id, userId: user.id, status: "ACTIVE" },
     });
-  }
 
-  return NextResponse.json({ success: true });
+    if (!staffSession) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    // Mark CALLED ticket as ABSENT
+    const updated = await prisma.ticket.updateMany({
+      where: {
+        staffSessionId: id,
+        status: "CALLED",
+      },
+      data: { status: "ABSENT" },
+    });
+
+    if (updated.count > 0) {
+      broadcastToQueue(staffSession.queueId, {
+        type: "ticket:absent",
+        data: {},
+      });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[POST /api/staff/session/[id]/absent]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

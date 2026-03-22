@@ -163,7 +163,7 @@ export async function POST(
           displayNumber,
           verifyCode,
           deviceId,
-          customerInfo: customerInfo ? JSON.parse(JSON.stringify(customerInfo)) : undefined,
+          customerInfo: customerInfo ? JSON.parse(JSON.stringify(customerInfo)) : null,
         },
         include: { stream: { select: { name: true, avgProcessingSeconds: true } } },
       });

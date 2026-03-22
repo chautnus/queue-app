@@ -27,7 +27,7 @@ export const StreamInputSchema = z.object({
     .string()
     .max(3)
     .optional()
-    .transform((v) => v || undefined),
+    .transform((v) => v || null),
   avgProcessingSeconds: z.number().min(30).max(3600).default(300),
   counters: z.array(CounterInputSchema).min(1, "At least one counter required"),
 });
