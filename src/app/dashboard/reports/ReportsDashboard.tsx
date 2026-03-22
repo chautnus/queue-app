@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 type Queue = { id: string; name: string };
 
@@ -13,7 +14,7 @@ type DailyReport = {
     avgWaitSeconds: number | null;
     avgServiceSeconds: number | null;
   };
-  byStream: Array<{ streamId: string; streamName: string; total: number; completed: number; absent: number }>;
+  byStream: Array<{ streamId: string; streamName: string; total: number; completed: number; absent: number; avgServiceSeconds: number | null }>;
   byStaff: Array<{ name: string; served: number; totalServiceSeconds: number }>;
 };
 
@@ -21,10 +22,11 @@ function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return "—";
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
-  return m > 0 ? `${m} phút ${s}s` : `${s}s`;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
 export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
+  const t = useTranslations("reports");
   const today = new Date().toISOString().slice(0, 10);
   const [queueId, setQueueId] = useState(queues[0]?.id ?? "");
   const [date, setDate] = useState(today);
@@ -42,7 +44,7 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
         if (d.error) setError(d.error);
         else setReport(d);
       })
-      .catch(() => setError("Lỗi tải dữ liệu"))
+      .catch(() => setError(t("load_error")))
       .finally(() => setLoading(false));
   }, [queueId, date]);
 
@@ -54,17 +56,18 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
   if (queues.length === 0) {
     return (
       <div className="card p-12 text-center">
-        <p className="text-slate-400 text-sm">Chưa có hàng đợi nào để xem báo cáo</p>
+        <p className="text-slate-400 text-sm">{t("no_queues")}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-5">
+      <h1 className="text-2xl font-bold text-slate-900">{t("heading")}</h1>
       {/* ── Filters ── */}
       <div className="card p-4 flex flex-wrap gap-4 items-center">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700 whitespace-nowrap">Hàng đợi</label>
+          <label className="text-sm font-medium text-slate-700 whitespace-nowrap">{t("queue")}</label>
           <select
             value={queueId}
             onChange={(e) => setQueueId(e.target.value)}
@@ -76,7 +79,7 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">Ngày</label>
+          <label className="text-sm font-medium text-slate-700">{t("date")}</label>
           <input
             type="date"
             value={date}
@@ -89,7 +92,7 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          Xuất CSV
+          {t("export_csv")}
         </button>
       </div>
 
@@ -111,11 +114,11 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
           {/* Summary cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
-              { label: "Phát số", value: report.summary.total, accent: "text-slate-900" },
-              { label: "Đã phục vụ", value: report.summary.completed, accent: "text-green-600" },
-              { label: "Vắng mặt", value: report.summary.absent, accent: "text-amber-600" },
-              { label: "Chờ TB", value: formatDuration(report.summary.avgWaitSeconds ?? 0), accent: "text-blue-600" },
-              { label: "Phục vụ TB", value: formatDuration(report.summary.avgServiceSeconds ?? 0), accent: "text-violet-600" },
+              { label: t("tickets_issued"), value: report.summary.total, accent: "text-slate-900" },
+              { label: t("served"), value: report.summary.completed, accent: "text-green-600" },
+              { label: t("absent"), value: report.summary.absent, accent: "text-amber-600" },
+              { label: t("avg_wait"), value: formatDuration(report.summary.avgWaitSeconds ?? 0), accent: "text-blue-600" },
+              { label: t("avg_service"), value: formatDuration(report.summary.avgServiceSeconds ?? 0), accent: "text-violet-600" },
             ].map((card) => (
               <div key={card.label} className="card p-4 text-center">
                 <p className={`text-2xl font-bold ${card.accent}`}>{card.value}</p>
@@ -127,14 +130,14 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
           {/* By staff */}
           {report.byStaff.length > 0 && (
             <div className="card p-5">
-              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Theo nhân viên</h3>
+              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">{t("by_staff")}</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-100">
-                      <th className="text-left py-2 pr-4 font-medium text-slate-500">Nhân viên</th>
-                      <th className="text-right py-2 pr-4 font-medium text-slate-500">Đã phục vụ</th>
-                      <th className="text-right py-2 font-medium text-slate-500">TB phục vụ</th>
+                      <th className="text-left py-2 pr-4 font-medium text-slate-500">{t("staff_member")}</th>
+                      <th className="text-right py-2 pr-4 font-medium text-slate-500">{t("served")}</th>
+                      <th className="text-right py-2 font-medium text-slate-500">{t("avg_service")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -154,15 +157,16 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
           {/* By stream */}
           {report.byStream.length > 0 && (
             <div className="card p-5">
-              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Theo luồng</h3>
+              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">{t("by_stream")}</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-100">
-                      <th className="text-left py-2 pr-4 font-medium text-slate-500">Luồng</th>
-                      <th className="text-right py-2 pr-4 font-medium text-slate-500">Phát</th>
-                      <th className="text-right py-2 pr-4 font-medium text-slate-500">Xong</th>
-                      <th className="text-right py-2 font-medium text-slate-500">Vắng</th>
+                      <th className="text-left py-2 pr-4 font-medium text-slate-500">{t("stream")}</th>
+                      <th className="text-right py-2 pr-4 font-medium text-slate-500">{t("issued")}</th>
+                      <th className="text-right py-2 pr-4 font-medium text-slate-500">{t("completed")}</th>
+                      <th className="text-right py-2 pr-4 font-medium text-slate-500">{t("absent")}</th>
+                      <th className="text-right py-2 font-medium text-slate-500">{t("avg_service")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -171,7 +175,8 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
                         <td className="py-3 pr-4 font-medium text-slate-800">{row.streamName}</td>
                         <td className="py-3 pr-4 text-right text-slate-700">{row.total}</td>
                         <td className="py-3 pr-4 text-right text-green-600">{row.completed}</td>
-                        <td className="py-3 text-right text-amber-600">{row.absent}</td>
+                        <td className="py-3 pr-4 text-right text-amber-600">{row.absent}</td>
+                        <td className="py-3 text-right text-violet-600">{formatDuration(row.avgServiceSeconds ?? 0)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -182,7 +187,7 @@ export default function ReportsDashboard({ queues }: { queues: Queue[] }) {
 
           {report.summary.total === 0 && (
             <div className="card p-10 text-center">
-              <p className="text-slate-400 text-sm">Không có dữ liệu cho ngày này</p>
+              <p className="text-slate-400 text-sm">{t("no_data")}</p>
             </div>
           )}
         </>

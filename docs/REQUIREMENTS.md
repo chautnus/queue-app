@@ -947,3 +947,10 @@ Minimum required: **Node.js >= 20.9.0** (specified in `package.json` engines).
 - **Logo display**: Logo should render in QR code center, display board header, dashboard sidebar, and customer queue page header. Currently blocked by upload/path issues being investigated.
 - **Counter name on customer screen**: When a ticket is called, the SSE broadcast now includes `counterName`. The customer `TicketDisplay` component shows the counter name prominently (e.g., "Mời đến Cửa 3") when the ticket status is CALLED or SERVING.
 - **LanguageSwitcher in dashboard**: The existing `LanguageSwitcher` component has been added to the `DashboardSidebar`, allowing admins to switch the UI language from the dashboard.
+
+### Sprint 5 Changes
+
+- **i18n coverage**: Applied `next-intl` translations to all remaining admin, staff, and auth pages that were previously hardcoded in Vietnamese. All 21+ screens now use the i18n message catalog.
+- **Logo fix for QR generator**: QR code logo rendering failed because `fetch()` was called with a relative path. Fixed by constructing an absolute URL using the request's `baseUrl`, ensuring the logo loads correctly in both local and deployed environments.
+- **Reports: avg service time per stream**: The daily report API (`/api/reports/daily`) now returns `avgServiceSeconds` in each `byStream` entry, calculated from completed tickets where both `calledAt` and `completedAt` exist. The ReportsDashboard UI displays this as a new "TB phục vụ" column in the "Theo luồng" table.
+- **Detailed screen descriptions**: All 21+ screens (admin dashboard, queue management, stream/counter CRUD, staff work page, customer ticket flow, display board, reports, settings, auth pages) are now fully documented with field-level details in Section 4.

@@ -64,12 +64,19 @@ export async function GET(req: NextRequest) {
     // Per-stream breakdown
     const byStream = queue.streams.map((s) => {
       const st = tickets.filter((t) => t.stream?.id === s.id);
+      const completedWithTimes = st.filter(
+        (t) => t.status === "COMPLETED" && t.calledAt && t.completedAt
+      );
+      const streamServiceTimes = completedWithTimes.map(
+        (t) => (t.completedAt!.getTime() - t.calledAt!.getTime()) / 1000
+      );
       return {
         streamId: s.id,
         streamName: s.name,
         total: st.length,
         completed: st.filter((t) => t.status === "COMPLETED").length,
         absent: st.filter((t) => t.status === "ABSENT").length,
+        avgServiceSeconds: avg(streamServiceTimes),
       };
     });
 

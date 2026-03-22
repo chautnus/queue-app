@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type Counter = { id: string; name: string };
 type Stream = { id: string; name: string; counters: Counter[] };
@@ -14,6 +15,7 @@ type Props = {
 
 export default function SessionSetup({ queueId, staffName, streams }: Props) {
   const router = useRouter();
+  const t = useTranslations("session_setup");
   const [selectedStreamIds, setSelectedStreamIds] = useState<string[]>([
     streams[0]?.id ?? "",
   ]);
@@ -62,13 +64,13 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
       <p className="text-sm text-gray-600">
-        Xin chào, <strong>{staffName}</strong>. Vui lòng chọn thông tin ca làm việc.
+        {t("greeting", { name: staffName })}
       </p>
 
       {/* Stream selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Luồng phục vụ
+          {t("service_streams")}
         </label>
         <div className="space-y-2">
           {streams.map((s) => (
@@ -107,7 +109,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
       {allCounters.length > 0 && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Cửa phục vụ
+            {t("counter")}
           </label>
           <select
             value={selectedCounterId}
@@ -126,7 +128,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
       {/* Planned end time */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Dự kiến kết thúc ca
+          {t("planned_end_time")}
         </label>
         <input
           type="time"
@@ -145,7 +147,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
         }
         className="w-full py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
-        {submitting ? "Đang bắt đầu..." : "Bắt đầu ca làm việc"}
+        {submitting ? t("starting") : t("start_session")}
       </button>
     </div>
   );

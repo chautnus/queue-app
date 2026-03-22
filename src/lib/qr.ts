@@ -69,7 +69,8 @@ export async function generateQrPng(url: string): Promise<Buffer> {
 
 export async function generateQrPngWithLogo(
   url: string,
-  logoUrl?: string | null
+  logoUrl?: string | null,
+  baseUrl?: string
 ): Promise<Buffer> {
   const qrBuffer = await QRCode.toBuffer(url, {
     type: "png",
@@ -82,8 +83,14 @@ export async function generateQrPngWithLogo(
   if (!logoUrl) return qrBuffer;
 
   try {
+    // Resolve relative URLs to absolute for server-side fetch
+    let absoluteLogoUrl = logoUrl;
+    if (logoUrl && !logoUrl.startsWith("http")) {
+      absoluteLogoUrl = `${baseUrl}${logoUrl}`;
+    }
+
     // Fetch the logo image
-    const logoRes = await fetch(logoUrl);
+    const logoRes = await fetch(absoluteLogoUrl!);
     if (!logoRes.ok) return qrBuffer;
     const logoArrayBuffer = await logoRes.arrayBuffer();
     const logoBuffer = Buffer.from(logoArrayBuffer);

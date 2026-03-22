@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type StreamStats = {
   id: string;
@@ -35,11 +36,9 @@ type Stats = {
   totalServing: number;
 };
 
-const DAY_NAMES_SHORT = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-
-function formatOperatingHours(hours: OperatingHour[]): string {
+function formatOperatingHours(hours: OperatingHour[], dayNames: string[], noSchedule: string): string {
   const enabled = hours.filter((h) => h.enabled).sort((a, b) => a.day - b.day);
-  if (enabled.length === 0) return "Không có lịch";
+  if (enabled.length === 0) return noSchedule;
 
   // Group consecutive days with same hours
   const groups: { days: number[]; open: string; close: string }[] = [];
@@ -56,14 +55,15 @@ function formatOperatingHours(hours: OperatingHour[]): string {
     .map((g) => {
       const dayRange =
         g.days.length === 1
-          ? DAY_NAMES_SHORT[g.days[0]]
-          : `${DAY_NAMES_SHORT[g.days[0]]}-${DAY_NAMES_SHORT[g.days[g.days.length - 1]]}`;
+          ? dayNames[g.days[0]]
+          : `${dayNames[g.days[0]]}-${dayNames[g.days[g.days.length - 1]]}`;
       return `${dayRange} ${g.open}-${g.close}`;
     })
     .join(", ");
 }
 
 export default function LiveMonitor({ queueId }: { queueId: string }) {
+  const t = useTranslations("monitor");
   const [stats, setStats] = useState<Stats | null>(null);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [staffQrUrl, setStaffQrUrl] = useState<string | null>(null);
@@ -125,13 +125,17 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
             queueStatus === "CLOSED" ? "bg-red-50 text-red-700" :
             "bg-slate-100 text-slate-500"
           }`}>
-            {queueStatus === "ACTIVE" ? "Hoat dong" :
-             queueStatus === "PAUSED" ? "Tam dung" :
-             queueStatus === "CLOSED" ? "Da dong" : "Chua kich hoat"}
+            {queueStatus === "ACTIVE" ? t("status_active") :
+             queueStatus === "PAUSED" ? t("status_paused") :
+             queueStatus === "CLOSED" ? t("status_closed") : t("status_inactive")}
           </span>
           {stats.queue.operatingHours && Array.isArray(stats.queue.operatingHours) && (
             <span className="text-xs text-slate-400 ml-2">
-              {formatOperatingHours(stats.queue.operatingHours as OperatingHour[])}
+              {formatOperatingHours(
+              stats.queue.operatingHours as OperatingHour[],
+              [t("day_sun_short"), t("day_mon_short"), t("day_tue_short"), t("day_wed_short"), t("day_thu_short"), t("day_fri_short"), t("day_sat_short")],
+              t("no_schedule")
+            )}
             </span>
           )}
         </div>
@@ -139,7 +143,7 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
           {live && (
             <span className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
               <span className="live-dot" />
-              Truc tiep
+              {t("live")}
             </span>
           )}
           {queueStatus !== "ACTIVE" && (
@@ -148,7 +152,7 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
               disabled={statusLoading}
               className="text-xs py-2 px-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 disabled:opacity-50"
             >
-              Kich hoat
+              {t("activate")}
             </button>
           )}
           {queueStatus === "ACTIVE" && (
@@ -157,7 +161,7 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
               disabled={statusLoading}
               className="text-xs py-2 px-3 bg-amber-500 text-white font-medium rounded-xl hover:bg-amber-600 disabled:opacity-50"
             >
-              Tam dung
+              {t("pause")}
             </button>
           )}
           {queueStatus === "PAUSED" && (
@@ -166,7 +170,7 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
               disabled={statusLoading}
               className="text-xs py-2 px-3 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 disabled:opacity-50"
             >
-              Dong
+              {t("close")}
             </button>
           )}
           {qrUrl && (
@@ -187,10 +191,10 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
       {/* ── Summary cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Đang chờ", value: stats.totalWaiting, accent: "text-blue-600" },
-          { label: "Đang phục vụ", value: stats.totalServing, accent: "text-green-600" },
-          { label: "Nhân viên", value: stats.activeSessions.length, accent: "text-violet-600" },
-          { label: "Hôm nay", value: totalToday, accent: "text-slate-700" },
+          { label: t("waiting"), value: stats.totalWaiting, accent: "text-blue-600" },
+          { label: t("serving"), value: stats.totalServing, accent: "text-green-600" },
+          { label: t("staff"), value: stats.activeSessions.length, accent: "text-violet-600" },
+          { label: t("today"), value: totalToday, accent: "text-slate-700" },
         ].map((card) => (
           <div key={card.label} className="card p-4 text-center">
             <p className={`text-3xl font-bold ${card.accent}`}>{card.value}</p>
@@ -205,13 +209,13 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
           <div key={s.id} className="card p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-slate-800 text-sm">{s.name}</h3>
-              <span className="text-xs text-slate-400">Tổng: {s.total}</span>
+              <span className="text-xs text-slate-400">{t("total")}: {s.total}</span>
             </div>
             <div className="flex gap-3">
               {[
-                { label: "Chờ", value: s.waiting, color: "text-blue-600" },
-                { label: "Gọi", value: s.called, color: "text-amber-600" },
-                { label: "Phục vụ", value: s.serving, color: "text-green-600" },
+                { label: t("wait"), value: s.waiting, color: "text-blue-600" },
+                { label: t("called"), value: s.called, color: "text-amber-600" },
+                { label: t("serve"), value: s.serving, color: "text-green-600" },
               ].map((stat) => (
                 <div key={stat.label} className="flex-1 text-center bg-slate-50 rounded-xl py-2">
                   <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
@@ -226,7 +230,7 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
       {/* ── Active staff ── */}
       {stats.activeSessions.length > 0 && (
         <div className="card p-5">
-          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Nhân viên đang làm việc</h3>
+          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">{t("active_staff")}</h3>
           <div className="space-y-2">
             {stats.activeSessions.map((sess) => (
               <div key={sess.id} className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
@@ -237,13 +241,13 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
                     </span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-800">{sess.staffName ?? "Nhân viên"}</p>
+                    <p className="text-sm font-medium text-slate-800">{sess.staffName ?? t("staff_member")}</p>
                     <p className="text-xs text-slate-400">{sess.counter}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-slate-900">{sess.servedCount}</p>
-                  <p className="text-xs text-slate-400">phục vụ</p>
+                  <p className="text-xs text-slate-400">{t("served")}</p>
                 </div>
               </div>
             ))}
@@ -255,15 +259,15 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
       <div className="grid gap-4 sm:grid-cols-2">
         {qrUrl && (
           <div className="card p-5 text-center">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">QR Khach hang</h3>
-            <Image src={qrUrl} alt="QR Khach hang" width={180} height={180} className="mx-auto rounded-xl" unoptimized />
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">{t("qr_customer")}</h3>
+            <Image src={qrUrl} alt={t("qr_customer")} width={180} height={180} className="mx-auto rounded-xl" unoptimized />
             <div className="flex justify-center gap-3 mt-4">
-              <a href={qrUrl} download="qr-khach-hang.png" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                Tai PNG
+              <a href={qrUrl} download="qr-customer.png" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                {t("download_png")}
               </a>
             </div>
             <div className="mt-3 p-2 bg-slate-50 rounded-lg">
-              <p className="text-xs text-slate-400 mb-1">Link truc tiep:</p>
+              <p className="text-xs text-slate-400 mb-1">{t("direct_link")}:</p>
               <a
                 href={`/q/${queueId}`}
                 target="_blank"
@@ -276,22 +280,22 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
                 onClick={() => navigator.clipboard.writeText(`${window.location.origin}/q/${queueId}`)}
                 className="mt-1 text-xs text-slate-500 hover:text-slate-700 underline"
               >
-                Sao chep link
+                {t("copy_link")}
               </button>
             </div>
           </div>
         )}
         {staffQrUrl && (
           <div className="card p-5 text-center">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">QR Nhan vien</h3>
-            <Image src={staffQrUrl} alt="QR Nhan vien" width={180} height={180} className="mx-auto rounded-xl" unoptimized />
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">{t("qr_staff")}</h3>
+            <Image src={staffQrUrl} alt={t("qr_staff")} width={180} height={180} className="mx-auto rounded-xl" unoptimized />
             <div className="flex justify-center gap-3 mt-4">
-              <a href={staffQrUrl} download="qr-nhan-vien.png" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                Tai PNG
+              <a href={staffQrUrl} download="qr-staff.png" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                {t("download_png")}
               </a>
             </div>
             <div className="mt-3 p-2 bg-slate-50 rounded-lg">
-              <p className="text-xs text-slate-400 mb-1">Link truc tiep:</p>
+              <p className="text-xs text-slate-400 mb-1">{t("direct_link")}:</p>
               <a
                 href={`/staff/join/${queueId}`}
                 target="_blank"
@@ -304,7 +308,7 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
                 onClick={() => navigator.clipboard.writeText(`${window.location.origin}/staff/join/${queueId}`)}
                 className="mt-1 text-xs text-slate-500 hover:text-slate-700 underline"
               >
-                Sao chep link
+                {t("copy_link")}
               </button>
             </div>
           </div>
@@ -313,15 +317,15 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
 
       {/* ── Display Board Link ── */}
       <div className="card p-5">
-        <h3 className="text-sm font-semibold text-slate-700 mb-2">Bang thong bao</h3>
-        <p className="text-xs text-slate-400 mb-3">Mo trang nay tren man hinh lon de hien thi so dang phuc vu.</p>
+        <h3 className="text-sm font-semibold text-slate-700 mb-2">{t("display_board")}</h3>
+        <p className="text-xs text-slate-400 mb-3">{t("display_board_desc")}</p>
         <div className="flex items-center gap-3">
           <a
             href={`/display/${queueId}`}
             target="_blank"
             className="btn-primary text-xs py-2 px-4"
           >
-            Mo bang thong bao
+            {t("open_display_board")}
           </a>
           <button
             type="button"

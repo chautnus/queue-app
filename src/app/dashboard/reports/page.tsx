@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ReportsDashboard from "./ReportsDashboard";
 
-export const metadata: Metadata = { title: "Báo cáo" };
+export const metadata: Metadata = { title: "Reports" };
 
 export default async function ReportsPage() {
   const session = await auth();
@@ -13,10 +13,5 @@ export default async function ReportsPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Báo cáo</h1>
-      <ReportsDashboard queues={queues} />
-    </div>
-  );
+  return <ReportsDashboard queues={queues} />;
 }

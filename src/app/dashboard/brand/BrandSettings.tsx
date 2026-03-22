@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 const ACCEPTED_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
 const ACCEPTED_TYPES_SET = new Set(ACCEPTED_TYPES.split(","));
@@ -15,6 +16,7 @@ function UploadIcon() {
 }
 
 export default function BrandSettings() {
+  const t = useTranslations("brand");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -26,10 +28,10 @@ export default function BrandSettings() {
 
   const validateFile = (file: File): string | null => {
     if (!ACCEPTED_TYPES_SET.has(file.type)) {
-      return "Chỉ chấp nhận file PNG, JPEG, WebP hoặc SVG.";
+      return t("invalid_file_type");
     }
     if (file.size > MAX_SIZE) {
-      return "Logo phải nhỏ hơn 10 MB.";
+      return t("logo_too_large");
     }
     return null;
   };
@@ -54,11 +56,11 @@ export default function BrandSettings() {
       if (res.ok) {
         setLogoUrl(data.url);
       } else {
-        setError(data.error || "Tải logo thất bại. Vui lòng thử lại.");
+        setError(data.error || t("upload_failed"));
         setLogoPreview(null);
       }
     } catch {
-      setError("Không thể kết nối đến server. Vui lòng thử lại.");
+      setError(t("connection_error"));
       setLogoPreview(null);
     } finally {
       setUploading(false);
@@ -75,13 +77,13 @@ export default function BrandSettings() {
       // Fetch user's queues and update each with the new default logo
       const queuesRes = await fetch("/api/queues");
       if (!queuesRes.ok) {
-        throw new Error("Không thể tải danh sách hàng đợi.");
+        throw new Error(t("load_queues_failed"));
       }
 
       const { queues } = await queuesRes.json();
 
       if (!queues || queues.length === 0) {
-        setError("Chưa có hàng đợi nào. Hãy tạo hàng đợi trước khi cập nhật logo.");
+        setError(t("no_queues_for_logo"));
         setSaving(false);
         return;
       }
@@ -98,9 +100,7 @@ export default function BrandSettings() {
 
       const failures = results.filter((r) => r.status === "rejected");
       if (failures.length > 0) {
-        setError(
-          `Cập nhật thành công ${queues.length - failures.length}/${queues.length} hàng đợi. Một số hàng đợi không thể cập nhật.`
-        );
+        setError(t("partial_update_error"));
       } else {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
@@ -109,7 +109,7 @@ export default function BrandSettings() {
       setError(
         err instanceof Error
           ? err.message
-          : "Lưu thất bại. Vui lòng thử lại."
+          : t("save_failed")
       );
     } finally {
       setSaving(false);
@@ -120,7 +120,7 @@ export default function BrandSettings() {
     <div className="max-w-xl space-y-5">
       {/* Logo */}
       <div className="card p-5">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Logo mặc định</h3>
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">{t("default_logo")}</h3>
         <div
           className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${
             dragOver ? "border-blue-400 bg-blue-50" : "border-slate-200 hover:border-blue-300 hover:bg-slate-50"
@@ -140,15 +140,15 @@ export default function BrandSettings() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={logoPreview} alt="Logo" className="w-20 h-20 rounded-2xl object-cover border border-slate-100 shrink-0" />
               <div className="text-left">
-                <p className="text-sm font-medium text-slate-700">{uploading ? "Đang tải lên..." : "Logo đã chọn"}</p>
-                <p className="text-xs text-slate-400 mt-0.5">Click để thay đổi · PNG/JPG/WebP/SVG tối đa 10 MB</p>
+                <p className="text-sm font-medium text-slate-700">{uploading ? t("uploading") : t("logo_selected")}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{t("click_to_change")}</p>
               </div>
             </div>
           ) : (
             <>
               <UploadIcon />
-              <p className="text-sm font-medium text-slate-600">Kéo thả hoặc click để tải lên</p>
-              <p className="text-xs text-slate-400 mt-1">PNG, JPG, WebP, SVG · Tối đa 10 MB</p>
+              <p className="text-sm font-medium text-slate-600">{t("drag_drop_upload")}</p>
+              <p className="text-xs text-slate-400 mt-1">{t("file_format_limit")}</p>
             </>
           )}
           <input
@@ -166,16 +166,16 @@ export default function BrandSettings() {
             onClick={() => { setLogoPreview(null); setLogoUrl(null); setError(null); }}
             className="btn-danger text-xs mt-3"
           >
-            Xóa logo
+            {t("remove_logo")}
           </button>
         )}
       </div>
 
       {/* Info */}
       <div className="card p-5">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Thông tin thương hiệu</h3>
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">{t("brand_info")}</h3>
         <p className="text-xs text-slate-400">
-          Logo và thông tin thương hiệu sẽ được áp dụng cho các hàng đợi mới. Hàng đợi hiện có có thể được cập nhật riêng trong phần chỉnh sửa.
+          {t("brand_info_desc")}
         </p>
       </div>
 
@@ -184,7 +184,7 @@ export default function BrandSettings() {
       )}
 
       {saved && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">Da luu thay doi thanh cong cho tat ca hang doi.</div>
+        <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">{t("save_success")}</div>
       )}
 
       <button
@@ -192,7 +192,7 @@ export default function BrandSettings() {
         disabled={saving || uploading || !logoUrl}
         className="btn-primary"
       >
-        {saving ? "Đang lưu..." : "Lưu thay đổi"}
+        {saving ? t("saving") : t("save_changes")}
       </button>
     </div>
   );

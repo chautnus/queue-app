@@ -28,10 +28,15 @@
 - Logo upload validation rejects local paths → removed .url() validator
 - new Date("") → Invalid Date in create queue → added empty string check
 
-## Sprint 4 (Current)
-- [ ] Logo not showing in QR center
-- [ ] Logo not showing in display board, dashboard, customer screen
-- [ ] PATCH queue any field → internal server error (spread operator clears nullable fields)
-- [ ] Customer doesn't see counter name when called
-- [ ] Operating hours using DateTime instead of weekly schedule
-- [ ] Dashboard missing LanguageSwitcher
+## Sprint 4
+- [x] Logo not showing in QR center
+- [x] Logo not showing in display board, dashboard, customer screen
+- [x] PATCH queue any field → internal server error (spread operator clears nullable fields)
+- [x] Customer doesn't see counter name when called
+- [x] Operating hours using DateTime instead of weekly schedule
+- [x] Dashboard missing LanguageSwitcher
+
+## Sprint 5 (Current)
+- [ ] i18n missing in 10 admin/staff/auth components
+- [ ] Logo not rendering: QR generator fetch() fails with relative paths
+- [ ] Reports missing avg service time per stream

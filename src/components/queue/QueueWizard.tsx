@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import {
   CreateQueueSchema,
   type CreateQueueInput,
@@ -20,33 +21,27 @@ const TIMEZONES = [
   "UTC",
 ];
 
-const CATEGORIES = [
-  "Nhà hàng / Quán ăn",
-  "Bệnh viện / Phòng khám",
-  "Ngân hàng / Tài chính",
-  "Cơ quan hành chính",
-  "Salon tóc / Làm đẹp",
-  "Trung tâm thể dục",
-  "Cửa hàng bán lẻ",
-  "Bưu điện / Chuyển phát",
-  "Khách sạn / Du lịch",
-  "Trường học / Giáo dục",
-  "Siêu thị / Tạp hóa",
-  "Bảo hiểm",
-  "Viễn thông",
-  "Dịch vụ xe cộ",
-  "Khác",
-];
+const CATEGORY_KEYS = [
+  "cat_restaurant",
+  "cat_hospital",
+  "cat_bank",
+  "cat_government",
+  "cat_salon",
+  "cat_gym",
+  "cat_retail",
+  "cat_post",
+  "cat_hotel",
+  "cat_school",
+  "cat_supermarket",
+  "cat_insurance",
+  "cat_telecom",
+  "cat_vehicle",
+  "cat_other",
+] as const;
 
-const DAYS_FULL = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+const DAY_KEYS = ["day_sun", "day_mon", "day_tue", "day_wed", "day_thu", "day_fri", "day_sat"] as const;
 
-const TABS = [
-  { id: 0, label: "Cơ bản" },
-  { id: 1, label: "Giờ làm việc" },
-  { id: 2, label: "Luồng & Cửa" },
-  { id: 3, label: "Khách hàng" },
-  { id: 4, label: "QR & Xuất bản" },
-];
+const TAB_KEYS = ["tab_basic", "tab_hours", "tab_streams", "tab_customer", "tab_qr"] as const;
 
 const DEFAULT_OPERATING_HOURS = Array.from({ length: 7 }, (_, day) => ({
   day,
@@ -55,7 +50,7 @@ const DEFAULT_OPERATING_HOURS = Array.from({ length: 7 }, (_, day) => ({
   enabled: day >= 1 && day <= 5, // Mon-Fri enabled, Sat+Sun disabled
 }));
 
-const OH_DAY_NAMES = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+const OH_DAY_KEYS = ["day_sun", "day_mon", "day_tue", "day_wed", "day_thu", "day_fri", "day_sat"] as const;
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -98,6 +93,7 @@ export default function QueueWizard({
   initialLogoUrl,
 }: QueueWizardProps) {
   const router = useRouter();
+  const t = useTranslations("wizard");
   const [activeTab, setActiveTab] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -130,10 +126,10 @@ export default function QueueWizard({
       operatingHours: DEFAULT_OPERATING_HOURS,
       streams: [
         {
-          name: "Tổng quát",
+          name: "General",
           ticketPrefix: "A",
           avgProcessingSeconds: 300,
-          counters: [{ name: "Cửa 1" }],
+          counters: [{ name: "Counter 1" }],
         },
       ],
       customFields: [],
@@ -208,7 +204,7 @@ export default function QueueWizard({
 
   const handleLogoFile = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) {
-      setError("Logo phải nhỏ hơn 10 MB");
+      setError(t("logo_too_large"));
       return;
     }
     setLogoUploading(true);
@@ -221,7 +217,7 @@ export default function QueueWizard({
         const { url } = await res.json();
         setValue("logoUrl", url);
       } else {
-        setError("Tải logo thất bại");
+        setError(t("logo_upload_failed"));
         setLogoPreview(null);
       }
     } finally {
@@ -236,7 +232,7 @@ export default function QueueWizard({
         <div className="sticky top-0 z-10 bg-white border-b border-slate-200 -mx-4 px-4 mb-0">
           <div className="flex items-center justify-between py-3">
             <h1 className="font-bold text-lg text-slate-900">
-              {mode === "edit" ? "Chỉnh sửa hàng đợi" : "Tạo hàng đợi mới"}
+              {mode === "edit" ? t("edit_queue") : t("create_new_queue")}
             </h1>
             <div className="flex items-center gap-2">
               <button
@@ -244,7 +240,7 @@ export default function QueueWizard({
                 onClick={() => router.back()}
                 className="btn-ghost text-sm py-2 px-3"
               >
-                Hủy
+                {t("cancel")}
               </button>
               <button
                 type="submit"
@@ -252,27 +248,27 @@ export default function QueueWizard({
                 className="btn-primary text-sm py-2"
               >
                 {submitting
-                  ? mode === "edit" ? "Đang lưu..." : "Đang tạo..."
-                  : mode === "edit" ? "Lưu thay đổi" : "Tạo hàng đợi"}
+                  ? mode === "edit" ? t("saving") : t("creating")
+                  : mode === "edit" ? t("save_changes") : t("create_queue")}
               </button>
             </div>
           </div>
 
           {/* ── Tab nav ── */}
           <div className="flex gap-0">
-            {TABS.map((tab) => (
+            {TAB_KEYS.map((tabKey, idx) => (
               <button
-                key={tab.id}
+                key={idx}
                 type="button"
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => setActiveTab(idx)}
                 className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab.id
+                  activeTab === idx
                     ? "text-blue-600 border-blue-600"
                     : "text-slate-500 border-transparent hover:text-slate-700"
                 }`}
               >
-                {tab.label}
-                {tabHasError[tab.id] && (
+                {t(tabKey)}
+                {tabHasError[idx] && (
                   <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
                 )}
               </button>
@@ -295,7 +291,7 @@ export default function QueueWizard({
           {activeTab === 0 && (
             <>
               {/* Logo upload */}
-              <Section title="Logo hàng đợi">
+              <Section title={t("queue_logo")}>
                 <div
                   className={`relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${
                     dragOver
@@ -323,9 +319,9 @@ export default function QueueWizard({
                       />
                       <div className="text-left">
                         <p className="text-sm font-medium text-slate-700">
-                          {logoUploading ? "Đang tải lên..." : "Logo đã chọn"}
+                          {logoUploading ? t("uploading") : t("logo_selected")}
                         </p>
-                        <p className="text-xs text-slate-400 mt-0.5">Click để thay đổi · PNG/JPG tối đa 10 MB</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{t("click_to_change")}</p>
                         {logoUploading && (
                           <div className="mt-2 h-1 bg-slate-200 rounded-full overflow-hidden w-32">
                             <div className="h-full bg-blue-500 animate-pulse w-2/3" />
@@ -336,8 +332,8 @@ export default function QueueWizard({
                   ) : (
                     <>
                       <UploadIcon />
-                      <p className="text-sm font-medium text-slate-600">Kéo thả hoặc click để tải lên</p>
-                      <p className="text-xs text-slate-400 mt-1">PNG, JPG · Tối đa 10 MB</p>
+                      <p className="text-sm font-medium text-slate-600">{t("drag_drop_upload")}</p>
+                      <p className="text-xs text-slate-400 mt-1">{t("file_format_limit")}</p>
                     </>
                   )}
                   <input
@@ -351,16 +347,16 @@ export default function QueueWizard({
               </Section>
 
               {/* Basic info */}
-              <Section title="Thông tin chung">
+              <Section title={t("general_info")}>
                 <div className="space-y-4">
-                  <FormField label="Tên hàng đợi" required error={errors.name?.message}>
+                  <FormField label={t("queue_name")} required error={errors.name?.message}>
                     <input
                       {...register("name")}
                       className={`input ${errors.name ? "input-error" : ""}`}
                       placeholder="VD: Chi nhánh Ngân hàng A"
                     />
                   </FormField>
-                  <FormField label="Lời chào">
+                  <FormField label={t("greeting")}>
                     <input
                       {...register("greeting")}
                       className="input"
@@ -371,8 +367,8 @@ export default function QueueWizard({
               </Section>
 
               {/* Timezone */}
-              <Section title="Múi giờ">
-                <FormField label="Múi giờ" required>
+              <Section title={t("timezone")}>
+                <FormField label={t("timezone")} required>
                   <select {...register("timezone")} className="input">
                     {TIMEZONES.map((tz) => (
                       <option key={tz} value={tz}>{tz}</option>
@@ -382,20 +378,20 @@ export default function QueueWizard({
               </Section>
 
               {/* Category */}
-              <Section title="Lĩnh vực">
-                <FormField label="Lĩnh vực / Loại hình dịch vụ">
+              <Section title={t("category")}>
+                <FormField label={t("category_label")}>
                   <select {...register("category")} className="input">
-                    <option value="">-- Chọn lĩnh vực --</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
+                    <option value="">{t("select_category")}</option>
+                    {CATEGORY_KEYS.map((catKey) => (
+                      <option key={catKey} value={catKey}>{t(catKey)}</option>
                     ))}
                   </select>
                 </FormField>
               </Section>
 
               {/* Advanced */}
-              <Section title="Tùy chọn nâng cao">
-                <FormField label="URL chuyển hướng sau khi lấy số">
+              <Section title={t("advanced_options")}>
+                <FormField label={t("redirect_url")}>
                   <input
                     {...register("redirectUrl")}
                     type="url"
@@ -415,21 +411,21 @@ export default function QueueWizard({
           {/* TAB 2: Streams & Counters */}
           {activeTab === 2 && (
             <Section
-              title="Luồng phục vụ"
+              title={t("service_streams")}
               action={
                 <button
                   type="button"
                   onClick={() =>
                     appendStream({
-                      name: `Luồng ${streamFields.length + 1}`,
+                      name: `${t("stream")} ${streamFields.length + 1}`,
                       ticketPrefix: String.fromCharCode(65 + streamFields.length),
                       avgProcessingSeconds: 300,
-                      counters: [{ name: "Cửa 1" }],
+                      counters: [{ name: "Counter 1" }],
                     })
                   }
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  + Thêm luồng
+                  + {t("add_stream")}
                 </button>
               }
             >
@@ -449,15 +445,15 @@ export default function QueueWizard({
                   type="button"
                   onClick={() =>
                     appendStream({
-                      name: `Luồng ${streamFields.length + 1}`,
+                      name: `${t("stream")} ${streamFields.length + 1}`,
                       ticketPrefix: String.fromCharCode(65 + streamFields.length),
                       avgProcessingSeconds: 300,
-                      counters: [{ name: "Cửa 1" }],
+                      counters: [{ name: "Counter 1" }],
                     })
                   }
                   className="w-full py-4 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl hover:border-blue-300 hover:text-blue-600 font-medium text-sm transition-colors"
                 >
-                  + Thêm luồng phục vụ
+                  + {t("add_service_stream")}
                 </button>
               </div>
             </Section>
@@ -466,16 +462,16 @@ export default function QueueWizard({
           {/* TAB 3: Customer behavior */}
           {activeTab === 3 && (
             <>
-              <Section title="Thông tin thu thập">
-                <p className="text-xs text-slate-400 mb-4">Chọn chế độ cho từng trường thông tin</p>
+              <Section title={t("collected_info")}>
+                <p className="text-xs text-slate-400 mb-4">{t("select_mode_per_field")}</p>
                 <div className="space-y-2">
                   {(
                     [
-                      { key: "collectName" as const, label: "Họ tên" },
-                      { key: "collectPhone" as const, label: "Số điện thoại" },
-                      { key: "collectAge" as const, label: "Tuổi" },
-                      { key: "collectAddress" as const, label: "Địa chỉ" },
-                      { key: "collectEmail" as const, label: "Email" },
+                      { key: "collectName" as const, label: t("field_name") },
+                      { key: "collectPhone" as const, label: t("field_phone") },
+                      { key: "collectAge" as const, label: t("field_age") },
+                      { key: "collectAddress" as const, label: t("field_address") },
+                      { key: "collectEmail" as const, label: t("field_email") },
                     ] as { key: "collectName" | "collectPhone" | "collectAge" | "collectAddress" | "collectEmail"; label: string }[]
                   ).map(({ key, label }) => (
                     <div key={key} className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white">
@@ -486,9 +482,9 @@ export default function QueueWizard({
                         render={({ field }) => (
                           <div className="flex rounded-lg border border-slate-200 overflow-hidden">
                             {[
-                              { val: "HIDDEN", text: "Ẩn" },
-                              { val: "OPTIONAL", text: "Tùy chọn" },
-                              { val: "REQUIRED", text: "Bắt buộc" },
+                              { val: "HIDDEN", text: t("hidden") },
+                              { val: "OPTIONAL", text: t("optional") },
+                              { val: "REQUIRED", text: t("required") },
                             ].map(({ val, text }) => (
                               <button
                                 key={val}
@@ -511,8 +507,8 @@ export default function QueueWizard({
                 </div>
               </Section>
 
-              <Section title="Chế độ chọn luồng">
-                <p className="text-xs text-slate-400 mb-3">Quy định cách khách hàng được gắn vào luồng phục vụ</p>
+              <Section title={t("stream_assign_mode")}>
+                <p className="text-xs text-slate-400 mb-3">{t("stream_assign_desc")}</p>
                 <Controller
                   control={control}
                   name="streamAssignMode"
@@ -521,13 +517,13 @@ export default function QueueWizard({
                       {[
                         {
                           val: "CUSTOMER_CHOICE" as const,
-                          title: "Khách hàng tự chọn",
-                          desc: "Khách hàng chọn luồng/dịch vụ trước khi lấy số",
+                          title: t("customer_choice"),
+                          desc: t("customer_choice_desc"),
                         },
                         {
                           val: "STAFF_ASSIGN" as const,
-                          title: "Nhân viên chỉ định",
-                          desc: "Khách hàng chỉ cung cấp thông tin, nhân viên sẽ chỉ định luồng sau",
+                          title: t("staff_assign"),
+                          desc: t("staff_assign_desc"),
                         },
                       ].map(({ val, title, desc }) => (
                         <label
@@ -557,13 +553,13 @@ export default function QueueWizard({
               </Section>
 
               <Section
-                title="Trường tùy chỉnh"
+                title={t("custom_fields")}
                 action={null}
               >
                 <CustomFieldsEditor control={control} watch={watch} setValue={setValue} register={register} />
               </Section>
 
-              <Section title="Chuyển hàng đợi">
+              <Section title={t("queue_transfer")}>
                 <label className="flex items-center gap-3 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
                   <input
                     type="checkbox"
@@ -571,8 +567,8 @@ export default function QueueWizard({
                     className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <div>
-                    <p className="text-sm font-medium text-slate-900">Cho phép chuyển hàng đợi</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Khách có thể được chuyển sang hàng đợi khác</p>
+                    <p className="text-sm font-medium text-slate-900">{t("allow_transfer")}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{t("allow_transfer_desc")}</p>
                   </div>
                 </label>
               </Section>
@@ -581,7 +577,7 @@ export default function QueueWizard({
 
           {/* TAB 4: QR & Publish */}
           {activeTab === 4 && (
-            <Section title="Chế độ mã QR">
+            <Section title={t("qr_mode")}>
               <Controller
                 control={control}
                 name="qrRotationType"
@@ -590,13 +586,13 @@ export default function QueueWizard({
                     {[
                       {
                         val: "FIXED",
-                        title: "Mã QR cố định",
-                        desc: "Cùng một mã QR mãi mãi. Phù hợp khi in poster, banner cố định.",
+                        title: t("qr_fixed"),
+                        desc: t("qr_fixed_desc"),
                       },
                       {
                         val: "DAILY",
-                        title: "Mã QR xoay theo ngày",
-                        desc: "Mã QR thay đổi lúc nửa đêm. Bảo mật hơn, phù hợp môi trường kiểm soát cao.",
+                        title: t("qr_daily"),
+                        desc: t("qr_daily_desc"),
                       },
                     ].map(({ val, title, desc }) => (
                       <label
@@ -636,8 +632,8 @@ export default function QueueWizard({
             className="btn-primary w-full py-3.5 text-base"
           >
             {submitting
-              ? mode === "edit" ? "Đang lưu..." : "Đang tạo..."
-              : mode === "edit" ? "Lưu thay đổi" : "Tạo hàng đợi"}
+              ? mode === "edit" ? t("saving") : t("creating")
+              : mode === "edit" ? t("save_changes") : t("create_queue")}
           </button>
         </div>
       </form>
@@ -658,6 +654,7 @@ function OperatingHoursTab({
   watch: ReturnType<typeof useForm<CreateQueueInput>>["watch"];
   setValue: ReturnType<typeof useForm<CreateQueueInput>>["setValue"];
 }) {
+  const t = useTranslations("wizard");
   const operatingHours = watch("operatingHours") ?? DEFAULT_OPERATING_HOURS;
 
   // Initialize if empty
@@ -679,18 +676,18 @@ function OperatingHoursTab({
   return (
     <div className="card p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Giờ làm việc</h3>
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">{t("operating_hours")}</h3>
         <button
           type="button"
           onClick={applyFirstToAll}
           className="text-xs text-blue-600 hover:text-blue-700 font-medium"
         >
-          Áp dụng cho tất cả
+          {t("apply_to_all")}
         </button>
       </div>
 
       <div className="space-y-2">
-        {OH_DAY_NAMES.map((dayName, dayIdx) => {
+        {OH_DAY_KEYS.map((dayKey, dayIdx) => {
           const hourIdx = operatingHours.findIndex((h) => h.day === dayIdx);
           const idx = hourIdx >= 0 ? hourIdx : dayIdx;
 
@@ -717,7 +714,7 @@ function OperatingHoursTab({
                       : "text-slate-400"
                   }
                 >
-                  {dayName}
+                  {t(dayKey)}
                 </span>
               </label>
 
@@ -746,7 +743,7 @@ function OperatingHoursTab({
                   />
                 </div>
               ) : (
-                <span className="text-slate-300 text-xs">Nghỉ</span>
+                <span className="text-slate-300 text-xs">{t("day_off")}</span>
               )}
             </div>
           );
@@ -817,6 +814,7 @@ function StreamEditor({
   onRemove: () => void;
   canRemove: boolean;
 }) {
+  const t = useTranslations("wizard");
   const {
     fields: counterFields,
     append: appendCounter,
@@ -827,24 +825,24 @@ function StreamEditor({
     <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden">
       {/* Stream header */}
       <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
-        <span className="text-sm font-semibold text-slate-700">Luồng {si + 1}</span>
+        <span className="text-sm font-semibold text-slate-700">{t("stream")} {si + 1}</span>
         {canRemove && (
           <button type="button" onClick={onRemove} className="text-xs text-red-500 hover:text-red-700 font-medium">
-            Xóa luồng
+            {t("remove_stream")}
           </button>
         )}
       </div>
 
       <div className="p-4 space-y-3">
         <div className="grid grid-cols-2 gap-3">
-          <FormField label="Tên luồng" required error={errors.streams?.[si]?.name?.message}>
+          <FormField label={t("stream_name")} required error={errors.streams?.[si]?.name?.message}>
             <input
               {...register(`streams.${si}.name`)}
               className="input text-sm"
               placeholder="VD: Tổng quát"
             />
           </FormField>
-          <FormField label="Tiền tố số vé">
+          <FormField label={t("ticket_prefix")}>
             <input
               {...register(`streams.${si}.ticketPrefix`)}
               maxLength={3}
@@ -854,7 +852,7 @@ function StreamEditor({
           </FormField>
         </div>
 
-        <FormField label="Thời gian phục vụ TB (giây)">
+        <FormField label={t("avg_processing_time")}>
           <input
             type="number"
             {...register(`streams.${si}.avgProcessingSeconds`, { valueAsNumber: true })}
@@ -866,13 +864,13 @@ function StreamEditor({
         {/* Counters */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Cửa phục vụ</span>
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t("counters")}</span>
             <button
               type="button"
-              onClick={() => appendCounter({ name: `Cửa ${counterFields.length + 1}` })}
+              onClick={() => appendCounter({ name: `${t("counter")} ${counterFields.length + 1}` })}
               className="text-xs text-blue-600 hover:text-blue-700 font-medium"
             >
-              + Thêm cửa
+              + {t("add_counter")}
             </button>
           </div>
           <div className="space-y-2">
@@ -911,6 +909,7 @@ function CounterEditor({
   onRemove: () => void;
   canRemove: boolean;
 }) {
+  const t = useTranslations("wizard");
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const { fields: scheduleFields, replace } = useFieldArray({
     control,
@@ -948,7 +947,7 @@ function CounterEditor({
               : "bg-white border-slate-200 text-slate-500 hover:text-blue-600"
           }`}
         >
-          Lịch
+          {t("operating_hours")}
           <ChevronIcon open={scheduleOpen} />
         </button>
         {canRemove && (
@@ -965,7 +964,7 @@ function CounterEditor({
       {scheduleOpen && scheduleFields.length === 7 && (
         <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Lịch hoạt động</span>
+            <span className="text-xs font-medium text-slate-500">{t("operating_hours")}</span>
             <button
               type="button"
               onClick={() => {
@@ -983,14 +982,14 @@ function CounterEditor({
               }}
               className="text-xs text-blue-600 hover:text-blue-700"
             >
-              Áp dụng cho tất cả
+              {t("apply_to_all")}
             </button>
           </div>
-          {DAYS_FULL.map((dayName, dayIdx) => (
+          {DAY_KEYS.map((dayKey, dayIdx) => (
             <DayScheduleRow
               key={dayIdx}
               dayIdx={dayIdx}
-              dayName={dayName}
+              dayName={t(dayKey)}
               si={si}
               ci={ci}
               scheduleIndex={dayIdx}

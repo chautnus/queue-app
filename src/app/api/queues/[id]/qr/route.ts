@@ -36,7 +36,7 @@ export async function GET(
     const proto = req.headers.get("x-forwarded-proto") ?? "https";
     const baseUrl = `${proto}://${host}`;
     const qrUrl = `${baseUrl}/q/${queue.id}?token=${token}`;
-    const png = await generateQrPngWithLogo(qrUrl, queue.logoUrl);
+    const png = await generateQrPngWithLogo(qrUrl, queue.logoUrl, baseUrl);
 
     const cacheHeader =
       queue.qrRotationType === "DAILY"

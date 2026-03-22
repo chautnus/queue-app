@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { RegisterSchema, type RegisterInput } from "@/lib/validations/auth";
 
 interface RegisterFormProps {
@@ -13,6 +14,7 @@ interface RegisterFormProps {
 
 export default function RegisterForm({ showGoogle = false }: RegisterFormProps) {
   const router = useRouter();
+  const t = useTranslations("auth");
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -36,7 +38,7 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
       const body = await res.json();
       const firstError = Object.values(body.error ?? {})[0];
       setServerError(
-        Array.isArray(firstError) ? firstError[0] : "Đăng ký thất bại"
+        Array.isArray(firstError) ? firstError[0] : t("register_failed")
       );
       return;
     }
@@ -71,7 +73,7 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
-            Đăng ký với Google
+            {t("register_with_google")}
           </button>
 
           <div className="relative">
@@ -79,7 +81,7 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
               <div className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-white text-slate-400">hoặc</span>
+              <span className="px-3 bg-white text-slate-400">{t("or")}</span>
             </div>
           </div>
         </>
@@ -87,7 +89,7 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="label">Họ tên</label>
+          <label className="label">{t("full_name")}</label>
           <input
             type="text"
             {...register("name")}
@@ -100,7 +102,7 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
         </div>
 
         <div>
-          <label className="label">Email</label>
+          <label className="label">{t("email")}</label>
           <input
             type="email"
             {...register("email")}
@@ -113,12 +115,12 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
         </div>
 
         <div>
-          <label className="label">Mật khẩu</label>
+          <label className="label">{t("password")}</label>
           <input
             type="password"
             {...register("password")}
             className="input"
-            placeholder="Tối thiểu 8 ký tự"
+            placeholder={t("min_8_chars")}
           />
           {errors.password && (
             <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
@@ -126,12 +128,12 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
         </div>
 
         <div>
-          <label className="label">Xác nhận mật khẩu</label>
+          <label className="label">{t("confirm_password")}</label>
           <input
             type="password"
             {...register("confirmPassword")}
             className="input"
-            placeholder="Nhập lại mật khẩu"
+            placeholder={t("re_enter_password")}
           />
           {errors.confirmPassword && (
             <p className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</p>
@@ -149,7 +151,7 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
           disabled={isSubmitting}
           className="btn-primary w-full py-3"
         >
-          {isSubmitting ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
+          {isSubmitting ? t("creating_account") : t("create_account")}
         </button>
       </form>
     </div>
