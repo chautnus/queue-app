@@ -94,7 +94,8 @@
     "now_serving": "当前服务",
     "waiting": "等候中",
     "no_customers": "等待客户中...",
-    "serving": "服务中"
+    "serving": "服务中",
+    "default_name": "排队显示"
   },
   "customer": {
     "take_ticket": "取号",
@@ -216,7 +217,8 @@
     "counters_count": "个柜台",
     "tickets_count": "张票",
     "monitor": "监控",
-    "edit": "编辑"
+    "edit": "编辑",
+    "default_user": "管理员"
   },
   "wizard": {
     "tab_basic": "基本信息",
@@ -301,6 +303,23 @@
     "qr_daily_desc": "二维码在午夜更换。更安全，适合受控环境。",
     "operating_hours": "营业时间",
     "apply_to_all": "应用到所有",
+    "default_stream": "综合",
+    "default_counter": "柜台 1",
+    "name_placeholder": "例：银行A分行",
+    "greeting_placeholder": "例：欢迎！我们将尽快为您服务。",
+    "redirect_placeholder": "https://...（取号后打开）",
+    "counter_placeholder": "柜台 {number}",
+    "field_label": "字段标签",
+    "field_options": "选项：",
+    "options_placeholder": "输入选项后点击添加...",
+    "no_custom_fields": "暂无自定义字段",
+    "select": "选择",
+    "field_type_text": "文本",
+    "field_type_number": "数字",
+    "field_type_phone": "电话",
+    "field_type_email": "邮箱",
+    "add_option": "添加",
+    "add_custom_field": "添加自定义字段",
     "day_off": "休息",
     "day_sun": "星期日",
     "day_mon": "星期一",
@@ -405,7 +424,8 @@
     "counter": "柜台",
     "planned_end_time": "计划结束时间",
     "starting": "启动中...",
-    "start_session": "开始工作"
+    "start_session": "开始工作",
+    "start_failed": "无法启动工作会话"
   },
   "auth": {
     "login_with_google": "使用 Google 登录",
@@ -422,6 +442,36 @@
     "re_enter_password": "再次输入密码",
     "create_account": "创建账户",
     "creating_account": "创建账户中...",
-    "register_failed": "注册失败"
+    "register_failed": "注册失败",
+    "name_placeholder": "张三"
+  },
+  "guide": {
+    "step1_title": "扫描二维码",
+    "step1_desc": "使用手机摄像头扫描张贴在柜台或入口处的二维码。",
+    "step2_title": "选择服务",
+    "step2_desc": "选择您需要的服务类型。系统将显示等候人数和预计等待时间。",
+    "step3_title": "获取排队号",
+    "step3_desc": "确认后，您将收到排队号和验证码。请保留此屏幕以供工作人员验证。",
+    "step4_title": "等待通知",
+    "step4_desc": "开启通知功能，当快到您时会收到提醒。您无需在柜台等候。",
+    "usage_title": "排队使用指南",
+    "step_label": "第 {n} 步",
+    "tip_title": "温馨提示",
+    "tip1": "每台设备在同一排队中只能取 1 个号。",
+    "tip2": "您的号码仅在今天有效。",
+    "tip3": "如果超过预计时间仍未被叫到，请联系工作人员。",
+    "take_number": "立即取号"
+  },
+  "auth_page": {
+    "login_title": "登录",
+    "login_subtitle": "管理您的排队",
+    "no_account": "还没有账户？",
+    "register_link": "注册",
+    "register_title": "创建账户",
+    "register_subtitle": "开始管理您的排队",
+    "have_account": "已有账户？",
+    "login_link": "登录",
+    "staff_title": "员工门户",
+    "staff_subtitle": "登录以开始服务客户"
   }
 }

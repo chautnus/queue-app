@@ -126,10 +126,10 @@ export default function QueueWizard({
       operatingHours: DEFAULT_OPERATING_HOURS,
       streams: [
         {
-          name: "General",
+          name: t("default_stream"),
           ticketPrefix: "A",
           avgProcessingSeconds: 300,
-          counters: [{ name: "Counter 1" }],
+          counters: [{ name: t("default_counter") }],
         },
       ],
       customFields: [],
@@ -353,14 +353,14 @@ export default function QueueWizard({
                     <input
                       {...register("name")}
                       className={`input ${errors.name ? "input-error" : ""}`}
-                      placeholder="VD: Chi nhánh Ngân hàng A"
+                      placeholder={t("name_placeholder")}
                     />
                   </FormField>
                   <FormField label={t("greeting")}>
                     <input
                       {...register("greeting")}
                       className="input"
-                      placeholder="VD: Chào mừng! Chúng tôi sẽ phục vụ bạn sớm."
+                      placeholder={t("greeting_placeholder")}
                     />
                   </FormField>
                 </div>
@@ -396,7 +396,7 @@ export default function QueueWizard({
                     {...register("redirectUrl")}
                     type="url"
                     className="input"
-                    placeholder="https://... (Mở sau khi khách lấy số)"
+                    placeholder={t("redirect_placeholder")}
                   />
                 </FormField>
               </Section>
@@ -420,7 +420,7 @@ export default function QueueWizard({
                       name: `${t("stream")} ${streamFields.length + 1}`,
                       ticketPrefix: String.fromCharCode(65 + streamFields.length),
                       avgProcessingSeconds: 300,
-                      counters: [{ name: "Counter 1" }],
+                      counters: [{ name: t("default_counter") }],
                     })
                   }
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -448,7 +448,7 @@ export default function QueueWizard({
                       name: `${t("stream")} ${streamFields.length + 1}`,
                       ticketPrefix: String.fromCharCode(65 + streamFields.length),
                       avgProcessingSeconds: 300,
-                      counters: [{ name: "Counter 1" }],
+                      counters: [{ name: t("default_counter") }],
                     })
                   }
                   className="w-full py-4 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl hover:border-blue-300 hover:text-blue-600 font-medium text-sm transition-colors"
@@ -839,7 +839,7 @@ function StreamEditor({
             <input
               {...register(`streams.${si}.name`)}
               className="input text-sm"
-              placeholder="VD: Tổng quát"
+              placeholder={t("default_stream")}
             />
           </FormField>
           <FormField label={t("ticket_prefix")}>
@@ -936,7 +936,7 @@ function CounterEditor({
         <input
           {...register(`streams.${si}.counters.${ci}.name`)}
           className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder={`Cửa ${ci + 1}`}
+          placeholder={t("counter_placeholder", { number: ci + 1 })}
         />
         <button
           type="button"
@@ -1022,6 +1022,7 @@ function DayScheduleRow({
   register: ReturnType<typeof useForm<CreateQueueInput>>["register"];
   control: ReturnType<typeof useForm<CreateQueueInput>>["control"];
 }) {
+  const t = useTranslations("wizard");
   const isOpen = useWatch({
     control,
     name: `streams.${si}.counters.${ci}.schedule.${scheduleIndex}.isOpen`,
@@ -1059,7 +1060,7 @@ function DayScheduleRow({
           />
         </div>
       ) : (
-        <span className="text-slate-300 text-xs">Nghỉ</span>
+        <span className="text-slate-300 text-xs">{t("day_off")}</span>
       )}
     </div>
   );
@@ -1078,6 +1079,7 @@ function CustomFieldsEditor({
   setValue: ReturnType<typeof useForm<CreateQueueInput>>["setValue"];
   register: ReturnType<typeof useForm<CreateQueueInput>>["register"];
 }) {
+  const t = useTranslations("wizard");
   const { fields, append, remove } = useFieldArray({ control, name: "customFields" });
   const [optionInputs, setOptionInputs] = useState<Record<number, string>>({});
 
@@ -1104,7 +1106,7 @@ function CustomFieldsEditor({
                 render={({ field }) => (
                   <input
                     {...field}
-                    placeholder="Nhãn trường"
+                    placeholder={t("field_label")}
                     className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 )}
@@ -1117,17 +1119,17 @@ function CustomFieldsEditor({
                     {...field}
                     className="px-2 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="text">Văn bản</option>
-                    <option value="number">Số</option>
-                    <option value="phone">Điện thoại</option>
-                    <option value="email">Email</option>
-                    <option value="select">Chọn</option>
+                    <option value="text">{t("field_type_text")}</option>
+                    <option value="number">{t("field_type_number")}</option>
+                    <option value="phone">{t("field_type_phone")}</option>
+                    <option value="email">{t("field_type_email")}</option>
+                    <option value="select">{t("select")}</option>
                   </select>
                 )}
               />
               <label className="flex items-center gap-1.5 text-xs text-slate-600 whitespace-nowrap">
                 <input type="checkbox" {...register(`customFields.${i}.required`)} className="rounded" />
-                Bắt buộc
+                {t("required")}
               </label>
               <button
                 type="button"
@@ -1140,7 +1142,7 @@ function CustomFieldsEditor({
 
             {fieldType === "select" && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-slate-500">Các lựa chọn:</p>
+                <p className="text-xs font-medium text-slate-500">{t("field_options")}</p>
                 <div className="space-y-1.5">
                   {currentOptions.map((opt: string, oi: number) => (
                     <div key={oi} className="flex gap-2 items-center">
@@ -1160,7 +1162,7 @@ function CustomFieldsEditor({
                     type="text"
                     value={optionInputs[i] ?? ""}
                     onChange={(e) => setOptionInputs((prev) => ({ ...prev, [i]: e.target.value }))}
-                    placeholder="Nhập lựa chọn rồi nhấn Thêm..."
+                    placeholder={t("options_placeholder")}
                     className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                     onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOption(); } }}
                   />
@@ -1169,7 +1171,7 @@ function CustomFieldsEditor({
                     onClick={addOption}
                     className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700"
                   >
-                    Thêm
+                    {t("add_option")}
                   </button>
                 </div>
               </div>
@@ -1183,11 +1185,11 @@ function CustomFieldsEditor({
         onClick={() => append({ name: `field${fields.length}`, label: "", type: "text", required: false })}
         className="w-full py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-xl hover:border-blue-300 hover:text-blue-600 text-sm font-medium transition-colors"
       >
-        + Thêm trường tùy chỉnh
+        + {t("add_custom_field")}
       </button>
 
       {fields.length === 0 && (
-        <p className="text-xs text-slate-400 text-center py-1">Chưa có trường tùy chỉnh nào</p>
+        <p className="text-xs text-slate-400 text-center py-1">{t("no_custom_fields")}</p>
       )}
     </div>
   );

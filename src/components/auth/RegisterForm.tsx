@@ -94,7 +94,7 @@ export default function RegisterForm({ showGoogle = false }: RegisterFormProps) 
             type="text"
             {...register("name")}
             className="input"
-            placeholder="Nguyễn Văn A"
+            placeholder={t("name_placeholder")}
           />
           {errors.name && (
             <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>

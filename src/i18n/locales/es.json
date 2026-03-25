@@ -94,7 +94,8 @@
     "now_serving": "Atendiendo ahora",
     "waiting": "En espera",
     "no_customers": "Esperando clientes...",
-    "serving": "Atendiendo"
+    "serving": "Atendiendo",
+    "default_name": "Pantalla de cola"
   },
   "customer": {
     "take_ticket": "Tomar un número",
@@ -216,7 +217,8 @@
     "counters_count": "mostradores",
     "tickets_count": "tickets",
     "monitor": "Monitor",
-    "edit": "Editar"
+    "edit": "Editar",
+    "default_user": "Administrador"
   },
   "wizard": {
     "tab_basic": "Básico",
@@ -301,6 +303,23 @@
     "qr_daily_desc": "El código QR cambia a medianoche. Más seguro, ideal para entornos controlados.",
     "operating_hours": "Horario de atención",
     "apply_to_all": "Aplicar a todos",
+    "default_stream": "General",
+    "default_counter": "Mostrador 1",
+    "name_placeholder": "Ej: Sucursal Banco A",
+    "greeting_placeholder": "Ej: ¡Bienvenido! Lo atenderemos pronto.",
+    "redirect_placeholder": "https://... (Se abre después de tomar un número)",
+    "counter_placeholder": "Mostrador {number}",
+    "field_label": "Etiqueta del campo",
+    "field_options": "Opciones:",
+    "options_placeholder": "Escriba una opción y presione Agregar...",
+    "no_custom_fields": "No hay campos personalizados",
+    "select": "Seleccionar",
+    "field_type_text": "Texto",
+    "field_type_number": "Número",
+    "field_type_phone": "Teléfono",
+    "field_type_email": "Email",
+    "add_option": "Agregar",
+    "add_custom_field": "Agregar campo personalizado",
     "day_off": "Cerrado",
     "day_sun": "Domingo",
     "day_mon": "Lunes",
@@ -405,7 +424,8 @@
     "counter": "Mostrador",
     "planned_end_time": "Hora de fin planificada",
     "starting": "Iniciando...",
-    "start_session": "Iniciar sesión de trabajo"
+    "start_session": "Iniciar sesión de trabajo",
+    "start_failed": "No se pudo iniciar la sesión"
   },
   "auth": {
     "login_with_google": "Iniciar sesión con Google",
@@ -422,6 +442,36 @@
     "re_enter_password": "Vuelve a ingresar la contraseña",
     "create_account": "Crear cuenta",
     "creating_account": "Creando cuenta...",
-    "register_failed": "Error en el registro"
+    "register_failed": "Error en el registro",
+    "name_placeholder": "Juan Pérez"
+  },
+  "guide": {
+    "step1_title": "Escanear el codigo QR",
+    "step1_desc": "Usa la camara de tu telefono para escanear el codigo QR en el mostrador o la entrada.",
+    "step2_title": "Seleccionar servicio",
+    "step2_desc": "Elige el servicio que necesitas. El sistema mostrara el numero de personas en espera y el tiempo estimado.",
+    "step3_title": "Obtener tu numero",
+    "step3_desc": "Despues de confirmar, recibiras un numero de turno y un codigo de verificacion. Conserva esta pantalla para la verificacion del personal.",
+    "step4_title": "Esperar la notificacion",
+    "step4_desc": "Activa las notificaciones para recibir un aviso cuando se acerque tu turno. No necesitas esperar en el mostrador.",
+    "usage_title": "Guia de uso de la cola",
+    "step_label": "Paso {n}",
+    "tip_title": "Consejos",
+    "tip1": "Cada dispositivo solo puede tomar 1 numero por cola.",
+    "tip2": "Tu numero es valido solo para hoy.",
+    "tip3": "Si ha pasado el tiempo estimado sin ser llamado, contacta al personal.",
+    "take_number": "Tomar un numero"
+  },
+  "auth_page": {
+    "login_title": "Iniciar sesion",
+    "login_subtitle": "Administra tus colas",
+    "no_account": "No tienes cuenta?",
+    "register_link": "Registrarse",
+    "register_title": "Crear cuenta",
+    "register_subtitle": "Comienza a administrar tus colas",
+    "have_account": "Ya tienes cuenta?",
+    "login_link": "Iniciar sesion",
+    "staff_title": "Portal del personal",
+    "staff_subtitle": "Inicia sesion para comenzar a atender clientes"
   }
 }

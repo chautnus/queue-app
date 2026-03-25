@@ -332,7 +332,7 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
             onClick={() => navigator.clipboard.writeText(`${window.location.origin}/display/${queueId}`)}
             className="btn-outline text-xs py-2 px-4"
           >
-            Sao chep link
+            {t("copy_link")}
           </button>
         </div>
       </div>

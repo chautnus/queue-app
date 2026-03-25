@@ -112,7 +112,7 @@ export default function DashboardSidebar({ user }: { user: User }) {
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-800 truncate">{user.name ?? "Admin"}</p>
+            <p className="text-sm font-medium text-slate-800 truncate">{user.name ?? t("default_user")}</p>
             <p className="text-xs text-slate-400 truncate">{user.email}</p>
           </div>
         </div>

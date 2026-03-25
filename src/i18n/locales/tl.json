@@ -94,7 +94,8 @@
     "now_serving": "Kasalukuyang Sini-serve",
     "waiting": "Naghihintay",
     "no_customers": "Naghihintay ng mga customer...",
-    "serving": "Sini-serve"
+    "serving": "Sini-serve",
+    "default_name": "Display ng Pila"
   },
   "customer": {
     "take_ticket": "Kumuha ng Numero",
@@ -216,7 +217,8 @@
     "counters_count": "counter",
     "tickets_count": "ticket",
     "monitor": "Monitor",
-    "edit": "I-edit"
+    "edit": "I-edit",
+    "default_user": "Admin"
   },
   "wizard": {
     "tab_basic": "Basic",
@@ -301,6 +303,23 @@
     "qr_daily_desc": "Nagbabago ang QR code sa hatinggabi. Mas secure, ideal para sa mga kontroladong kapaligiran.",
     "operating_hours": "Oras ng Operasyon",
     "apply_to_all": "Ilapat sa lahat",
+    "default_stream": "Pangkalahatan",
+    "default_counter": "Counter 1",
+    "name_placeholder": "Hal: Sangay ng Bangko A",
+    "greeting_placeholder": "Hal: Maligayang pagdating! Seseserbisyuhan ka namin agad.",
+    "redirect_placeholder": "https://... (Magbubukas pagkatapos kumuha ng numero)",
+    "counter_placeholder": "Counter {number}",
+    "field_label": "Label ng field",
+    "field_options": "Mga pagpipilian:",
+    "options_placeholder": "Mag-type ng opsyon at pindutin ang Idagdag...",
+    "no_custom_fields": "Wala pang custom na field",
+    "select": "Pumili",
+    "field_type_text": "Teksto",
+    "field_type_number": "Numero",
+    "field_type_phone": "Telepono",
+    "field_type_email": "Email",
+    "add_option": "Idagdag",
+    "add_custom_field": "Magdagdag ng custom na field",
     "day_off": "Sarado",
     "day_sun": "Linggo",
     "day_mon": "Lunes",
@@ -405,7 +424,8 @@
     "counter": "Counter",
     "planned_end_time": "Planong Oras ng Pagtatapos",
     "starting": "Nagsisimula...",
-    "start_session": "Simulan ang Work Session"
+    "start_session": "Simulan ang Work Session",
+    "start_failed": "Hindi masimulan ang session"
   },
   "auth": {
     "login_with_google": "Mag-log in gamit ang Google",
@@ -422,6 +442,36 @@
     "re_enter_password": "Ilagay muli ang password",
     "create_account": "Gumawa ng Account",
     "creating_account": "Gumagawa ng account...",
-    "register_failed": "Nabigo ang pagpaparehistro"
+    "register_failed": "Nabigo ang pagpaparehistro",
+    "name_placeholder": "Juan dela Cruz"
+  },
+  "guide": {
+    "step1_title": "I-scan ang QR Code",
+    "step1_desc": "Gamitin ang camera ng iyong telepono para i-scan ang QR code na nakadikit sa counter o pasukan.",
+    "step2_title": "Pumili ng Serbisyo",
+    "step2_desc": "Piliin ang serbisyong kailangan mo. Ipapakita ng sistema ang bilang ng naghihintay at tinatayang oras.",
+    "step3_title": "Kunin ang Numero Mo",
+    "step3_desc": "Pagkatapos kumpirmahin, makakatanggap ka ng numero sa pila at verification code. Panatilihin ang screen na ito para sa verification ng staff.",
+    "step4_title": "Hintayin ang Notification",
+    "step4_desc": "I-enable ang mga notification para ma-alerto ka kapag malapit na ang iyong turn. Hindi mo kailangang maghintay sa counter.",
+    "usage_title": "Gabay sa Paggamit ng Pila",
+    "step_label": "Hakbang {n}",
+    "tip_title": "Mga Paalala",
+    "tip1": "Isang numero lang bawat device sa bawat pila.",
+    "tip2": "Ang iyong numero ay valid lang para sa araw na ito.",
+    "tip3": "Kung lumampas na ang tinatayang oras at hindi pa rin natatawag, makipag-ugnayan sa staff.",
+    "take_number": "Kumuha ng Numero"
+  },
+  "auth_page": {
+    "login_title": "Mag-log in",
+    "login_subtitle": "Pamahalaan ang iyong mga pila",
+    "no_account": "Wala pa kang account?",
+    "register_link": "Mag-register",
+    "register_title": "Gumawa ng Account",
+    "register_subtitle": "Magsimulang pamahalaan ang iyong mga pila",
+    "have_account": "May account ka na?",
+    "login_link": "Mag-log in",
+    "staff_title": "Portal ng Staff",
+    "staff_subtitle": "Mag-sign in para magsimulang maglingkod sa mga customer"
   }
 }

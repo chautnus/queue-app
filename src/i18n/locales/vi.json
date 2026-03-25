@@ -94,7 +94,8 @@
     "now_serving": "Đang phục vụ",
     "waiting": "Đang chờ",
     "no_customers": "Đang chờ khách hàng...",
-    "serving": "Đang phục vụ"
+    "serving": "Đang phục vụ",
+    "default_name": "Bảng hiển thị"
   },
   "customer": {
     "take_ticket": "Lấy số",
@@ -216,7 +217,8 @@
     "counters_count": "cửa",
     "tickets_count": "lượt",
     "monitor": "Giám sát",
-    "edit": "Chỉnh sửa"
+    "edit": "Chỉnh sửa",
+    "default_user": "Quản trị viên"
   },
   "wizard": {
     "tab_basic": "Cơ bản",
@@ -301,6 +303,23 @@
     "qr_daily_desc": "Mã QR thay đổi lúc nửa đêm. Bảo mật hơn, phù hợp môi trường kiểm soát cao.",
     "operating_hours": "Giờ làm việc",
     "apply_to_all": "Áp dụng cho tất cả",
+    "default_stream": "Tổng quát",
+    "default_counter": "Cửa 1",
+    "name_placeholder": "VD: Chi nhánh Ngân hàng A",
+    "greeting_placeholder": "VD: Chào mừng! Chúng tôi sẽ phục vụ bạn sớm.",
+    "redirect_placeholder": "https://... (Mở sau khi khách lấy số)",
+    "counter_placeholder": "Cửa {number}",
+    "field_label": "Nhãn trường",
+    "field_options": "Các lựa chọn:",
+    "options_placeholder": "Nhập lựa chọn rồi nhấn Thêm...",
+    "no_custom_fields": "Chưa có trường tùy chỉnh nào",
+    "select": "Chọn",
+    "field_type_text": "Văn bản",
+    "field_type_number": "Số",
+    "field_type_phone": "Điện thoại",
+    "field_type_email": "Email",
+    "add_option": "Thêm",
+    "add_custom_field": "Thêm trường tùy chỉnh",
     "day_off": "Nghỉ",
     "day_sun": "Chủ nhật",
     "day_mon": "Thứ 2",
@@ -405,7 +424,8 @@
     "counter": "Cửa phục vụ",
     "planned_end_time": "Dự kiến kết thúc ca",
     "starting": "Đang bắt đầu...",
-    "start_session": "Bắt đầu ca làm việc"
+    "start_session": "Bắt đầu ca làm việc",
+    "start_failed": "Không thể bắt đầu phiên làm việc"
   },
   "auth": {
     "login_with_google": "Đăng nhập với Google",
@@ -422,6 +442,36 @@
     "re_enter_password": "Nhập lại mật khẩu",
     "create_account": "Tạo tài khoản",
     "creating_account": "Đang tạo tài khoản...",
-    "register_failed": "Đăng ký thất bại"
+    "register_failed": "Đăng ký thất bại",
+    "name_placeholder": "Nguyễn Văn A"
+  },
+  "guide": {
+    "step1_title": "Quét mã QR",
+    "step1_desc": "Dùng camera điện thoại quét mã QR được dán tại quầy hoặc cổng vào.",
+    "step2_title": "Chọn dịch vụ",
+    "step2_desc": "Chọn loại dịch vụ bạn cần. Hệ thống sẽ hiển thị số người đang chờ và thời gian ước tính.",
+    "step3_title": "Nhận số thứ tự",
+    "step3_desc": "Sau khi xác nhận, bạn nhận được số thứ tự và mã kiểm tra. Giữ màn hình này để nhân viên xác minh.",
+    "step4_title": "Chờ thông báo",
+    "step4_desc": "Bật thông báo để nhận cảnh báo khi gần đến lượt. Bạn không cần ngồi chờ tại quầy.",
+    "usage_title": "Hướng dẫn sử dụng hàng đợi",
+    "step_label": "Bước {n}",
+    "tip_title": "Lưu ý",
+    "tip1": "Mỗi thiết bị chỉ được lấy 1 số trong cùng hàng đợi.",
+    "tip2": "Số thứ tự có hiệu lực trong ngày hôm nay.",
+    "tip3": "Nếu quá giờ dự kiến mà chưa được gọi, vui lòng liên hệ nhân viên.",
+    "take_number": "Lấy số ngay"
+  },
+  "auth_page": {
+    "login_title": "Đăng nhập",
+    "login_subtitle": "Quản lý hàng đợi của bạn",
+    "no_account": "Chưa có tài khoản?",
+    "register_link": "Đăng ký",
+    "register_title": "Tạo tài khoản",
+    "register_subtitle": "Bắt đầu quản lý hàng đợi",
+    "have_account": "Đã có tài khoản?",
+    "login_link": "Đăng nhập",
+    "staff_title": "Cổng nhân viên",
+    "staff_subtitle": "Đăng nhập để bắt đầu phục vụ khách hàng"
   }
 }

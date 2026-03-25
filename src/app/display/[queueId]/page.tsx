@@ -22,7 +22,7 @@ export default function DisplayBoardPage({
   const { queueId } = use(params);
   const t = useTranslations("display");
   const [serving, setServing] = useState<TicketInfo[]>([]);
-  const [queueName, setQueueName] = useState("Queue Display");
+  const [queueName, setQueueName] = useState(t("default_name"));
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [stats, setStats] = useState<QueueStats>({ totalWaiting: 0, totalServing: 0 });
   const [clock, setClock] = useState(new Date());

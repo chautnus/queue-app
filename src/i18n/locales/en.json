@@ -94,7 +94,8 @@
     "now_serving": "Now Serving",
     "waiting": "Waiting",
     "no_customers": "Waiting for customers...",
-    "serving": "Serving"
+    "serving": "Serving",
+    "default_name": "Queue Display"
   },
   "customer": {
     "take_ticket": "Take a Number",
@@ -216,7 +217,8 @@
     "counters_count": "counters",
     "tickets_count": "tickets",
     "monitor": "Monitor",
-    "edit": "Edit"
+    "edit": "Edit",
+    "default_user": "Admin"
   },
   "wizard": {
     "tab_basic": "Basic",
@@ -301,6 +303,23 @@
     "qr_daily_desc": "QR code changes at midnight. More secure, ideal for controlled environments.",
     "operating_hours": "Operating Hours",
     "apply_to_all": "Apply to all",
+    "default_stream": "General",
+    "default_counter": "Counter 1",
+    "name_placeholder": "e.g. Bank Branch A",
+    "greeting_placeholder": "e.g. Welcome! We will serve you shortly.",
+    "redirect_placeholder": "https://... (Opens after customer takes a number)",
+    "counter_placeholder": "Counter {number}",
+    "field_label": "Field label",
+    "field_options": "Options:",
+    "options_placeholder": "Type an option then press Add...",
+    "no_custom_fields": "No custom fields yet",
+    "select": "Select",
+    "field_type_text": "Text",
+    "field_type_number": "Number",
+    "field_type_phone": "Phone",
+    "field_type_email": "Email",
+    "add_option": "Add",
+    "add_custom_field": "Add custom field",
     "day_off": "Off",
     "day_sun": "Sunday",
     "day_mon": "Monday",
@@ -405,7 +424,8 @@
     "counter": "Counter",
     "planned_end_time": "Planned End Time",
     "starting": "Starting...",
-    "start_session": "Start Work Session"
+    "start_session": "Start Work Session",
+    "start_failed": "Failed to start session"
   },
   "auth": {
     "login_with_google": "Log in with Google",
@@ -422,6 +442,36 @@
     "re_enter_password": "Re-enter password",
     "create_account": "Create Account",
     "creating_account": "Creating account...",
-    "register_failed": "Registration failed"
+    "register_failed": "Registration failed",
+    "name_placeholder": "John Doe"
+  },
+  "guide": {
+    "step1_title": "Scan QR Code",
+    "step1_desc": "Use your phone camera to scan the QR code posted at the counter or entrance.",
+    "step2_title": "Select Service",
+    "step2_desc": "Choose the service you need. The system will show the number of people waiting and estimated time.",
+    "step3_title": "Get Your Number",
+    "step3_desc": "After confirming, you will receive a queue number and verification code. Keep this screen for staff verification.",
+    "step4_title": "Wait for Notification",
+    "step4_desc": "Enable notifications to get alerted when your turn is near. You do not need to wait at the counter.",
+    "usage_title": "Queue Usage Guide",
+    "step_label": "Step {n}",
+    "tip_title": "Tips",
+    "tip1": "Each device can only take 1 number per queue.",
+    "tip2": "Your number is valid for today only.",
+    "tip3": "If your estimated time has passed without being called, please contact the staff.",
+    "take_number": "Take a Number"
+  },
+  "auth_page": {
+    "login_title": "Log In",
+    "login_subtitle": "Manage your queues",
+    "no_account": "Don't have an account?",
+    "register_link": "Register",
+    "register_title": "Create Account",
+    "register_subtitle": "Start managing your queues",
+    "have_account": "Already have an account?",
+    "login_link": "Log In",
+    "staff_title": "Staff Portal",
+    "staff_subtitle": "Sign in to start serving customers"
   }
 }

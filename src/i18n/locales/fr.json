@@ -94,7 +94,8 @@
     "now_serving": "En cours de service",
     "waiting": "En attente",
     "no_customers": "En attente de clients...",
-    "serving": "En service"
+    "serving": "En service",
+    "default_name": "Affichage de la file"
   },
   "customer": {
     "take_ticket": "Prendre un numéro",
@@ -216,7 +217,8 @@
     "counters_count": "guichets",
     "tickets_count": "tickets",
     "monitor": "Surveiller",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "default_user": "Administrateur"
   },
   "wizard": {
     "tab_basic": "Général",
@@ -301,6 +303,23 @@
     "qr_daily_desc": "Le QR code change à minuit. Plus sécurisé, idéal pour les environnements contrôlés.",
     "operating_hours": "Horaires d'ouverture",
     "apply_to_all": "Appliquer à tous",
+    "default_stream": "Général",
+    "default_counter": "Guichet 1",
+    "name_placeholder": "Ex : Agence Bancaire A",
+    "greeting_placeholder": "Ex : Bienvenue ! Nous vous servirons bientôt.",
+    "redirect_placeholder": "https://... (S'ouvre après la prise de numéro)",
+    "counter_placeholder": "Guichet {number}",
+    "field_label": "Libellé du champ",
+    "field_options": "Options :",
+    "options_placeholder": "Saisissez une option puis appuyez sur Ajouter...",
+    "no_custom_fields": "Aucun champ personnalisé",
+    "select": "Sélection",
+    "field_type_text": "Texte",
+    "field_type_number": "Nombre",
+    "field_type_phone": "Téléphone",
+    "field_type_email": "Email",
+    "add_option": "Ajouter",
+    "add_custom_field": "Ajouter un champ personnalisé",
     "day_off": "Fermé",
     "day_sun": "Dimanche",
     "day_mon": "Lundi",
@@ -405,7 +424,8 @@
     "counter": "Guichet",
     "planned_end_time": "Heure de fin prévue",
     "starting": "Démarrage...",
-    "start_session": "Démarrer la session"
+    "start_session": "Démarrer la session",
+    "start_failed": "Impossible de démarrer la session"
   },
   "auth": {
     "login_with_google": "Se connecter avec Google",
@@ -422,6 +442,36 @@
     "re_enter_password": "Ressaisir le mot de passe",
     "create_account": "Créer un compte",
     "creating_account": "Création du compte...",
-    "register_failed": "Échec de l'inscription"
+    "register_failed": "Échec de l'inscription",
+    "name_placeholder": "Jean Dupont"
+  },
+  "guide": {
+    "step1_title": "Scanner le QR code",
+    "step1_desc": "Utilisez l'appareil photo de votre téléphone pour scanner le QR code affiché au guichet ou à l'entrée.",
+    "step2_title": "Choisir le service",
+    "step2_desc": "Choisissez le service dont vous avez besoin. Le système affichera le nombre de personnes en attente et le temps estimé.",
+    "step3_title": "Obtenir votre numéro",
+    "step3_desc": "Après confirmation, vous recevrez un numéro de file et un code de vérification. Gardez cet écran pour la vérification par le personnel.",
+    "step4_title": "Attendre la notification",
+    "step4_desc": "Activez les notifications pour être alerté quand votre tour approche. Vous n'avez pas besoin d'attendre au guichet.",
+    "usage_title": "Guide d'utilisation de la file",
+    "step_label": "Étape {n}",
+    "tip_title": "Conseils",
+    "tip1": "Chaque appareil ne peut prendre qu'un seul numéro par file.",
+    "tip2": "Votre numéro est valable uniquement pour aujourd'hui.",
+    "tip3": "Si le temps estimé est dépassé sans être appelé, veuillez contacter le personnel.",
+    "take_number": "Prendre un numéro"
+  },
+  "auth_page": {
+    "login_title": "Se connecter",
+    "login_subtitle": "Gérez vos files d'attente",
+    "no_account": "Pas encore de compte ?",
+    "register_link": "S'inscrire",
+    "register_title": "Créer un compte",
+    "register_subtitle": "Commencez à gérer vos files d'attente",
+    "have_account": "Déjà un compte ?",
+    "login_link": "Se connecter",
+    "staff_title": "Portail du personnel",
+    "staff_subtitle": "Connectez-vous pour commencer à servir les clients"
   }
 }

@@ -57,7 +57,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
       router.push(`/staff/work/${session.id}`);
     } else {
       setSubmitting(false);
-      alert("Failed to start session");
+      alert(t("start_failed"));
     }
   };
 

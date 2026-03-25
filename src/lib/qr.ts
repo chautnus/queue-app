@@ -89,9 +89,16 @@ export async function generateQrPngWithLogo(
       absoluteLogoUrl = `${baseUrl}${logoUrl}`;
     }
 
-    // Fetch the logo image
-    const logoRes = await fetch(absoluteLogoUrl!);
-    if (!logoRes.ok) return qrBuffer;
+    console.log("[QR Logo] Fetching logo from:", absoluteLogoUrl);
+
+    // Fetch the logo image with timeout
+    const logoRes = await fetch(absoluteLogoUrl!, {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!logoRes.ok) {
+      console.warn("[QR Logo] Fetch failed:", logoRes.status, logoRes.statusText);
+      return qrBuffer;
+    }
     const logoArrayBuffer = await logoRes.arrayBuffer();
     const logoBuffer = Buffer.from(logoArrayBuffer);
 
@@ -147,8 +154,10 @@ export async function generateQrPngWithLogo(
       .toBuffer();
 
     return result;
+    console.log("[QR Logo] Successfully composited logo onto QR");
+    return result;
   } catch (err) {
-    console.error("[generateQrPngWithLogo] Failed to overlay logo:", err);
+    console.error("[QR Logo] Failed to overlay logo:", err);
     return qrBuffer; // Fallback to plain QR on any error
   }
 }
