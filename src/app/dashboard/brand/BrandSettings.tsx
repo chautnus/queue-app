@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 const ACCEPTED_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
@@ -25,6 +25,20 @@ export default function BrandSettings() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load current logo from first queue on mount
+  useEffect(() => {
+    fetch("/api/queues")
+      .then((r) => r.json())
+      .then(({ queues }) => {
+        const existing = queues?.[0]?.logoUrl;
+        if (existing) {
+          setLogoUrl(existing);
+          setLogoPreview(existing);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const validateFile = (file: File): string | null => {
     if (!ACCEPTED_TYPES_SET.has(file.type)) {

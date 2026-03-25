@@ -119,6 +119,7 @@ export default function DisplayBoardPage({
               src={logoUrl}
               alt={queueName}
               className="w-12 h-12 rounded-xl object-cover border border-white/20 shrink-0"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
           ) : null}
           <div className="text-center">

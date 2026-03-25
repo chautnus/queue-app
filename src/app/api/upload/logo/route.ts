@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -11,12 +8,6 @@ const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/webp",
 ]);
-
-const EXTENSION_MAP: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-};
 
 function isCloudinaryConfigured(): boolean {
   return !!(
@@ -27,7 +18,6 @@ function isCloudinaryConfigured(): boolean {
 }
 
 async function uploadToCloudinary(buffer: Buffer): Promise<string> {
-  // Dynamic import so the module is only loaded when Cloudinary is configured
   const { v2: cloudinary } = await import("cloudinary");
 
   cloudinary.config({
@@ -55,21 +45,17 @@ async function uploadToCloudinary(buffer: Buffer): Promise<string> {
   });
 }
 
-async function uploadToLocal(buffer: Buffer, mimeType: string): Promise<string> {
-  const ext = EXTENSION_MAP[mimeType] ?? "png";
-  const filename = `${randomUUID()}.${ext}`;
-  const dir = path.join(process.cwd(), "public", "uploads", "logos");
-
-  await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, filename), buffer);
-
-  return `/uploads/logos/${filename}`;
-}
-
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!isCloudinaryConfigured()) {
+    return NextResponse.json(
+      { error: "Image storage is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables." },
+      { status: 503 }
+    );
   }
 
   const formData = await req.formData();
@@ -89,10 +75,7 @@ export async function POST(req: NextRequest) {
   const mimeType = file.type;
   if (!ALLOWED_TYPES.has(mimeType)) {
     return NextResponse.json(
-      {
-        error:
-          "Invalid file type. Only PNG, JPEG, and WebP are allowed.",
-      },
+      { error: "Invalid file type. Only PNG, JPEG, and WebP are allowed." },
       { status: 400 }
     );
   }
@@ -101,10 +84,7 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(arrayBuffer);
 
   try {
-    const url = isCloudinaryConfigured()
-      ? await uploadToCloudinary(buffer)
-      : await uploadToLocal(buffer, mimeType);
-
+    const url = await uploadToCloudinary(buffer);
     return NextResponse.json({ url });
   } catch (err) {
     console.error("Logo upload failed:", err);

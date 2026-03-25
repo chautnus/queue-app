@@ -89,14 +89,14 @@ export default function QueuesList({ queues }: { queues: QueueData[] }) {
                       src={queue.logoUrl}
                       alt={queue.name}
                       className="w-11 h-11 rounded-xl object-cover border border-slate-100 shrink-0"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden"); }}
                     />
-                  ) : (
-                    <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
-                      <span className="text-blue-600 font-bold text-base">
-                        {queue.name[0].toUpperCase()}
-                      </span>
-                    </div>
-                  )}
+                  ) : null}
+                  <div className={`w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center shrink-0 ${queue.logoUrl ? "hidden" : ""}`}>
+                    <span className="text-blue-600 font-bold text-base">
+                      {queue.name[0].toUpperCase()}
+                    </span>
+                  </div>
                   <div className="min-w-0">
                     <h3 className="font-semibold text-slate-900 truncate">{queue.name}</h3>
                     <p className="text-xs text-slate-400 mt-0.5">

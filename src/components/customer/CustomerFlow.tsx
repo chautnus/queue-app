@@ -202,12 +202,16 @@ export default function CustomerFlow({ queue }: { queue: QueueData }) {
         <div className="max-w-md mx-auto flex flex-col items-center text-center gap-3">
           {queue.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={queue.logoUrl} alt={queue.name} className="w-16 h-16 rounded-2xl object-cover border border-slate-100" />
-          ) : (
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center">
-              <span className="text-blue-600 font-bold text-2xl">{queue.name[0].toUpperCase()}</span>
-            </div>
-          )}
+            <img
+              src={queue.logoUrl}
+              alt={queue.name}
+              className="w-16 h-16 rounded-2xl object-cover border border-slate-100"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden"); }}
+            />
+          ) : null}
+          <div className={`w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center ${queue.logoUrl ? "hidden" : ""}`}>
+            <span className="text-blue-600 font-bold text-2xl">{queue.name[0].toUpperCase()}</span>
+          </div>
           <div>
             <h1 className="text-xl font-bold text-slate-900">{queue.name}</h1>
             {queue.greeting && <p className="text-sm text-slate-500 mt-0.5">{queue.greeting}</p>}
