@@ -153,7 +153,6 @@ export async function generateQrPngWithLogo(
       .png()
       .toBuffer();
 
-    return result;
     console.log("[QR Logo] Successfully composited logo onto QR");
     return result;
   } catch (err) {

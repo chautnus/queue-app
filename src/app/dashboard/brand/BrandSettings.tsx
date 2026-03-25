@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
-const ACCEPTED_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
+const ACCEPTED_TYPES = "image/png,image/jpeg,image/webp";
 const ACCEPTED_TYPES_SET = new Set(ACCEPTED_TYPES.split(","));
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -33,6 +33,11 @@ export default function BrandSettings() {
       .then(({ queues }) => {
         const existing = queues?.[0]?.logoUrl;
         if (existing) {
+          // Warn if logo is a local path (won't work on Railway)
+          if (existing.startsWith("/uploads/")) {
+            setError("Logo was stored locally and won't display on production. Please re-upload.");
+            return;
+          }
           setLogoUrl(existing);
           setLogoPreview(existing);
         }
