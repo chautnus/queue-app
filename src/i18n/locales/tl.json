@@ -364,7 +364,10 @@
     "day_wed_short": "Miy",
     "day_thu_short": "Huw",
     "day_fri_short": "Biy",
-    "day_sat_short": "Sab"
+    "day_sat_short": "Sab",
+    "avg_wait": "Ave. Paghintay",
+    "avg_serve": "Ave. Serbisyo",
+    "edit": "I-edit"
   },
   "brand": {
     "default_logo": "Default na Logo",
@@ -425,7 +428,8 @@
     "planned_end_time": "Planong Oras ng Pagtatapos",
     "starting": "Nagsisimula...",
     "start_session": "Simulan ang Work Session",
-    "start_failed": "Hindi masimulan ang session"
+    "start_failed": "Hindi masimulan ang session",
+    "setup_subtitle": "I-setup ang iyong work session"
   },
   "auth": {
     "login_with_google": "Mag-log in gamit ang Google",

@@ -34,6 +34,9 @@ type Stats = {
   activeSessions: SessionInfo[];
   totalWaiting: number;
   totalServing: number;
+  avgWaitSeconds?: number;
+  avgServeSeconds?: number;
+  todayServed?: number;
 };
 
 function formatOperatingHours(hours: OperatingHour[], dayNames: string[], noSchedule: string): string {
@@ -189,12 +192,14 @@ export default function LiveMonitor({ queueId }: { queueId: string }) {
       </div>
 
       {/* ── Summary cards ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: t("waiting"), value: stats.totalWaiting, accent: "text-blue-600" },
-          { label: t("serving"), value: stats.totalServing, accent: "text-green-600" },
-          { label: t("staff"), value: stats.activeSessions.length, accent: "text-violet-600" },
-          { label: t("today"), value: totalToday, accent: "text-slate-700" },
+          { label: t("waiting"), value: String(stats.totalWaiting), accent: "text-blue-600" },
+          { label: t("serving"), value: String(stats.totalServing), accent: "text-green-600" },
+          { label: t("staff"), value: String(stats.activeSessions.length), accent: "text-violet-600" },
+          { label: t("today"), value: String(totalToday), accent: "text-slate-700" },
+          { label: t("avg_wait"), value: stats.avgWaitSeconds ? `${Math.round(stats.avgWaitSeconds / 60)}m` : "—", accent: "text-amber-600" },
+          { label: t("avg_serve"), value: stats.avgServeSeconds ? `${Math.round(stats.avgServeSeconds / 60)}m` : "—", accent: "text-teal-600" },
         ].map((card) => (
           <div key={card.label} className="card p-4 text-center">
             <p className={`text-3xl font-bold ${card.accent}`}>{card.value}</p>

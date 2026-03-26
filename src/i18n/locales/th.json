@@ -364,7 +364,10 @@
     "day_wed_short": "พ",
     "day_thu_short": "พฤ",
     "day_fri_short": "ศ",
-    "day_sat_short": "ส"
+    "day_sat_short": "ส",
+    "avg_wait": "เฉลี่ยรอ",
+    "avg_serve": "เฉลี่ยให้บริการ",
+    "edit": "แก้ไข"
   },
   "brand": {
     "default_logo": "โลโก้เริ่มต้น",
@@ -425,7 +428,8 @@
     "planned_end_time": "เวลาสิ้นสุดที่วางแผน",
     "starting": "กำลังเริ่ม...",
     "start_session": "เริ่มเซสชันการทำงาน",
-    "start_failed": "ไม่สามารถเริ่มเซสชันได้"
+    "start_failed": "ไม่สามารถเริ่มเซสชันได้",
+    "setup_subtitle": "ตั้งค่าเซสชันการทำงานของคุณ"
   },
   "auth": {
     "login_with_google": "เข้าสู่ระบบด้วย Google",

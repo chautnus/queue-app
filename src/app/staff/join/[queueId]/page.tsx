@@ -39,13 +39,10 @@ export default async function StaffJoinPage({
   return (
     <div className="min-h-screen bg-slate-50 flex items-start justify-center pt-8 px-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">{queue.name}</h1>
-          <p className="text-slate-500 mt-1">Thiet lap phien lam viec</p>
-        </div>
         <SessionSetup
           queueId={queue.id}
-          staffName={session.user.name ?? "Nhan vien"}
+          queueName={queue.name}
+          staffName={session.user.name ?? "Staff"}
           streams={queue.streams.map((s) => ({
             id: s.id,
             name: s.name,

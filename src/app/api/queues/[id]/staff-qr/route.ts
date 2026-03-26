@@ -30,7 +30,8 @@ export async function GET(
     const proto = req.headers.get("x-forwarded-proto") ?? "https";
     const baseUrl = `${proto}://${host}`;
     const qrUrl = `${baseUrl}/staff/join/${queue.id}?token=${token}`;
-    const png = await generateQrPngWithLogo(qrUrl, queue.logoUrl, baseUrl);
+    const effectiveLogoUrl = queue.logoUrl?.startsWith("/uploads/") ? null : queue.logoUrl;
+    const png = await generateQrPngWithLogo(qrUrl, effectiveLogoUrl, baseUrl);
 
     return new NextResponse(new Uint8Array(png), {
       headers: {

@@ -364,7 +364,10 @@
     "day_wed_short": "三",
     "day_thu_short": "四",
     "day_fri_short": "五",
-    "day_sat_short": "六"
+    "day_sat_short": "六",
+    "avg_wait": "平均等待",
+    "avg_serve": "平均服务",
+    "edit": "编辑"
   },
   "brand": {
     "default_logo": "默认标志",
@@ -425,7 +428,8 @@
     "planned_end_time": "计划结束时间",
     "starting": "启动中...",
     "start_session": "开始工作",
-    "start_failed": "无法启动工作会话"
+    "start_failed": "无法启动工作会话",
+    "setup_subtitle": "设置您的工作会话"
   },
   "auth": {
     "login_with_google": "使用 Google 登录",

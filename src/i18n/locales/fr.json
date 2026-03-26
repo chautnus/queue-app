@@ -364,7 +364,10 @@
     "day_wed_short": "Mer",
     "day_thu_short": "Jeu",
     "day_fri_short": "Ven",
-    "day_sat_short": "Sam"
+    "day_sat_short": "Sam",
+    "avg_wait": "Attente moy.",
+    "avg_serve": "Service moy.",
+    "edit": "Modifier"
   },
   "brand": {
     "default_logo": "Logo par défaut",
@@ -425,7 +428,8 @@
     "planned_end_time": "Heure de fin prévue",
     "starting": "Démarrage...",
     "start_session": "Démarrer la session",
-    "start_failed": "Impossible de démarrer la session"
+    "start_failed": "Impossible de démarrer la session",
+    "setup_subtitle": "Configurer votre session de travail"
   },
   "auth": {
     "login_with_google": "Se connecter avec Google",

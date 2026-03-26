@@ -9,11 +9,12 @@ type Stream = { id: string; name: string; counters: Counter[] };
 
 type Props = {
   queueId: string;
+  queueName?: string;
   staffName: string;
   streams: Stream[];
 };
 
-export default function SessionSetup({ queueId, staffName, streams }: Props) {
+export default function SessionSetup({ queueId, queueName, staffName, streams }: Props) {
   const router = useRouter();
   const t = useTranslations("session_setup");
   const [selectedStreamIds, setSelectedStreamIds] = useState<string[]>([
@@ -62,6 +63,13 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
   };
 
   return (
+    <div>
+      {queueName && (
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-slate-900">{queueName}</h1>
+          <p className="text-slate-500 mt-1">{t("setup_subtitle")}</p>
+        </div>
+      )}
     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
       <p className="text-sm text-gray-600">
         {t("greeting", { name: staffName })}
@@ -149,6 +157,7 @@ export default function SessionSetup({ queueId, staffName, streams }: Props) {
       >
         {submitting ? t("starting") : t("start_session")}
       </button>
+    </div>
     </div>
   );
 }

@@ -14,7 +14,10 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const [queue, streamStats, activeSessions] = await Promise.all([
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const [queue, streamStats, activeSessions, todayTickets] = await Promise.all([
       prisma.queue.findUnique({
         where: { id, ownerId: session.user.id },
         select: { id: true, name: true, status: true, operatingHours: true },
@@ -40,6 +43,13 @@ export async function GET(
           user: { select: { name: true, email: true } },
           counter: { select: { name: true } },
         },
+      }),
+      prisma.ticket.findMany({
+        where: {
+          queueId: id,
+          createdAt: { gte: todayStart },
+        },
+        select: { createdAt: true, calledAt: true, completedAt: true, status: true },
       }),
     ]);
 
@@ -72,6 +82,19 @@ export async function GET(
         (sum, s) => sum + s.tickets.filter((t) => t.status === "SERVING").length,
         0
       ),
+      avgWaitSeconds: (() => {
+        const waits = todayTickets
+          .filter((t) => t.calledAt)
+          .map((t) => (t.calledAt!.getTime() - t.createdAt.getTime()) / 1000);
+        return waits.length ? Math.round(waits.reduce((a, b) => a + b, 0) / waits.length) : 0;
+      })(),
+      avgServeSeconds: (() => {
+        const serves = todayTickets
+          .filter((t) => t.status === "COMPLETED" && t.calledAt && t.completedAt)
+          .map((t) => (t.completedAt!.getTime() - t.calledAt!.getTime()) / 1000);
+        return serves.length ? Math.round(serves.reduce((a, b) => a + b, 0) / serves.length) : 0;
+      })(),
+      todayServed: todayTickets.filter((t) => t.status === "COMPLETED").length,
     };
 
     return NextResponse.json({ stats });

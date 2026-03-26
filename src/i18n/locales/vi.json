@@ -364,7 +364,10 @@
     "day_wed_short": "T4",
     "day_thu_short": "T5",
     "day_fri_short": "T6",
-    "day_sat_short": "T7"
+    "day_sat_short": "T7",
+    "avg_wait": "TB chờ",
+    "avg_serve": "TB phục vụ",
+    "edit": "Chỉnh sửa"
   },
   "brand": {
     "default_logo": "Logo mặc định",
@@ -425,7 +428,8 @@
     "planned_end_time": "Dự kiến kết thúc ca",
     "starting": "Đang bắt đầu...",
     "start_session": "Bắt đầu ca làm việc",
-    "start_failed": "Không thể bắt đầu phiên làm việc"
+    "start_failed": "Không thể bắt đầu phiên làm việc",
+    "setup_subtitle": "Thiết lập phiên làm việc"
   },
   "auth": {
     "login_with_google": "Đăng nhập với Google",

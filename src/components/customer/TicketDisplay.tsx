@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { formatWaitTime } from "@/lib/wait-time";
+import AdBanner from "@/components/AdBanner";
 
 type TicketInfo = {
   id: string;
@@ -121,6 +122,13 @@ export default function TicketDisplay({ ticket, queueId, onRatingRequest }: Prop
       <p className="text-xs text-center text-slate-400">
         {t("keep_page_open")}
       </p>
+
+      {/* Ad while waiting */}
+      {(isWaiting || isCalled) && (
+        <div className="mt-4">
+          <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_CUSTOMER ?? ""} />
+        </div>
+      )}
     </div>
   );
 }

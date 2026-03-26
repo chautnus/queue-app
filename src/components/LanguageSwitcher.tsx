@@ -1,15 +1,17 @@
 "use client";
 
-import { locales, localeNames, type Locale } from "@/i18n/config";
+import { locales, localeNames, detectBrowserLocale, type Locale } from "@/i18n/config";
 import { useEffect, useState } from "react";
 
 export default function LanguageSwitcher() {
-  const [currentLocale, setCurrentLocale] = useState<Locale>("vi");
+  const [currentLocale, setCurrentLocale] = useState<Locale>("en");
 
   useEffect(() => {
     const stored = localStorage.getItem("locale") as Locale | null;
-    if (stored && locales.includes(stored)) {
+    if (stored && (locales as readonly string[]).includes(stored)) {
       setCurrentLocale(stored);
+    } else {
+      setCurrentLocale(detectBrowserLocale());
     }
   }, []);
 

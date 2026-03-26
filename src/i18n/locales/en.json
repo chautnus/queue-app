@@ -364,7 +364,10 @@
     "day_wed_short": "Wed",
     "day_thu_short": "Thu",
     "day_fri_short": "Fri",
-    "day_sat_short": "Sat"
+    "day_sat_short": "Sat",
+    "avg_wait": "Avg Wait",
+    "avg_serve": "Avg Serve",
+    "edit": "Edit"
   },
   "brand": {
     "default_logo": "Default Logo",
@@ -425,7 +428,8 @@
     "planned_end_time": "Planned End Time",
     "starting": "Starting...",
     "start_session": "Start Work Session",
-    "start_failed": "Failed to start session"
+    "start_failed": "Failed to start session",
+    "setup_subtitle": "Set up your work session"
   },
   "auth": {
     "login_with_google": "Log in with Google",
