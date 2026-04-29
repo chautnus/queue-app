@@ -63,7 +63,7 @@ export default function DashboardSidebar({ user }: { user: User }) {
       <div className="px-5 py-5 border-b border-slate-100">
         <Link href="/dashboard/queues" className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />
-          <span className="text-base font-bold text-slate-900">QueueApp</span>
+          <span className="text-base font-bold text-slate-900">FreeQueue</span>
         </Link>
       </div>
 

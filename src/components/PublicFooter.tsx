@@ -16,18 +16,18 @@ export default function PublicFooter() {
               <rect width="28" height="28" rx="8" fill="#2563eb" />
               <path d="M8 10h12M8 14h8M8 18h10" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
             </svg>
-            QueueApp
+            FreeQueue
           </Link>
           <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
             <Link href="/about" className="hover:text-slate-900 transition-colors">{t("footer_about")}</Link>
             <Link href="/terms" className="hover:text-slate-900 transition-colors">{t("footer_terms")}</Link>
             <Link href="/privacy" className="hover:text-slate-900 transition-colors">{t("footer_privacy")}</Link>
-            <Link href="mailto:support@queueapp.dev" className="hover:text-slate-900 transition-colors">{t("footer_contact")}</Link>
+            <Link href="mailto:support@freequeue.app" className="hover:text-slate-900 transition-colors">{t("footer_contact")}</Link>
             <LanguageSwitcher />
           </nav>
         </div>
         <div className="mt-6 text-center text-xs text-slate-400">
-          &copy; {new Date().getFullYear()} QueueApp. {tc("all_rights")}
+          &copy; {new Date().getFullYear()} FreeQueue. {tc("all_rights")}
         </div>
       </div>
     </footer>

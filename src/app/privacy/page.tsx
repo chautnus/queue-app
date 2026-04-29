@@ -3,7 +3,7 @@ import PrivacyPage from "@/components/PrivacyPage";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for QueueApp.",
+  description: "Privacy Policy for FreeQueue.",
 };
 
 export default function PrivacyPageRoute() {

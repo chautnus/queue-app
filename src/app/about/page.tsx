@@ -3,7 +3,7 @@ import AboutPage from "@/components/AboutPage";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about QueueApp and our mission to modernize queue management.",
+  description: "Learn about FreeQueue and our mission to modernize queue management.",
 };
 
 export default function AboutPageRoute() {

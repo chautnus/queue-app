@@ -5,62 +5,140 @@ import { useTranslations } from "next-intl";
 import PublicFooter from "@/components/PublicFooter";
 import AdBanner from "@/components/AdBanner";
 
-export default function LandingPage() {
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "FreeQueue",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+  },
+  "description": "Free queue management system for businesses. Let customers join queues via QR code and get real-time updates on their turn.",
+  "url": "https://freequeue.app",
+};
+
+export default function LandingPage({ session }: { session: any }) {
   const t = useTranslations("landing");
   const tc = useTranslations("common");
 
+  const isLoggedIn = !!session?.user;
+
   return (
     <div className="min-h-screen bg-slate-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-blue-600 flex items-center gap-2">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0">
-              <rect width="28" height="28" rx="8" fill="#2563eb" />
-              <path d="M8 10h12M8 14h8M8 18h10" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-            QueueApp
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <Link href="/" className="group flex items-center gap-3 transition-transform hover:scale-105 active:scale-95">
+            <div className="relative w-10 h-10 flex items-center justify-center bg-blue-600 rounded-xl shadow-lg shadow-blue-200 group-hover:rotate-6 transition-transform">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
+                <path d="M4 6H20M4 12H16M4 18H12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+            <span className="text-2xl font-black tracking-tight text-slate-900">
+              Free<span className="text-blue-600">Queue</span>
+            </span>
           </Link>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login" className="btn-ghost text-sm">
-              {tc("login")}
+          
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/announcements" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+              Announcements
             </Link>
-            <Link href="/register" className="btn-primary text-sm">
-              {tc("get_started")}
+            <Link href="#features" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+              Features
             </Link>
+            <Link href="#pricing" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+              Pricing
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {isLoggedIn ? (
+              <Link href="/dashboard/queues" className="inline-flex items-center justify-center bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-full shadow-md hover:bg-blue-700 hover:shadow-lg transition-all text-sm active:scale-95">
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors">
+                  {tc("login")}
+                </Link>
+                <Link href="/register" className="inline-flex items-center justify-center bg-slate-900 text-white font-semibold px-6 py-2.5 rounded-full shadow-lg hover:bg-slate-800 transition-all text-sm active:scale-95">
+                  {tc("get_started")}
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-50 to-transparent" />
+      <section className="relative pt-32 pb-20 sm:pt-48 sm:pb-36 overflow-hidden">
+        {/* Premium Background */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/hero-bg.png" 
+            alt="Hero Background" 
+            className="w-full h-full object-cover opacity-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-50/0 via-slate-50/20 to-slate-50" />
+        </div>
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight animate-[fadeInUp_0.6s_ease-out]">
-            {t("hero_title")}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-2 rounded-full mb-8 animate-fade-in">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            <span className="text-xs font-bold text-blue-700 uppercase tracking-widest">Version 2.0 is live</span>
+          </div>
+          
+          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black text-slate-900 tracking-tight leading-[1.1] mb-8">
+            Manage your queue <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+              without the wait.
+            </span>
           </h1>
-          <p className="mt-5 text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed animate-[fadeInUp_0.6s_ease-out_0.15s_both]">
-            {t("hero_subtitle")}
+          
+          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-slate-600 leading-relaxed mb-12">
+            The modern way to handle customer flow. Let your customers join the queue from anywhere and get notified when it's their turn.
           </p>
-          <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 animate-[fadeInUp_0.6s_ease-out_0.3s_both]">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-blue-700 font-semibold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:bg-blue-50 transition-all text-base"
-            >
-              {t("cta_start")}
-              <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-            <Link
-              href="/login"
-              className="w-full sm:w-auto inline-flex items-center justify-center border-2 border-white/30 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-white/10 transition-all text-base"
-            >
-              {t("cta_login")}
-            </Link>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            {isLoggedIn ? (
+              <Link
+                href="/dashboard/queues"
+                className="group relative inline-flex items-center justify-center bg-blue-600 text-white font-bold px-10 py-4 rounded-2xl shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all"
+              >
+                Go to Dashboard
+                <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/register"
+                  className="group relative inline-flex items-center justify-center bg-blue-600 text-white font-bold px-10 py-4 rounded-2xl shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all"
+                >
+                  Start for Free
+                  <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center bg-white text-slate-900 font-bold px-10 py-4 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-all hover:-translate-y-1"
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>

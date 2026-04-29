@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { allocateTicketNumber, generateVerifyCode } from "@/lib/ticket";
-import { broadcastToQueue } from "@/lib/sse";
-import { estimateWaitTime } from "@/lib/wait-time";
 import { verifyToken } from "@/app/api/captcha/route";
+import { createTicket } from "@/lib/join-service";
+import { verifyQrUrl } from "@/lib/qr-signature";
+import { checkRateLimit, buildRateLimitKey, getClientIp } from "@/lib/rate-limit";
+import {
+  getIdempotencyKey,
+  getIdempotentResponse,
+  setIdempotentResponse,
+} from "@/lib/idempotency";
 
 const JoinSchema = z.object({
   deviceId: z.string().min(1),
@@ -12,33 +17,25 @@ const JoinSchema = z.object({
   customerInfo: z.record(z.unknown()).optional(),
   captchaAnswer: z.number(),
   captchaToken: z.string(),
+  /** Full queue URL from QR scan — used for HMAC signature verification */
+  qrUrl: z.string().optional(),
 });
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Check existing ticket for device
   const { id } = await params;
   const deviceId = req.nextUrl.searchParams.get("deviceId");
-
-  if (!deviceId) {
-    return NextResponse.json({ ticket: null });
-  }
+  if (!deviceId) return NextResponse.json({ ticket: null });
 
   const registration = await prisma.deviceRegistration.findUnique({
     where: { queueId_deviceId: { queueId: id, deviceId } },
   });
-
-  if (!registration?.ticketId) {
-    return NextResponse.json({ ticket: null });
-  }
+  if (!registration?.ticketId) return NextResponse.json({ ticket: null });
 
   const ticket = await prisma.ticket.findUnique({
-    where: {
-      id: registration.ticketId,
-      status: { in: ["WAITING", "CALLED", "SERVING"] },
-    },
+    where: { id: registration.ticketId, status: { in: ["WAITING", "CALLED", "SERVING"] } },
     include: { stream: { select: { name: true } } },
   });
 
@@ -50,46 +47,55 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const ip = getClientIp(req);
+
+  // 1. Rate limiting — 5 req/min per IP+deviceId
+  const body = await req.json().catch(() => null);
+  const rlKey = buildRateLimitKey(ip, body?.deviceId);
+  const { allowed } = await checkRateLimit(rlKey);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
+  // 2. Idempotency
+  const idemKey = getIdempotencyKey(req);
+  if (idemKey) {
+    const cached = await getIdempotentResponse(idemKey);
+    if (cached) {
+      return NextResponse.json(cached.body, { status: cached.status });
+    }
+  }
 
   try {
-    const body = await req.json();
     const parsed = JoinSchema.safeParse(body);
-
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.flatten().fieldErrors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { deviceId, streamId, customerInfo, captchaAnswer, captchaToken } =
-      parsed.data;
+    const { deviceId, streamId, customerInfo, captchaAnswer, captchaToken, qrUrl } = parsed.data;
 
-    // Verify CAPTCHA
-    const captchaValid = await verifyCaptchaToken(
-      captchaToken,
-      captchaAnswer
-    );
+    // 3. HMAC QR signature verification (if QR_SECRET set and qrUrl provided)
+    if (qrUrl && process.env.QR_SECRET) {
+      const valid = verifyQrUrl(qrUrl, process.env.QR_SECRET);
+      if (!valid) {
+        return NextResponse.json({ error: "Invalid QR signature" }, { status: 400 });
+      }
+    }
+
+    // 4. CAPTCHA verification
+    const captchaValid = verifyCaptchaToken(captchaToken, captchaAnswer);
     if (!captchaValid) {
-      return NextResponse.json(
-        { error: { captcha: ["Invalid CAPTCHA answer"] } },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: { captcha: ["Invalid CAPTCHA answer"] } }, { status: 400 });
     }
 
-    // Check if device already has an active ticket for this queue
+    // 5. Check duplicate active ticket
     const existingReg = await prisma.deviceRegistration.findUnique({
       where: { queueId_deviceId: { queueId: id, deviceId } },
     });
-
     if (existingReg?.ticketId) {
       const existingTicket = await prisma.ticket.findUnique({
-        where: {
-          id: existingReg.ticketId,
-          status: { in: ["WAITING", "CALLED", "SERVING"] },
-        },
+        where: { id: existingReg.ticketId, status: { in: ["WAITING", "CALLED", "SERVING"] } },
       });
-
       if (existingTicket) {
         return NextResponse.json(
           { error: "Device already has an active ticket", ticket: existingTicket },
@@ -98,138 +104,30 @@ export async function POST(
       }
     }
 
-    // Get queue config
-    const queue = await prisma.queue.findUnique({
-      where: { id },
-      include: {
-        streams: { orderBy: { order: "asc" } },
-      },
-    });
-
-    if (!queue) {
-      return NextResponse.json({ error: "Queue not found" }, { status: 404 });
-    }
-
+    // 6. Queue status check
+    const queue = await prisma.queue.findUnique({ where: { id }, select: { status: true } });
+    if (!queue) return NextResponse.json({ error: "Queue not found" }, { status: 404 });
     if (queue.status !== "ACTIVE") {
-      return NextResponse.json(
-        { error: "Queue is not accepting tickets" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Queue is not accepting tickets" }, { status: 400 });
     }
 
-    // Determine target stream
-    const isStaffAssign = queue.streamAssignMode === "STAFF_ASSIGN";
-    const targetStreamId =
-      isStaffAssign && !streamId ? null : (streamId ?? queue.streams[0]?.id);
+    // 7. Create ticket (pessimistic locking inside)
+    const ticket = await createTicket({ queueId: id, deviceId, streamId, customerInfo });
 
-    if (!isStaffAssign && !targetStreamId) {
-      return NextResponse.json(
-        { error: "No stream available" },
-        { status: 400 }
-      );
-    }
+    const responseBody = { ticket };
+    if (idemKey) await setIdempotentResponse(idemKey, { status: 200, body: responseBody });
 
-    let number: number;
-    let displayNumber: string;
-
-    if (targetStreamId) {
-      // Allocate ticket number atomically via stream counter
-      const allocated = await allocateTicketNumber(
-        targetStreamId,
-        queue.timezone
-      );
-      number = allocated.number;
-      displayNumber = allocated.displayNumber;
-    } else {
-      // STAFF_ASSIGN with no stream: use queue-level counter based on total waiting tickets
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const count = await prisma.ticket.count({
-        where: { queueId: id, createdAt: { gte: todayStart } },
-      });
-      number = count + 1;
-      displayNumber = `Q${String(number).padStart(3, "0")}`;
-    }
-
-    const verifyCode = generateVerifyCode();
-
-    // Create ticket + device registration in a transaction
-    const ticket = await prisma.$transaction(async (tx) => {
-      const t = await tx.ticket.create({
-        data: {
-          queueId: id,
-          streamId: targetStreamId,
-          ticketNumber: number,
-          displayNumber,
-          verifyCode,
-          deviceId,
-          customerInfo: customerInfo ? JSON.parse(JSON.stringify(customerInfo)) : null,
-        },
-        include: { stream: { select: { name: true, avgProcessingSeconds: true } } },
-      });
-
-      await tx.deviceRegistration.upsert({
-        where: { queueId_deviceId: { queueId: id, deviceId } },
-        create: { queueId: id, deviceId, ticketId: t.id },
-        update: { ticketId: t.id },
-      });
-
-      return t;
-    });
-
-    // Calculate wait time
-    let waitingAhead = 0;
-    let estimatedSeconds = 0;
-    if (targetStreamId) {
-      const waitInfo = await estimateWaitTime(
-        targetStreamId,
-        number,
-        queue.timezone
-      );
-      waitingAhead = waitInfo.waitingAhead;
-      estimatedSeconds = waitInfo.estimatedSeconds;
-    } else {
-      // For unassigned tickets, count all waiting tickets in queue
-      waitingAhead = await prisma.ticket.count({
-        where: { queueId: id, status: "WAITING", ticketNumber: { lt: number } },
-      });
-    }
-
-    // Broadcast to queue subscribers
-    broadcastToQueue(id, {
-      type: "ticket:created",
-      data: { ticketId: ticket.id, displayNumber, streamId: targetStreamId, waitingAhead },
-    });
-
-    return NextResponse.json({
-      ticket: {
-        id: ticket.id,
-        displayNumber: ticket.displayNumber,
-        verifyCode: ticket.verifyCode,
-        streamName: ticket.stream?.name ?? "",
-        status: ticket.status,
-        waitingAhead,
-        estimatedSeconds,
-      },
-    });
+    return NextResponse.json(responseBody);
   } catch (err) {
     console.error("[POST /api/queues/:id/join]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-// Verify CAPTCHA token (HMAC-signed, server-side math challenge)
-async function verifyCaptchaToken(
-  token: string,
-  answer: number
-): Promise<boolean> {
+function verifyCaptchaToken(token: string, answer: number): boolean {
   const decoded = verifyToken(token);
   if (!decoded) return false;
-
-  let expected: number;
-  if (decoded.op === "+") expected = decoded.a + decoded.b;
-  else if (decoded.op === "-") expected = decoded.a - decoded.b;
-  else return false;
-
-  return expected === answer;
+  if (decoded.op === "+") return decoded.a + decoded.b === answer;
+  if (decoded.op === "-") return decoded.a - decoded.b === answer;
+  return false;
 }

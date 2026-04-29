@@ -18,7 +18,7 @@ export default function AboutPage() {
               <rect width="28" height="28" rx="8" fill="#2563eb" />
               <path d="M8 10h12M8 14h8M8 18h10" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
             </svg>
-            QueueApp
+            FreeQueue
           </Link>
           <Link href="/" className="btn-ghost text-sm">
             &larr; {tc("back_to_home")}
@@ -65,8 +65,8 @@ export default function AboutPage() {
               </p>
               <p className="mt-2 text-slate-600">
                 Email:{" "}
-                <a href="mailto:support@queueapp.dev" className="text-blue-600 hover:underline">
-                  support@queueapp.dev
+                <a href="mailto:support@freequeue.app" className="text-blue-600 hover:underline">
+                  support@freequeue.app
                 </a>
               </p>
             </section>
@@ -81,10 +81,10 @@ export default function AboutPage() {
             <Link href="/about" className="text-slate-900 font-medium">{tl("footer_about")}</Link>
             <Link href="/terms" className="hover:text-slate-900 transition-colors">{tl("footer_terms")}</Link>
             <Link href="/privacy" className="hover:text-slate-900 transition-colors">{tl("footer_privacy")}</Link>
-            <Link href="mailto:support@queueapp.dev" className="hover:text-slate-900 transition-colors">{tl("footer_contact")}</Link>
+            <Link href="mailto:support@freequeue.app" className="hover:text-slate-900 transition-colors">{tl("footer_contact")}</Link>
           </nav>
           <span className="text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} QueueApp. {tc("all_rights")}
+            &copy; {new Date().getFullYear()} FreeQueue. {tc("all_rights")}
           </span>
         </div>
       </footer>

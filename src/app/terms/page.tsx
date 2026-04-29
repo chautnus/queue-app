@@ -3,7 +3,7 @@ import TermsPage from "@/components/TermsPage";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for QueueApp.",
+  description: "Terms of Service for FreeQueue.",
 };
 
 export default function TermsPageRoute() {

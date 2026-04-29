@@ -5,15 +5,26 @@ import LocaleProvider from "@/components/LocaleProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "QueueApp", template: "%s | QueueApp" },
-  description: "Smart queue management for businesses",
+  title: { default: "FreeQueue", template: "%s | FreeQueue" },
+  description: "Free queue management system for businesses. Let customers join queues via QR code and get real-time updates on their turn.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "QueueApp",
+    title: "FreeQueue",
   },
   formatDetection: { telephone: false },
+  openGraph: {
+    title: "FreeQueue — Free Queue Management System",
+    description: "Let customers join queues via QR code and get real-time updates. Free queue management for any business.",
+    siteName: "FreeQueue",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FreeQueue — Free Queue Management System",
+    description: "Let customers join queues via QR code and get real-time updates. Free queue management for any business.",
+  },
 };
 
 export const viewport: Viewport = {

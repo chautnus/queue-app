@@ -1,6 +1,6 @@
-// Server-Sent Events channel registry
-// In-memory for single-instance deployment.
-// For multi-instance: swap Map with Redis pub/sub (ioredis) without changing broadcast() signature.
+// Server-Sent Events channel registry.
+// In-memory channels for single-instance delivery.
+// Redis Pub/Sub (sse-pubsub.ts) fans out events across multiple instances.
 
 export type QueueEventType =
   | "ticket:created"
@@ -9,12 +9,21 @@ export type QueueEventType =
   | "ticket:completed"
   | "ticket:absent"
   | "stats:updated"
-  | "session:updated";
+  | "session:updated"
+  | "ticket:reassigned"
+  | "session:ticket_assigned";
 
 export type QueueEvent = {
   type: QueueEventType;
   data: Record<string, unknown>;
 };
+
+import {
+  publishEvent,
+  subscribeChannel,
+  queueChannel,
+  sessionChannel,
+} from "@/lib/sse-pubsub";
 
 type Controller = ReadableStreamDefaultController<string>;
 
@@ -73,10 +82,16 @@ export function unsubscribeFromQueue(queueId: string, controller: Controller) {
 
 export function broadcastToQueue(queueId: string, event: QueueEvent) {
   broadcastTo(queueChannels, queueId, event);
+  // Fan-out to other instances via Redis (no-op if Redis unavailable)
+  publishEvent(queueChannel(queueId), event).catch(() => {});
 }
 
 export function subscribeToSession(sessionId: string, controller: Controller) {
   subscribe(sessionChannels, sessionId, controller);
+  // Forward Redis cross-instance events into local in-memory channel
+  subscribeChannel(sessionChannel(sessionId), (e) =>
+    broadcastTo(sessionChannels, sessionId, e)
+  ).catch(() => {});
 }
 
 export function unsubscribeFromSession(
@@ -88,6 +103,7 @@ export function unsubscribeFromSession(
 
 export function broadcastToSession(sessionId: string, event: QueueEvent) {
   broadcastTo(sessionChannels, sessionId, event);
+  publishEvent(sessionChannel(sessionId), event).catch(() => {});
 }
 
 // SSE stream factory helper
