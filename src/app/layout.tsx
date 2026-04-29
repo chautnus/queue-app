@@ -3,6 +3,7 @@ import Script from "next/script";
 import Providers from "@/components/Providers";
 import LocaleProvider from "@/components/LocaleProvider";
 import "./globals.css";
+import VersionFooter from "@/components/VersionFooter";
 
 export const metadata: Metadata = {
   title: { default: "FreeQueue", template: "%s | FreeQueue" },
@@ -59,6 +60,7 @@ export default function RootLayout({
           />
         )}
         <Script src="/sw-register.js" strategy="afterInteractive" />
+        <VersionFooter />
       </body>
     </html>
   );
