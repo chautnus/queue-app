@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+build
+.git
+.vscode
+.claude
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.local
+.env.production
+README.md
+docs
+scripts
